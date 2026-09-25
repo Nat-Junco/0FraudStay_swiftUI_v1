@@ -8,11 +8,29 @@
 import SwiftUI
 
 struct ForgotPasswordView: View {
+
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack {
+            Spacer()
+            
+            Button(action: {
+                // Acción al presionar el botón
+            }) {
+                Text("Recuperar contraseña")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.accentColor)
+                    .cornerRadius(12)
+            }
+            .padding(.horizontal, 24)
+            
+            Spacer()
+        }
     }
 }
 
 #Preview {
-    ForgotPasswordView()
+    ForgotPasswordView()    
 }

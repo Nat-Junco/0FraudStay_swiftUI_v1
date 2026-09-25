@@ -9,7 +9,7 @@ import SwiftUI
 
 struct WelcomeView: View {
     @State private var isActive = false
-
+    
     var body: some View {
         
         if isActive {
@@ -60,7 +60,7 @@ struct WelcomeView: View {
             }
             .task {
                 try? await Task.sleep(for: .seconds(5))
-                // Transición suave
+                
                 withAnimation(.easeInOut) {
                     isActive = true
                 }
