@@ -1,0 +1,48 @@
+# 0Fraud Stay
+
+## Descripción breve
+
+**0Fraud Stay** Es una plataforma web/móvil para el registro, gestión y seguimiento de reportes sobre incidentes o intentos de fraude en el sector de rentas vacacionales y hospedaje. Permite a los usuarios autenticados generar reportes detallados (adjuntando evidencia de la fuente, tipo de fraude, ubicación geográfica e imágenes) para dar visibilidad a los incidentes y administrar su estado mediante distintos roles dentro del sistema.
+
+## Integrantes del equipo
+
+| Integrante | Matrícula |
+|---|---|
+| Natalia Junco Fócil | A01786717 |
+| Marbella Barba De Los Santos | A01660946 |
+| Javier Padilla Marcial | A01660945 |
+| Adriana Sandoval Santos | A01667445 |
+| Aranza Valentina Vázquez Martínez | A01739377 |
+
+**Grupo:** 451
+
+## Entorno de desarrollo
+
+- **Versión de Xcode:** 26.6
+- **Modelo de iPhone (simulador):** iPhone 16
+
+## Convención para nombrar las ramas
+
+Se utiliza el prefijo según el tipo de trabajo, seguido de una descripción corta en inglés y en `kebab-case`:
+
+```
+feature/nombre-funcionalidad   → nueva funcionalidad
+fix/nombre-del-bug             → corrección de errores
+docs/nombre-del-cambio         → cambios de documentación
+chore/nombre-de-la-tarea       → tareas de mantenimiento (configuración, dependencias, etc.)
+```
+
+- Todo en minúsculas, sin espacios ni acentos.
+- Palabras separadas por guiones (`-`).
+- El nombre debe describir claramente la funcionalidad, no la persona que la desarrolla.
+
+## Acuerdos básicos de colaboración
+
+1. **No realizar cambios directamente en `main`.** Todo cambio se hace a través de una rama y un Pull Request.
+2. **Desarrollar cada funcionalidad en una rama independiente**, siguiendo la convención de nombres definida arriba.
+3. **Utilizar mensajes de commit claros**, que describan qué se hizo y por qué (ej. `Agrega validación de campo de texto para el reporte de fraude`).
+4. **Revisar el código antes de integrarlo**, mediante Pull Requests aprobados por al menos un integrante del equipo.
+5. **Atender la retroalimentación recibida** en las revisiones antes de hacer el merge a `main`.
+6. **Mantener una comunicación respetuosa y centrada en el código**, evitando comentarios personales; toda observación debe enfocarse en mejorar la calidad del proyecto.
+
+> Realizado con apoyo de IA generativa - Claude Sonnet 5

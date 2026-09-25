@@ -6,8 +6,15 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		FBEA74A230648AC500D2BE5C /* .gitignore  in Resources */ = {isa = PBXBuildFile; fileRef = FBEA74A130648AB900D2BE5C /* .gitignore  */; };
+		FBEA74A430648ADE00D2BE5C /* README in Resources */ = {isa = PBXBuildFile; fileRef = FBEA74A330648AD400D2BE5C /* README */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		7F74F73E3064884D00DEE9CE /* 0FraudStay_swiftUI_v1.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = 0FraudStay_swiftUI_v1.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FBEA74A130648AB900D2BE5C /* .gitignore  */ = {isa = PBXFileReference; lastKnownFileType = text; path = ".gitignore "; sourceTree = "<group>"; };
+		FBEA74A330648AD400D2BE5C /* README */ = {isa = PBXFileReference; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -32,6 +39,8 @@
 		7F74F7353064884D00DEE9CE = {
 			isa = PBXGroup;
 			children = (
+				FBEA74A330648AD400D2BE5C /* README */,
+				FBEA74A130648AB900D2BE5C /* .gitignore  */,
 				7F74F7403064884D00DEE9CE /* 0FraudStay_swiftUI_v1 */,
 				7F74F73F3064884D00DEE9CE /* Products */,
 			);
@@ -109,6 +118,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FBEA74A430648ADE00D2BE5C /* README in Resources */,
+				FBEA74A230648AC500D2BE5C /* .gitignore  in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
