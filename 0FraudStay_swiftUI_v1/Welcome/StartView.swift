@@ -112,13 +112,8 @@ struct StartView: View {
                         Image("appLogo")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 60, height: 60)
-                            .background(rojo.opacity(0.12))
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(rojo.opacity(0.25), lineWidth: 1)
-                            )
+                            .frame(width: 70, height:70)
+                            .background(fondo)
                     }
                     .padding(.top, 8)
 
