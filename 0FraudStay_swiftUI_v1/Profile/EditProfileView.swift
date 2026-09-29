@@ -46,4 +46,73 @@ struct profileView: View {
                             .foregroundStyle(rojoPrimary)
                     }
                     .padding(.top, 12)
-                }}}}}
+                    //Formulario para editar perfil
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("INFORMACIÓN PERSONAL")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundStyle(textoGris)
+                            .padding(.horizontal, 4)
+                        
+                        VStack(spacing: 14) {
+                            campoVisual(
+                                titulo: "Nombre completo",
+                                icono: "person.fill",
+                                valor: "Marbella Barba"
+                            )
+                            
+                            Divider()
+                            
+                            campoVisual(
+                                titulo: "Correo electrónico",
+                                icono: "envelope.fill",
+                                valor: "marbella@ejemplo.com"
+                            )
+                            
+                            Divider()
+                            
+                            campoVisual(
+                                titulo: "Teléfono de contacto",
+                                icono: "phone.fill",
+                                valor: "+52 55 1234 5678"
+                            )
+                            
+                            Divider()
+                            
+                            campoVisual(
+                                titulo: "Ubicación / Ciudad",
+                                icono: "mappin.and.ellipse",
+                                valor: "Ciudad de México, MX"
+                            )
+                        }
+                        .padding(16)
+                        .background(fondoTarjeta)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                    }
+                    
+                }}}}
+    
+    //Función de campo visual
+    private func campoVisual(
+            titulo: String,
+            icono: String,
+            valor: String
+        ) -> some View {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(titulo)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(textoGris)
+                
+                HStack(spacing: 12) {
+                    Image(systemName: icono)
+                        .foregroundStyle(rojoPrimary)
+                        .frame(width: 20)
+                    
+                    TextField(titulo, text: .constant(valor))
+                        .font(.system(size: 15))
+                        .foregroundStyle(textoPrincipal)
+                }
+            }
+        }
+    }
+
+
