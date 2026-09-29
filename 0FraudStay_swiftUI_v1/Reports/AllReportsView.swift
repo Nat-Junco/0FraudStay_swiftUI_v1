@@ -5,4 +5,14 @@
 //  Created by alumnos on 29/09/26.
 //
 
-import Foundation
+import SwiftUI
+
+struct AllReportsView: View {
+    var body: some View {
+        Text("Reportes de todos los usuarios")
+    }
+}
+
+#Preview {
+    AllReportsView()
+}
