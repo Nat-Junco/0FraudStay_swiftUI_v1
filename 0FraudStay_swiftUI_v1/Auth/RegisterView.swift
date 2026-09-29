@@ -6,153 +6,92 @@
 //
 
 import SwiftUI
-
 struct RegisterView: View {
-    @Environment(\.dismiss) private var dismiss
-    
-    // Lo que escribe el usuario
-    @State private var nombre = ""
-    @State private var correo = ""
-    @State private var contrasena = ""
-    @State private var confirmar = ""
-    
-    // Reglas para activar tu botón de registrarse
-    private var camposLlenos: Bool {
-        !nombre.isEmpty && !correo.isEmpty && !contrasena.isEmpty && !confirmar.isEmpty
-    }
-    private var contrasenaValida: Bool { contrasena.count >= 8 }
-    private var contrasenasIguales: Bool { contrasena == confirmar }
-    private var puedeContinuar: Bool { camposLlenos && contrasenaValida && contrasenasIguales }
-    
+    @State private var fullName = ""
+    @State private var email = ""
+    @State private var password = ""
+    @State private var confirmPassword = ""
+    private let primaryColor = Color("BrandPrimaryColor")
     var body: some View {
-        VStack(spacing: 0) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
+        ZStack {
+            Color.white
+                .ignoresSafeArea()
+            VStack(alignment: .leading, spacing: 18) {
+                
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Crea tu cuenta")
+                        .font(.system(size: 28, weight: .bold, design: .serif))
+                    Text("La comunidad necesita tu voz para detener fraudes")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                }
+                .padding(.top, 16)
+                // Name
+                VStack(alignment: .leading, spacing: 14) {
                     
-                    // 1. "← Volver" en rojo
-                    Button {
-                        dismiss()
-                    } label: {
-                        Text("← Volver")
-                            .font(.system(size: 17))
-                            .foregroundStyle(Color("Rojo"))
-                    }
-                    
-                    // 2. Barra de 2 segmentos: el primero en rojo
-                    HStack(spacing: 8) {
-                        Capsule()
-                            .fill(Color("Rojo"))
-                            .frame(height: 4)
-                        Capsule()
-                            .fill(Color("Borde"))
-                            .frame(height: 4)
-                    }
-                    .padding(.bottom, 16)
-                    
-                    // 3. Títulos
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Crea tu cuenta")
-                            .font(.system(size: 32, weight: .bold, design: .serif))
-                            .foregroundStyle(Color("TextoPrincipal"))
-                        Text("La comunidad necesita tu voz para detener fraudes")
-                            .font(.system(size: 16))
-                            .foregroundStyle(Color("TextoGris"))
-                    }
-                    .padding(.bottom, 8)
-                    
-                    // 4. Nombre completo
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 6) {
                         Text("NOMBRE COMPLETO")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(Color("TextoGris"))
-                        TextField("Ana Martínez", text: $nombre)
-                            .font(.system(size: 16))
-                            .padding(16)
-                            .background(Color("Tarjeta"))
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color("Borde")))
+                            .font(.caption)
+                            .bold()
+                            .foregroundColor(.gray)
+                        TextField("Escribe tu nombre completo", text: $fullName)
+                            .padding()
+                            .background(Color(.systemGray6))
+                            .cornerRadius(12)
                     }
-                    
-                    // 5. Correo electrónico
-                    VStack(alignment: .leading, spacing: 8) {
+                    // Email
+                    VStack(alignment: .leading, spacing: 6) {
                         Text("CORREO ELECTRÓNICO")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(Color("TextoGris"))
-                        TextField("ana@correo.com", text: $correo)
-                            .font(.system(size: 16))
-                            .keyboardType(.emailAddress)
-                            .textInputAutocapitalization(.never)
-                            .autocorrectionDisabled()
-                            .padding(16)
-                            .background(Color("Tarjeta"))
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color("Borde")))
+                            .font(.caption)
+                            .bold()
+                            .foregroundColor(.gray)
+                        TextField("Escribe tu correo", text: $email)
+                            .padding()
+                            .background(Color(.systemGray6))
+                            .cornerRadius(12)
                     }
-                    
-                    // 6. Contraseña (con puntitos)
-                    VStack(alignment: .leading, spacing: 8) {
+                    // Password
+                    VStack(alignment: .leading, spacing: 6) {
                         Text("CONTRASEÑA")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(Color("TextoGris"))
-                        SecureField("Mín. 8 caracteres", text: $contrasena)
-                            .font(.system(size: 16))
-                            .padding(16)
-                            .background(Color("Tarjeta"))
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color("Borde")))
+                            .font(.caption)
+                            .bold()
+                            .foregroundColor(.gray)
+                        SecureField("Mín. 8 caracteres", text: $password)
+                            .padding()
+                            .background(Color(.systemGray6))
+                            .cornerRadius(12)
                     }
-                    
-                    // 7. Confirmar contraseña
-                    VStack(alignment: .leading, spacing: 8) {
+                    // Confirm Password
+                    VStack(alignment: .leading, spacing: 6) {
                         Text("CONFIRMAR CONTRASEÑA")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(Color("TextoGris"))
-                        SecureField("Repite tu contraseña", text: $confirmar)
-                            .font(.system(size: 16))
-                            .padding(16)
-                            .background(Color("Tarjeta"))
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color("Borde")))
-                    }
-                    
-                    // 8. Avisos de validación
-                    if !contrasena.isEmpty && !contrasenaValida {
-                        Text("La contraseña debe tener al menos 8 caracteres")
-                            .font(.system(size: 13))
-                            .foregroundStyle(Color("Rojo"))
-                    }
-                    if !confirmar.isEmpty && !contrasenasIguales {
-                        Text("Las contraseñas no coinciden")
-                            .font(.system(size: 13))
-                            .foregroundStyle(Color("Rojo"))
+                            .font(.caption)
+                            .bold()
+                            .foregroundColor(.gray)
+                        SecureField("Repite tu contraseña", text: $confirmPassword)
+                            .padding()
+                            .background(Color(.systemGray6))
+                            .cornerRadius(12)
                     }
                 }
-                .padding(.horizontal, 24)
-                .padding(.top, 8)
+                Spacer()
+                Button(action: {
+                    // Acción al presionar el botón
+                }) {
+                    Text("Registrarme")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(primaryColor)
+                        .cornerRadius(12)
+                }
+                .padding(.bottom, 10)
             }
-            
-            // Botón de registro conectado a las reglas de validación
-            Button(action: {
-                // Acción al presionar el botón
-            }) {
-                Text("Registrarme")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.accentColor)
-                    .cornerRadius(12)
-            }
-            .disabled(!puedeContinuar)
-            .opacity(puedeContinuar ? 1.0 : 0.45)
             .padding(.horizontal, 24)
-            .padding(.vertical, 16)
         }
-        .background(Color("Fondo"))
-        .navigationBarBackButtonHidden(true)
+        .tint(primaryColor)
     }
 }
-
 #Preview {
     NavigationStack {
         RegisterView()
