@@ -121,8 +121,32 @@ struct profileView: View {
                                             .background(fondoTarjeta)
                                             .clipShape(RoundedRectangle(cornerRadius: 16))
                                         }
-
-                }}}}
+                    //Botón para guardar cambios
+                    Text("Guardar Cambios")
+                                            .font(.system(size: 16, weight: .bold))
+                                            .foregroundStyle(.white)
+                                            .frame(maxWidth: .infinity)
+                                            .frame(height: 50)
+                                            .background(rojoPrimary)
+                                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                                            .padding(.top, 12)
+                                        
+                                    }
+                                    .padding(.horizontal, 20)
+                                    .padding(.bottom, 30)
+                                }
+                                .background(fondo.ignoresSafeArea())
+                                .navigationTitle("Editar Perfil")
+                                .navigationBarTitleDisplayMode(.inline)
+                                .toolbar {
+                                    ToolbarItem(placement: .topBarLeading) {
+                                        Text("Cancelar")
+                                            .font(.system(size: 16))
+                                            .foregroundStyle(textoGris)
+                                    }
+                                }
+                            }
+                        }
     
     //Función de campo visual
     private func campoVisual(
