@@ -28,7 +28,22 @@ struct ForgotPasswordView: View {
                                         Text("Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu cuenta.")
                                             .font(.subheadline)
                                             .foregroundColor(.gray)
-                                    }}}}}
+                                    }.padding(.top, 16)
+                                VStack(alignment: .leading, spacing: 6) {
+                                        Text("CORREO ELECTRÓNICO")
+                                            .font(.caption)
+                                            .bold()
+                                            .foregroundColor(.gray)
+                                        TextField("Ingresa tu correo electróncico", text: $email)
+                                            .keyboardType(.emailAddress)
+                                            .textInputAutocapitalization(.never)
+                                            .autocorrectionDisabled()
+                                            .foregroundColor(.black)
+                                            .padding()
+                                            .background(Color(.systemGray6))
+                                            .cornerRadius(12)
+                                    }
+                                Spacer()}}}}
 
 #Preview {
     ForgotPasswordView()    
