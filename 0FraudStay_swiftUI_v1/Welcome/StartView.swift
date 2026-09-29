@@ -23,10 +23,10 @@ struct StartView: View {
     // Colores de la app
     private let rojo = Color("BrandPrimaryColor")
     private let verde = Color("VerificateColor")
-    private let fondo = Color(red: 0.95, green: 0.95, blue: 0.97)
-    private let borde = Color(red: 0.90, green: 0.90, blue: 0.92)
-    private let textoPrincipal = Color(red: 0.11, green: 0.11, blue: 0.12)
-    private let textoGris = Color(red: 0.56, green: 0.56, blue: 0.58)
+    private let fondo = Color("FondoApp")
+    private let borde = Color("Border")
+    private let textoPrincipal = Color(.black)
+    private let textoGris = Color(.lightGray)
 
     // DATOS DE EJEMPLO — se reemplazan con lo que venga de la base de datos
     private let misReportes: [(icono: String, titulo: String, estado: String, colorEstado: Color,
