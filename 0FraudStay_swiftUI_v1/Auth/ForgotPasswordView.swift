@@ -49,7 +49,7 @@ Spacer()
     Button(action: {
 // Botón paara enviar correo
 }) {
-    Text("Enviar instrucciones")
+    Text("Enviar código de recuperación")
     .font(.headline)
     .foregroundColor(.white)
     .frame(maxWidth: .infinity)
