@@ -88,7 +88,40 @@ struct profileView: View {
                         .background(fondoTarjeta)
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                     }
-                    
+                    //Preferencias de la cuenta
+                    VStack(alignment: .leading, spacing: 16) {
+                                            Text("PREFERENCIAS DE CUENTA")
+                                                .font(.system(size: 12, weight: .bold))
+                                                .foregroundStyle(textoGris)
+                                                .padding(.horizontal, 4)
+                                            
+                                            VStack(spacing: 14) {
+                                                HStack(spacing: 12) {
+                                                    Image(systemName: "bell.fill")
+                                                        .foregroundStyle(rojoPrimary)
+                                                        .frame(width: 24)
+                                                    
+                                                    VStack(alignment: .leading, spacing: 2) {
+                                                        Text("Alertas de fraudes")
+                                                            .font(.system(size: 15, weight: .medium))
+                                                            .foregroundStyle(textoPrincipal)
+                                                        Text("Recibir notificaciones sobre reportes en tu zona")
+                                                            .font(.system(size: 12))
+                                                            .foregroundStyle(textoGris)
+                                                    }
+                                                    
+                                                    Spacer()
+                                                    
+                                                    Toggle("", isOn: .constant(true))
+                                                        .labelsHidden()
+                                                        .tint(rojoPrimary)
+                                                }
+                                            }
+                                            .padding(16)
+                                            .background(fondoTarjeta)
+                                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                                        }
+
                 }}}}
     
     //Función de campo visual
