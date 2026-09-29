@@ -21,8 +21,8 @@ struct StartView: View {
     @State private var selectedTab: Tab = .inicio
 
     // Colores de la app
-    private let rojo = Color(red: 1.00, green: 0.27, blue: 0.20)
-    private let verde = Color(red: 0.20, green: 0.66, blue: 0.36)
+    private let rojo = Color("BrandPrimaryColor")
+    private let verde = Color("VerificateColor")
     private let fondo = Color(red: 0.95, green: 0.95, blue: 0.97)
     private let borde = Color(red: 0.90, green: 0.90, blue: 0.92)
     private let textoPrincipal = Color(red: 0.11, green: 0.11, blue: 0.12)
@@ -32,7 +32,7 @@ struct StartView: View {
     private let misReportes: [(icono: String, titulo: String, estado: String, colorEstado: Color,
                                plataforma: String, fecha: String, codigo: String)] = [
         ("⏳", "Depto Condesa — anfitrión desapareció tras cobro", "EN REVISIÓN",
-         Color(red: 0.85, green: 0.55, blue: 0.05), "Facebook Marketplace", "12 mar 2026", "RS-2026-0089"),
+         Color("ReviewColor"), "Facebook Marketplace", "12 mar 2026", "RS-2026-0089"),
         ("📋", "Penthouse Roma Norte — cambio de último minuto", "PENDIENTE",
          Color.gray, "WhatsApp", "1 mar 2026", "RS-2026-0086")
     ]
@@ -109,9 +109,10 @@ struct StartView: View {
                                 .foregroundStyle(textoPrincipal)
                         }
                         Spacer()
-                        Text("🏠")
-                            .font(.system(size: 22))
-                            .frame(width: 46, height: 46)
+                        Image("appLogo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 60, height: 60)
                             .background(rojo.opacity(0.12))
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                             .overlay(
