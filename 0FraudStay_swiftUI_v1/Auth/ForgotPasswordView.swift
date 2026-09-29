@@ -9,11 +9,12 @@ import SwiftUI
 
 //Creación de pantalla con elementos
 struct ForgotPasswordView: View {
-@State private var email = ""
-let primaryColor = Color("BrandPrimaryColor")
+    @State private var email = ""
+    private let primaryColor = Color("BrandPrimaryColor")
+    private let fondo = Color("FondoApp")
 var body: some View {
 ZStack {
-        Color.white
+        fondo
         .ignoresSafeArea()
         VStack(alignment: .leading, spacing: 20) {
                 
@@ -41,7 +42,7 @@ TextField("Ingresa tu correo electróncico", text: $email)
         .autocorrectionDisabled()
         .foregroundColor(.black)
         .padding()
-        .background(Color(.systemGray6))
+        .background(Color(.white))
         .cornerRadius(12)}
             
 Spacer()
