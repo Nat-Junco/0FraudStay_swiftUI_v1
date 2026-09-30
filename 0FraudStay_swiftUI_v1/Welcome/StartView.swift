@@ -58,7 +58,7 @@ struct StartView: View {
                 .tag(Tab.inicio)
 
             NavigationStack {
-                ReportsView()
+                AllReportsView()
             }
             .tabItem {
                 Label("Reportes", systemImage: "exclamationmark.triangle")
@@ -232,7 +232,7 @@ struct StartView: View {
                         .buttonStyle(.plain)
 
                         NavigationLink {
-                            ReportsView()
+                            AllReportsView()
                         } label: {
                             VStack(spacing: 12) {
                                 Text("🔍").font(.system(size: 26))
@@ -260,7 +260,7 @@ struct StartView: View {
                                 .foregroundStyle(textoPrincipal)
                             Spacer()
                             NavigationLink {
-                                ReportsView()
+                                MyReportsView()
                             } label: {
                                 Text("Ver más →")
                                     .font(.system(size: 16, weight: .semibold))
@@ -361,7 +361,7 @@ struct StartView: View {
                             .foregroundStyle(textoPrincipal)
                         Spacer()
                         NavigationLink {
-                            ReportsView()
+                            AllReportsView()
                         } label: {
                             Text("Ver todos →")
                                 .font(.system(size: 16, weight: .semibold))

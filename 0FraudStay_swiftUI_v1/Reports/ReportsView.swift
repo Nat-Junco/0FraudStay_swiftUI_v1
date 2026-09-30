@@ -115,7 +115,7 @@ class MyReportsViewModel: ObservableObject {
 }
 
 // VISTA SWIFTUI
-struct ReportsView: View {
+struct MyReportsView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel = MyReportsViewModel()
     @State private var filtroSeleccionado: ReportStatus = .todos
@@ -313,6 +313,6 @@ struct ReportRowCard: View {
 
 #Preview {
     NavigationStack {
-        ReportsView()
+        MyReportsView()
     }
 }
