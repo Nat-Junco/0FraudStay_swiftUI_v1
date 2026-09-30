@@ -54,77 +54,59 @@ enum ReportStatus: String, Codable, CaseIterable {
     }
 }
 
-// SERVICIO API (BACKEND)
-class ReportService {
-    private let baseURL = "https://api.tudominio.com/v1"
-    
-    func fetchUserReports(token: String) async throws -> [UserReport] {
-        guard let url = URL(string: "\(baseURL)/reports/me") else {
-            throw URLError(.badURL)
+extension UserReport{
+    init(dto:DTOReporteResponse, plataforma: String){
+        let estado: ReportStatus
+        switch dto.estadoId{
+        case 2: estado = .enRevision
+        case 3: estado = .fraude
+        default: estado = .pendiente
         }
+        let formato = NumberFormatter()
+        formato.numberStyle = .currency
+        formato.locale = Locale(identifier: "es_MX")
         
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        
-        let (data, response) = try await URLSession.shared.data(for: request)
-        
-        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-            throw URLError(.badServerResponse)
-        }
-        
-        return try JSONDecoder().decode([UserReport].self, from: data)
-    }
-}
-
-// VIEWMODEL
-@MainActor
-class MyReportsViewModel: ObservableObject {
-    @Published var reportes: [UserReport] = []
-    @Published var isLoading: Bool = false
-    @Published var errorMessage: String? = nil
-    
-    // Cambia a 'true' cuando tengas listo tu backend real
-    private let usarBackendReal = false
-    private let service = ReportService()
-    
-    func cargarReportes() async {
-        self.isLoading = true
-        self.errorMessage = nil
-        
-        if usarBackendReal {
-            do {
-                let token = "TOKEN_JWT_AQUI"
-                self.reportes = try await service.fetchUserReports(token: token)
-            } catch {
-                self.errorMessage = "No se pudo conectar con el servidor."
-            }
-        } else {
-            // MODO ESTÁTICO / MOCK
-            try? await Task.sleep(nanoseconds: 400_000_000) // Simula tiempo de respuesta
-            self.reportes = [
-                UserReport(id: "1", folio: "RS-2026-0089", titulo: "Depto Condesa — anfitrión desapareció tras cobro", plataforma: "Facebook Marketplace", ubicacion: "CDMX", fecha: "12 mar 2026", monto: "$8,500 MXN", estado: .enRevision, esEditable: true, imageUrl: nil),
-                UserReport(id: "2", folio: "RS-2026-0086", titulo: "Penthouse Roma Norte — cambio de último minuto", plataforma: "WhatsApp", ubicacion: "CDMX", fecha: "1 mar 2026", monto: "$14,000 MXN", estado: .pendiente, esEditable: true, imageUrl: nil),
-                UserReport(id: "3", folio: "RS-2026-0071", titulo: "Casa Tulum — fotos falsas, nunca entregaron llaves", plataforma: "Airbnb", ubicacion: "Tulum", fecha: "18 feb 2026", monto: "$22,000 MXN", estado: .fraude, esEditable: false, imageUrl: nil),
-                UserReport(id: "4", folio: "RS-2026-0058", titulo: "Studio Polanco — propietario inexistente", plataforma: "Inmuebles24", ubicacion: "CDMX", fecha: "4 feb 2026", monto: "$6,200 MXN", estado: .fraude, esEditable: false, imageUrl: nil)
-            ]
-        }
-        
-        self.isLoading = false
+        self.init(
+            id: String(dto.id),
+            folio: "RS-\(String(format: "%04d",dto.id))",
+            titulo: dto.nombre,
+            plataforma: plataforma,
+            ubicacion: dto.zona ?? "Sin zona",
+            fecha: dto.fecha,
+            monto: (formato.string(from: NSNumber(value: dto.precio ?? 0)) ?? "$0") + "MXN",
+            estado: estado,
+            esEditable: dto.esEditable,
+            imageUrl: dto.fotoURLCompleta?.absoluteString
+            
+            
+        )
     }
 }
 
 // VISTA SWIFTUI
 struct MyReportsView: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var viewModel = MyReportsViewModel()
+    @EnvironmentObject var vm : ReportesViewModel
     @State private var filtroSeleccionado: ReportStatus = .todos
+    
+    private var reportes: [UserReport] {
+        vm.mios.map {
+            UserReport(dto: $0, plataforma: vm.nombreFuente($0.fuenteId))
+        }
+    }
+    
+    private var perdidas: String{
+        let confirmados = vm.mios.filter { $0.estadoId == 3 }
+        let total: Double = confirmados.reduce (0.0) { suma, r in suma + (r.precio ?? 0)}
+        return total >= 1000 ? "$\(Int(total / 1000))k" : "$\(Int(total))"
+        
+    }
 
     private var reportesFiltrados: [UserReport] {
         if filtroSeleccionado == .todos {
-            return viewModel.reportes
+            return reportes
         }
-        return viewModel.reportes.filter { $0.estado == filtroSeleccionado }
+        return reportes.filter { $0.estado == filtroSeleccionado }
     }
 
     var body: some View {
@@ -153,9 +135,9 @@ struct MyReportsView: View {
                 
                 // Tarjetas Métricas
                 HStack(spacing: 8) {
-                    MetricCard(valor: "\(viewModel.reportes.count)", titulo: "TOTAL", colorTexto: .black)
-                    MetricCard(valor: "\(viewModel.reportes.filter { $0.estado == .fraude }.count)", titulo: "FRAUDE CONF.", colorTexto: .red)
-                    MetricCard(valor: "\(viewModel.reportes.filter { $0.estado == .enRevision }.count)", titulo: "EN REVISIÓN", colorTexto: .orange)
+                    MetricCard(valor: "\(reportes.count)", titulo: "TOTAL", colorTexto: .black)
+                    MetricCard(valor: "\(reportes.filter { $0.estado == .fraude }.count)", titulo: "FRAUDE CONF.", colorTexto: .red)
+                    MetricCard(valor: "\(reportes.filter { $0.estado == .enRevision }.count)", titulo: "EN REVISIÓN", colorTexto: .orange)
                     MetricCard(valor: "$51k", titulo: "PÉRDIDAS", colorTexto: .red)
                 }
 
@@ -185,22 +167,26 @@ struct MyReportsView: View {
                 }
 
                 // Contenido principal
-                if viewModel.isLoading {
+                if vm.isLoading && reportes.isEmpty{
                     ProgressView()
                         .frame(maxWidth: .infinity)
                         .padding(.top, 30)
-                } else if let error = viewModel.errorMessage {
+                } else if let error = vm.errorMessage, reportes.isEmpty {
                     VStack(spacing: 8) {
                         Text(error)
                             .font(.system(size: 13))
                             .foregroundStyle(Color.red)
                         Button("Reintentar") {
-                            Task { await viewModel.cargarReportes() }
+                            Task { await vm.cargarTodo() }
                         }
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.top, 20)
-                } else {
+                } else if reportes.isEmpty{
+                    ContentUnavailableView("Sin reportes", systemImage: "tray", description: Text("Aún no has creado ningún reporte."))
+                }
+                
+                else{
                     VStack(spacing: 12) {
                         ForEach(reportesFiltrados) { reporte in
                             ReportRowCard(reporte: reporte)
@@ -213,7 +199,10 @@ struct MyReportsView: View {
         .background(Color(red: 0.97, green: 0.97, blue: 0.98).ignoresSafeArea())
         .navigationBarBackButtonHidden(true)
         .task {
-            await viewModel.cargarReportes()
+            await vm.cargarTodo()
+        }
+        .refreshable{
+            await vm.cargarTodo()
         }
     }
 }
@@ -314,5 +303,6 @@ struct ReportRowCard: View {
 #Preview {
     NavigationStack {
         MyReportsView()
+            .environmentObject(ReportesViewModel())
     }
 }

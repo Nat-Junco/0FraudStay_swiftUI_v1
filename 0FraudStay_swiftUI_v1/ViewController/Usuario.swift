@@ -42,7 +42,7 @@ extension RegisterView{
                 if !password.tieneSimbolo{
                     errores.append("La contraseña debe tener al menos un símbolo")
                 }
-                if !password.tieneTresIgualesSeguidos {
+                if password.tieneTresIgualesSeguidos {
                     errores.append("La contraseña no puede tener tres caracteres iguales seguidos")
                 }
             }

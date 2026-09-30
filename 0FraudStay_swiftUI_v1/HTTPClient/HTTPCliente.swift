@@ -11,7 +11,7 @@ struct HTTPClient {
 
     // En el simulador `localhost` apunta a tu Mac. En un iPhone físico
     // cámbialo por la IP de tu Mac, p. ej. "http://192.168.1.20:3000".
-    static let baseURL = "http://10.48.214.64:3000"
+    static let baseURL = "http://10.48.212.164:3000"
 
     //Auth (sin token)
 
@@ -52,6 +52,84 @@ struct HTTPClient {
         TokenStorage.set(identifier: "accessToken", value: refresh.accessToken)
         return true
     }
+    
+    //Catalogos
+    
+    func Fuentes() async throws -> [DTOFuente] {
+         let data = try await enviarConToken(URLRequest(url: url("/fuentes")))
+         return try JSONDecoder().decode([DTOFuente].self, from: data)
+     }
+
+     func TiposFraude() async throws -> [DTOCatalogo] {
+         let data = try await enviarConToken(URLRequest(url: url("/tipos-fraude")))
+         return try JSONDecoder().decode([DTOCatalogo].self, from: data)
+     }
+
+     func TiposPropiedad() async throws -> [DTOCatalogo] {
+         let data = try await enviarConToken(URLRequest(url: url("/tipos-propiedad")))
+         return try JSONDecoder().decode([DTOCatalogo].self, from: data)
+     }
+
+     // Reportes
+
+     /// GET /reportes — todos los reportes (de todos los usuarios).
+     func TodosReportes() async throws -> [DTOReporteResponse] {
+         let data = try await enviarConToken(URLRequest(url: url("/reportes")))
+         return try JSONDecoder().decode([DTOReporteResponse].self, from: data)
+     }
+
+     /// GET /reportes/self — reportes del usuario autenticado.
+     func MisReportes() async throws -> [DTOReporteResponse] {
+         let data = try await enviarConToken(URLRequest(url: url("/reportes/self")))
+         return try JSONDecoder().decode([DTOReporteResponse].self, from: data)
+     }
+
+     /// POST /reportes/fotos (paso 1) — sube la foto como multipart/form-data
+     /// en el campo "foto" (el mismo nombre que FileInterceptor('foto') en el back).
+     func SubirFoto(_ imagen: Data) async throws -> DTOFotoTempResponse {
+         let boundary = "Boundary-\(UUID().uuidString)"
+         var urlRequest = URLRequest(url: url("/reportes/fotos"))
+         urlRequest.httpMethod = "POST"
+         urlRequest.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+
+         var body = Data()
+         body.append("--\(boundary)\r\n".data(using: .utf8)!)
+         body.append("Content-Disposition: form-data; name=\"foto\"; filename=\"evidencia.jpg\"\r\n".data(using: .utf8)!)
+         body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
+         body.append(imagen)
+         body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
+         urlRequest.httpBody = body
+
+         let data = try await enviarConToken(urlRequest)
+         return try JSONDecoder().decode(DTOFotoTempResponse.self, from: data)
+     }
+
+     /// POST /reportes (paso 2) — crea el reporte con el `fotoTemp` del paso 1.
+     func CrearReporte(_ reporte: DTOCrearReporteRequest) async throws -> DTOReporteResponse {
+         var urlRequest = URLRequest(url: url("/reportes"))
+         urlRequest.httpMethod = "POST"
+         urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+         urlRequest.httpBody = try JSONEncoder().encode(reporte)
+         let data = try await enviarConToken(urlRequest)
+         return try JSONDecoder().decode(DTOReporteResponse.self, from: data)
+     }
+
+     /// PATCH /reportes/:id
+     func ActualizarReporte(id: Int, cambios: DTOActualizarReporteRequest) async throws -> DTOReporteResponse {
+         var urlRequest = URLRequest(url: url("/reportes/\(id)"))
+         urlRequest.httpMethod = "PATCH"
+         urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+         urlRequest.httpBody = try JSONEncoder().encode(cambios)
+         let data = try await enviarConToken(urlRequest)
+         return try JSONDecoder().decode(DTOReporteResponse.self, from: data)
+     }
+
+     /// DELETE /reportes/:id — borrado lógico, responde 204 sin cuerpo.
+     func EliminarReporte(id: Int) async throws {
+         var urlRequest = URLRequest(url: url("/reportes/\(id)"))
+         urlRequest.httpMethod = "DELETE"
+         _ = try await enviarConToken(urlRequest)
+     }
 
 
     //Utilidades

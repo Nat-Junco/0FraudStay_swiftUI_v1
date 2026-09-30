@@ -7,7 +7,7 @@
 
 import Foundation
 
-// MARK: - DTORegistroUsuarioRequest
+
 class DTORegistroUsuarioRequest: Codable {
     var email, password, nombre: String
 
@@ -18,7 +18,7 @@ class DTORegistroUsuarioRequest: Codable {
     }
 }
 
-// MARK: - DTORegistroUsuarioResponse
+
 class DTORegistroUsuarioResponse: Codable {
     var id, email: String
 

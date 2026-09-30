@@ -7,7 +7,7 @@
 
 import SwiftUI
 struct RegisterView: View {
-    @Environment (\.authController) var controladorRegistro
+    @Environment(\.authController) var controladorRegistro
     @Environment(\.dismiss) private var dismiss
     @State private var usuario = Usuario()
     @State private var erroresFormulario: [String] = []
@@ -18,7 +18,7 @@ struct RegisterView: View {
         do {
             let response = try await controladorRegistro.registerUser(
                 email: usuario.correo,
-                password: usuario.contraseña,
+                password: usuario.password,
                 nombre: usuario.nombre
             )
             print("Usuario registrado \(response.id) \(response.email)")
@@ -99,7 +99,7 @@ struct RegisterView: View {
                 }
                 Spacer()
                 Button(action: {
-                     erroresFormulario = usuario.validaDatos()
+                     erroresFormulario = usuario.validarDatos()
                     if erroresFormulario.isEmpty {
                         Task {
                             await registroUsuario()

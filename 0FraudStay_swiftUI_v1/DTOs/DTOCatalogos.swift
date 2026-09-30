@@ -6,3 +6,14 @@
 //
 
 import Foundation
+
+struct DTOFuente: Codable, Identifiable, Hashable {
+    let id: Int
+    let tipoFuente: String
+    let valorFuente:String
+}
+
+struct DTOCatalogo: Codable, Identifiable, Hashable{
+    let id: Int
+    let nombre: String
+}
