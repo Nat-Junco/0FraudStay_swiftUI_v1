@@ -7,11 +7,32 @@
 
 import SwiftUI
 struct RegisterView: View {
-    @State private var fullName = ""
-    @State private var email = ""
-    @State private var password = ""
-    @State private var confirmPassword = ""
+    @Environment (\.authController) var controladorRegistro
+    @Environment(\.dismiss) private var dismiss
+    @State private var usuario = Usuario()
+    @State private var erroresFormulario: [String] = []
+    @State private var registroExitoso = false
     private let primaryColor = Color("BrandPrimaryColor")
+
+    func registroUsuario() async {
+        do {
+            let response = try await controladorRegistro.registerUser(
+                email: usuario.correo,
+                password: usuario.contraseña,
+                nombre: usuario.nombre
+            )
+            print("Usuario registrado \(response.id) \(response.email)")
+            registroExitoso = true
+        } catch ErrorAPI.status(409) {
+            erroresFormulario = ["El correo ya está registrado"]
+        } catch ErrorAPI.status(400) {
+            erroresFormulario = ["El servidor rechazó los datos. Revisa la contraseña."]
+        } catch {
+            erroresFormulario = ["No se pudo conectar con el servidor"]
+            print("Error al registrar \(error)")
+        }
+    }
+    
     var body: some View {
         ZStack {
             Color.white
@@ -34,7 +55,7 @@ struct RegisterView: View {
                             .font(.caption)
                             .bold()
                             .foregroundColor(.gray)
-                        TextField("Escribe tu nombre completo", text: $fullName)
+                        TextField("Escribe tu nombre completo", text: $usuario.nombre)
                             .padding()
                             .background(Color(.systemGray6))
                             .cornerRadius(12)
@@ -45,7 +66,7 @@ struct RegisterView: View {
                             .font(.caption)
                             .bold()
                             .foregroundColor(.gray)
-                        TextField("Escribe tu correo", text: $email)
+                        TextField("Escribe tu correo", text: $usuario.correo)
                             .padding()
                             .background(Color(.systemGray6))
                             .cornerRadius(12)
@@ -56,7 +77,7 @@ struct RegisterView: View {
                             .font(.caption)
                             .bold()
                             .foregroundColor(.gray)
-                        SecureField("Mín. 8 caracteres", text: $password)
+                        SecureField("Mín. 8 caracteres", text: $usuario.password)
                             .padding()
                             .background(Color(.systemGray6))
                             .cornerRadius(12)
@@ -67,15 +88,23 @@ struct RegisterView: View {
                             .font(.caption)
                             .bold()
                             .foregroundColor(.gray)
-                        SecureField("Repite tu contraseña", text: $confirmPassword)
+                        SecureField("Repite tu contraseña", text: $usuario.confirmarPassword)
                             .padding()
                             .background(Color(.systemGray6))
                             .cornerRadius(12)
                     }
                 }
+                if !erroresFormulario.isEmpty {
+                    ResumenErrores(errores: erroresFormulario)
+                }
                 Spacer()
                 Button(action: {
-                    // Acción al presionar el botón
+                     erroresFormulario = usuario.validaDatos()
+                    if erroresFormulario.isEmpty {
+                        Task {
+                            await registroUsuario()
+                        }
+                    }
                 }) {
                     Text("Registrarme")
                         .font(.headline)
@@ -90,8 +119,14 @@ struct RegisterView: View {
             .padding(.horizontal, 24)
         }
         .tint(primaryColor)
+        .alert("¡Cuenta creada!", isPresented: $registroExitoso) {
+                                                                  Button("Iniciar sesión") { dismiss() }
+        } message: {
+            Text("Ya puedes entrar con tu correo y contraseña.")
+        }
     }
 }
+
 #Preview {
     NavigationStack {
         RegisterView()
