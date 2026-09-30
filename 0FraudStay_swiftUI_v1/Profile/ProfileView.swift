@@ -97,7 +97,7 @@ struct ProfileView: View {
                         }
                         Divider()
                         
-                        NavigationLink(destination: AllReportsView()) {
+                        NavigationLink(destination: MyReportsView()) {
                             ProfileMenuItem(icon: "doc.text.fill", iconColor: .gray, title: "Todos mis reportes")
                         }
                         Divider()
