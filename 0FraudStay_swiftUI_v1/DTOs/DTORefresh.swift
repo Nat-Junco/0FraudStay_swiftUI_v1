@@ -6,3 +6,14 @@
 //
 
 import Foundation
+
+
+struct DTORefreshRequest: Codable {
+    let refreshToken: String
+}
+
+struct DTORefreshResponse: Codable {
+    let accessToken: String
+}
+
+

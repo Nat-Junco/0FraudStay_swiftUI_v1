@@ -6,3 +6,11 @@
 //
 
 import Foundation
+import SwiftUI
+
+extension EnvironmentValues {
+    @Entry var authController = ControladorRegistroUsuario(httpClient: HTTPClient())
+    //Variable reportes controller
+}
+
+
