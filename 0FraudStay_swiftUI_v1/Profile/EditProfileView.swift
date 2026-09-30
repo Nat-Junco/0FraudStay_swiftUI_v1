@@ -53,7 +53,7 @@ struct profileView: View {
                             .foregroundStyle(textoGris)
                             .padding(.horizontal, 4)
                         
-                        //Datos de ejemplo (Hardcodeados)
+                        //Datos de ejemplo
                         VStack(spacing: 14) {
                             campoVisual(
                                 titulo: "Nombre completo",
