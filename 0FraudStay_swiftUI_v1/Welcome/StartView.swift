@@ -185,7 +185,7 @@ struct StartView: View {
 
                     // Guías de seguridad
                     NavigationLink {
-                        Text("Guías de seguridad") // Cambiar por la pantalla real cuando exista
+                        GuidesView()
                     } label: {
                         HStack(spacing: 14) {
                             Text("📖")
