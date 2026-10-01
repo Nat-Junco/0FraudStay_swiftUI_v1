@@ -11,7 +11,7 @@ enum Tab {
     case inicio
     case reportes
     case crear
-    case dashboard
+    case guides
     case perfil
 }
 
@@ -74,12 +74,12 @@ struct StartView: View {
             .tag(Tab.crear)
 
             NavigationStack {
-                DashboardView()
+                GuidesView()
             }
             .tabItem {
-                Label("Dashboard", systemImage: "square.grid.2x2")
+                Label("Guías", systemImage: "book")
             }
-            .tag(Tab.dashboard)
+            .tag(Tab.guides)
 
             NavigationStack {
                 ProfileView()
