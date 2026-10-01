@@ -68,15 +68,6 @@ struct EditProfileView: View {
                                 texto: $correo,
                                 teclado: .emailAddress
                             )
-                            
-                            Divider()
-                            
-                            campoVisual(
-                                titulo: "Contraseña",
-                                icono: "lock.fill",
-                                texto: $contrasena,
-                                esSeguro: true
-                            )
                         }
                         .padding(16)
                         .background(Color(.secondarySystemGroupedBackground))
@@ -138,15 +129,6 @@ struct EditProfileView: View {
             .background(Color(.systemGroupedBackground).ignoresSafeArea())
             .navigationTitle("Editar Perfil")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("Cancelar") {
-                        dismiss()
-                    }
-                    .font(.system(size: 16))
-                    .foregroundStyle(.secondary)
-                }
-            }
         }
     }
     
@@ -187,8 +169,8 @@ struct EditProfileView: View {
 
 #Preview {
     EditProfileView(
-        nombre: .constant("Marbella Barba"),
-        correo: .constant("marbella@ejemplo.com"),
+        nombre: .constant("Usuario"),
+        correo: .constant("correo@ejemplo.com"),
         alertasHabilitadas: .constant(true)
     )
 }
