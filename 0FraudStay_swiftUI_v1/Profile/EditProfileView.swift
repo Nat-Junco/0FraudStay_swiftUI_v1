@@ -55,7 +55,7 @@ struct EditProfileView: View {
                     VStack(alignment: .leading, spacing: 16) {
                         Text("INFORMACIÓN PERSONAL")
                             .font(.system(size: 12, weight: .bold))
-                            .foregroundStyle(textoGris)
+                            .foregroundStyle(.secondary)
                             .padding(.horizontal, 4)
                         
                         VStack(spacing: 14) {
@@ -83,7 +83,7 @@ struct EditProfileView: View {
                             
                         }
                         .padding(16)
-                        .background(fondoTarjeta)
+                        .background(Color(.secondarySystemGroupedBackground))
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                     }
                     
