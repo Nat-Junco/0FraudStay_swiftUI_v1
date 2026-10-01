@@ -90,8 +90,8 @@ struct EditProfileView: View {
                     // MARK: - Preferencias de Cuenta
                     VStack(alignment: .leading, spacing: 16) {
                         Text("PREFERENCIAS DE CUENTA")
-                            .font(.system(size: 12, weight: .bold)) // Corregido: .system en lugar de .systemGray
-                            .foregroundStyle(textoGris)
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundStyle(.secondary) // Adaptativo para subtítulos
                             .padding(.horizontal, 4)
                         
                         VStack(spacing: 14) {
@@ -103,22 +103,22 @@ struct EditProfileView: View {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text("Alertas de fraudes")
                                         .font(.system(size: 15, weight: .medium))
-                                        .foregroundStyle(textoPrincipal)
+                                        .foregroundStyle(.primary) // Negro en Modo Claro / Blanco en Modo Oscuro
+                                    
                                     Text("Recibir notificaciones sobre reportes en tu zona")
-                                        .font(.system(size: 12)) // Corregido: .system en lugar de .systemGray
-                                        .foregroundStyle(textoGris)
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(.secondary) // Gris adaptativo
                                 }
                                 
                                 Spacer()
                                 
-                                // Corregido: Se vincula a la variable @State con $
                                 Toggle("", isOn: $alertasHabilitadas)
                                     .labelsHidden()
                                     .tint(rojoPrimary)
                             }
                         }
                         .padding(16)
-                        .background(fondoTarjeta)
+                        .background(Color(.secondarySystemGroupedBackground))
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                     }
                     
