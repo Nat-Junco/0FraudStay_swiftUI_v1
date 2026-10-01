@@ -13,7 +13,7 @@ struct PrivacyView: View {
                     
                     // Header Informativo
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("OFRAUD STAY")
+                        Text("0FRAUD STAY")
                             .font(.caption)
                             .bold()
                             .foregroundStyle(rojoPrimary)
@@ -30,3 +30,18 @@ struct PrivacyView: View {
                     .padding(.top, 8)
                     
                 }}}}}
+// Función para mostrar el texto
+  @ViewBuilder
+  private func seccionTexto(titulo: String, contenido: String) -> some View {
+      VStack(alignment: .leading, spacing: 6) {
+          Text(titulo)
+              .font(.system(size: 15, weight: .bold))
+              .foregroundStyle(.primary)
+          
+          Text(contenido)
+              .font(.system(size: 13))
+              .foregroundStyle(.secondary)
+              .lineSpacing(3)
+      }
+  }
+
