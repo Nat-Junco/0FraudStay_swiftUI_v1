@@ -1,29 +1,24 @@
-//
-//  EditProfileView.swift
-//  0FraudStay_swiftUI_v1
-//
-//  Created by Marbella Barba De Los Santos on 29/09/26.
-//
-
 import SwiftUI
 
 struct EditProfileView: View {
+    @Environment(\.dismiss) private var dismiss
     
-    @State private var alertasHabilitadas: Bool = true
+    // Bindings para sincronizar con la pantalla principal de Perfil
+    @Binding var nombre: String
+    @Binding var correo: String
+    @Binding var alertasHabilitadas: Bool
     
-    // Colores obtenidos directamente de los Assets
+    // Variable local para la contraseña
+    @State private var contrasena: String = ""
+    
     private let rojoPrimary = Color("BrandPrimaryColor")
-    private let verdeVerificate = Color("VerificateColor")
-    private let fondo = Color("AppFondo")
-    private let fondoTarjeta = Color(.white)
-    private let textoPrincipal = Color(.label)
-    private let textoGris = Color(.secondaryLabel)
     
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
                     
+                    // MARK: - Foto de Perfil
                     VStack(spacing: 12) {
                         ZStack(alignment: .bottomTrailing) {
                             Image(systemName: "person.crop.circle.fill")
@@ -41,7 +36,7 @@ struct EditProfileView: View {
                                 .background(rojoPrimary)
                                 .clipShape(Circle())
                                 .overlay(
-                                    Circle().stroke(fondoTarjeta, lineWidth: 2)
+                                    Circle().stroke(Color(.secondarySystemGroupedBackground), lineWidth: 2)
                                 )
                         }
                         
@@ -62,7 +57,7 @@ struct EditProfileView: View {
                             campoVisual(
                                 titulo: "Nombre completo",
                                 icono: "person.fill",
-                                valor: "Marbella Barba"
+                                texto: $nombre
                             )
                             
                             Divider()
@@ -70,28 +65,29 @@ struct EditProfileView: View {
                             campoVisual(
                                 titulo: "Correo electrónico",
                                 icono: "envelope.fill",
-                                valor: "marbella@ejemplo.com"
+                                texto: $correo,
+                                teclado: .emailAddress
                             )
                             
                             Divider()
                             
                             campoVisual(
                                 titulo: "Contraseña",
-                                icono: "phone.fill",
-                                valor: "+52 55 1234 5678"
+                                icono: "lock.fill",
+                                texto: $contrasena,
+                                esSeguro: true
                             )
-                            
                         }
                         .padding(16)
                         .background(Color(.secondarySystemGroupedBackground))
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                     }
                     
-                    // MARK: - Preferencias de Cuenta
+                    // MARK: - Preferencias de Cuenta (Notificaciones)
                     VStack(alignment: .leading, spacing: 16) {
                         Text("PREFERENCIAS DE CUENTA")
                             .font(.system(size: 12, weight: .bold))
-                            .foregroundStyle(.secondary) // Adaptativo para subtítulos en modo claro y oscuro
+                            .foregroundStyle(.secondary)
                             .padding(.horizontal, 4)
                         
                         VStack(spacing: 14) {
@@ -103,15 +99,15 @@ struct EditProfileView: View {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text("Alertas de fraudes")
                                         .font(.system(size: 15, weight: .medium))
-                                        .foregroundStyle(.primary) // Negro en Modo Claro / Blanco en Modo Oscuro
-                                    
+                                        .foregroundStyle(.primary)
                                     Text("Recibir notificaciones sobre reportes en tu zona")
                                         .font(.system(size: 12))
-                                        .foregroundStyle(.secondary) // Gris adaptativo
+                                        .foregroundStyle(.secondary)
                                 }
                                 
                                 Spacer()
                                 
+                                // El estado del toggle ahora se guarda directamente
                                 Toggle("", isOn: $alertasHabilitadas)
                                     .labelsHidden()
                                     .tint(rojoPrimary)
@@ -123,57 +119,76 @@ struct EditProfileView: View {
                     }
                     
                     // MARK: - Botón Guardar Cambios
-                    Text("Guardar Cambios")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 50)
-                        .background(rojoPrimary)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
-                        .padding(.top, 12)
-                    
+                    Button(action: {
+                        dismiss() // Cierra la vista manteniendo el estado actualizado del Toggle y TextFields
+                    }) {
+                        Text("Guardar Cambios")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 50)
+                            .background(rojoPrimary)
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                    }
+                    .padding(.top, 12)
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 30)
             }
-            .background(fondo.ignoresSafeArea())
+            .background(Color(.systemGroupedBackground).ignoresSafeArea())
             .navigationTitle("Editar Perfil")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Text("Cancelar")
-                        .font(.system(size: 16))
-                        .foregroundStyle(textoGris)
+                    Button("Cancelar") {
+                        dismiss()
+                    }
+                    .font(.system(size: 16))
+                    .foregroundStyle(.secondary)
                 }
             }
         }
     }
-
-    // Subview puramente estática para maqueta de campos
+    
+    // MARK: - Campo Visual Editable
     @ViewBuilder
     private func campoVisual(
         titulo: String,
         icono: String,
-        valor: String
+        texto: Binding<String>,
+        teclado: UIKeyboardType = .default,
+        esSeguro: Bool = false
     ) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(titulo)
                 .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(textoGris)
+                .foregroundStyle(.secondary)
             
             HStack(spacing: 12) {
                 Image(systemName: icono)
                     .foregroundStyle(rojoPrimary)
                     .frame(width: 20)
                 
-                TextField(titulo, text: .constant(valor))
-                    .font(.system(size: 15))
-                    .foregroundStyle(textoPrincipal)
+                if esSeguro {
+                    SecureField("Ingresa contraseña", text: texto)
+                        .font(.system(size: 15))
+                        .foregroundStyle(.primary)
+                } else {
+                    TextField(titulo, text: texto)
+                        .font(.system(size: 15))
+                        .foregroundStyle(.primary)
+                        .keyboardType(teclado)
+                        .autocorrectionDisabled()
+                }
             }
         }
     }
-    }
+}
 
 #Preview {
-    EditProfileView()
+    EditProfileView(
+        nombre: .constant("Marbella Barba"),
+        correo: .constant("marbella@ejemplo.com"),
+        alertasHabilitadas: .constant(true)
+    )
 }

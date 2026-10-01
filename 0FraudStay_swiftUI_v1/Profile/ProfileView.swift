@@ -9,6 +9,10 @@ import SwiftUI
 
 struct ProfileView: View {
     
+    @State private var nombreUsuario: String = "Usaurio"
+    @State private var correoUsuario: String = "correo@ejemplo.com"
+    @State private var alertasActivas: Bool = true
+    
     let primaryColor = Color("BrandPrimaryColor")
     let cardbackColor = Color(.white)
     let backgroundColor = Color("FondoApp")
@@ -42,7 +46,7 @@ struct ProfileView: View {
                     .padding(.top, 10)
                     
                     // Tarjeta de Usuario
-                    NavigationLink(destination: EditProfileView()) {
+                    NavigationLink(destination: EditProfileView(nombre: $nombreUsuario, correo: $correoUsuario, alertasHabilitadas: $alertasActivas)) {
                         HStack(spacing: 16) {
                             ZStack(alignment: .bottomTrailing) {
                                 // DATOS DINÁMICOS / BASE DE DATOS:
