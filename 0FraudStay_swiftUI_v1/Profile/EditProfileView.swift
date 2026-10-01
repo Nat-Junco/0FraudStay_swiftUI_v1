@@ -91,7 +91,7 @@ struct EditProfileView: View {
                     VStack(alignment: .leading, spacing: 16) {
                         Text("PREFERENCIAS DE CUENTA")
                             .font(.system(size: 12, weight: .bold))
-                            .foregroundStyle(.secondary) // Adaptativo para subtítulos
+                            .foregroundStyle(.secondary) // Adaptativo para subtítulos en modo claro y oscuro
                             .padding(.horizontal, 4)
                         
                         VStack(spacing: 14) {
