@@ -86,12 +86,6 @@ struct GuidesView: View {
                         }
                         .frame(height: 130)
                         .clipped()
-                        .overlay(alignment: .topLeading) {
-                            Text("🛡️")
-                                .font(.system(size: 24))
-                                .padding(.leading, 16)
-                                .padding(.top, 6)
-                        }
 
                         // Etiquetas y flecha
                         HStack(spacing: 8) {
@@ -160,12 +154,6 @@ struct GuidesView: View {
                         }
                         .frame(height: 130)
                         .clipped()
-                        .overlay(alignment: .topLeading) {
-                            Text("🔐")
-                                .font(.system(size: 24))
-                                .padding(.leading, 16)
-                                .padding(.top, 6)
-                        }
 
                         HStack(spacing: 8) {
                             Text("\(GuiasData.tips.count) tips")
