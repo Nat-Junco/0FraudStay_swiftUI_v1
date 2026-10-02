@@ -73,7 +73,7 @@ struct PrivacyView: View {
                 
                 // Nota al pie
                 HStack(spacing: 8) {
-                    Image(systemName: "shield.checkmark.fill")
+                    Image(systemName: "shield.fill")
                         .foregroundStyle(rojoPrimary)
                         .font(.system(size: 16))
                     
