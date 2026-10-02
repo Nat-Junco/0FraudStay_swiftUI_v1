@@ -6,12 +6,11 @@
 //
 
 import SwiftUI
-
 struct ProfileView: View {
     
-    @State private var nombreUsuario: String = "Usaurio"
-    @State private var correoUsuario: String = "correo@ejemplo.com"
-    @State private var alertasActivas: Bool = true
+    @State private var nombre: String = "Nombre del usuario"
+    @State private var correo: String = "ejemplo@correo.com"
+    @State private var alertasHabilitadas: Bool = true
     
     let primaryColor = Color("BrandPrimaryColor")
     let cardbackColor = Color(.white)
@@ -23,123 +22,130 @@ struct ProfileView: View {
                 backgroundColor
                     .ignoresSafeArea()
                 
-                VStack(alignment: .leading, spacing: 20) {
-                    
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("OFRAUD STAY")
-                                .font(.caption)
-                                .bold()
-                                .foregroundColor(primaryColor)
-                                .tracking(1)
-                            Text("Mi perfil")
-                                .font(.system(size: 28, weight: .bold, design: .serif))
-                        }
-                        Spacer()
-                        Image("appLogo")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 55, height: 55)
-                            .padding(10)
-                            .cornerRadius(12)
-                    }
-                    .padding(.top, 10)
-                    
-                    // Tarjeta de Usuario
-                    NavigationLink(destination: EditProfileView(nombre: $nombreUsuario, correo: $correoUsuario, alertasHabilitadas: $alertasActivas)) {
-                        HStack(spacing: 16) {
-                            ZStack(alignment: .bottomTrailing) {
-                                // DATOS DINÁMICOS / BASE DE DATOS:
-                                Image(systemName: "person.fill")
-                                    .font(.system(size: 28))
-                                    .foregroundColor(primaryColor)
-                                    .frame(width: 60, height: 60)
-                                    .background(primaryColor.opacity(0.15))
-                                    .cornerRadius(16)
-                                
-                                Image(systemName: "pencil.circle.fill")
-                                    .font(.system(size: 18))
-                                    .foregroundColor(primaryColor)
-                                    .background(Color.white.clipShape(Circle()))
-                                    .offset(x: 4, y: 4)
-                            }
-                            
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 20) {
+                        
+                        // Header
+                        HStack {
                             VStack(alignment: .leading, spacing: 4) {
-                                // Nombre obtenido de la BD
-                                Text("Nombre del usuario")
-                                    .font(.system(size: 20, weight: .bold, design: .serif))
-                                    .foregroundColor(.primary)
+                                Text("OFRAUD STAY")
+                                    .font(.caption)
+                                    .bold()
+                                    .foregroundColor(primaryColor)
+                                    .tracking(1)
                                 
-                                // Correo obtenido de la BD
-                                Text("ejemplo@correo.com")
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
+                                Text("Mi perfil")
+                                    .font(.system(size: 28, weight: .bold, design: .serif))
                             }
-                            
                             Spacer()
-                            
-                            Image(systemName: "chevron.right")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.gray.opacity(0.5))
+                            Image("appLogo")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 50, height: 50)
+                                .padding(6)
+                                .background(backgroundColor)
+                                .cornerRadius(12)
                         }
-                        .padding()
+                        .padding(.top, 10)
+                        
+                        // Tarjeta de Usuario
+                        NavigationLink(destination: EditProfileView(
+                            nombre: $nombre,
+                            correo: $correo,
+                            alertasHabilitadas: $alertasHabilitadas
+                        )) {
+                            HStack(spacing: 16) {
+                                ZStack(alignment: .bottomTrailing) {
+                                    Image(systemName: "person.fill")
+                                        .font(.system(size: 28))
+                                        .foregroundColor(primaryColor)
+                                        .frame(width: 60, height: 60)
+                                        .background(primaryColor.opacity(0.15))
+                                        .cornerRadius(16)
+                                    
+                                    Image(systemName: "pencil.circle.fill")
+                                        .font(.system(size: 18))
+                                        .foregroundColor(primaryColor)
+                                        .background(Color.white.clipShape(Circle()))
+                                        .offset(x: 4, y: 4)
+                                }
+                                
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(nombre)
+                                        .font(.system(size: 18, weight: .bold, design: .serif))
+                                        .foregroundColor(.primary)
+                                        .multilineTextAlignment(.leading)
+                                    
+                                    Text(correo)
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                        .lineLimit(1)
+                                }
+                                
+                                Spacer()
+                                
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.gray.opacity(0.5))
+                            }
+                            .padding()
+                            .background(cardbackColor)
+                            .cornerRadius(18)
+                        }
+                        
+                        // Estadísticas
+                        HStack(spacing: 12) {
+                            ProfileStatBox(icon: "doc.text", value: "12", label: "Reportes", backgroundColor: cardbackColor)
+                            ProfileStatBox(icon: "triangle.fill", value: "2", label: "En revisión", backgroundColor: cardbackColor)
+                            ProfileStatBox(icon: "shield.fill", value: "7", label: "Validados", backgroundColor: cardbackColor)
+                        }
+                        
+                        // Menú Opciones
+                        VStack(spacing: 0) {
+                            NavigationLink(destination: PrivacyView()) {
+                                ProfileMenuItem(icon: "lock.fill", iconColor: .black, title: "Privacidad y seguridad")
+                            }
+                            Divider()
+                            
+                            NavigationLink(destination: MyReportsView()) {
+                                ProfileMenuItem(icon: "folder.fill.badge.person.crop", iconColor: .black, title: "Todos mis reportes")
+                            }
+                            Divider()
+                            
+                            NavigationLink(destination: GuidesView()) {
+                                ProfileMenuItem(icon: "text.page.badge.magnifyingglass", iconColor: .black, title: "Guías y consejos")
+                            }
+                            Divider()
+                            
+                            NavigationLink(destination: SupportView()) {
+                                ProfileMenuItem(icon: "info.circle", iconColor: .black, title: "Ayuda y soporte")
+                            }
+                        }
                         .background(cardbackColor)
                         .cornerRadius(18)
-                    }
-                    
-                    // Estadísticas
-                    HStack(spacing: 12) {
-                        ProfileStatBox(icon: "doc.text", value: "2", label: "Reportes", backgroundColor: cardbackColor)
-                        ProfileStatBox(icon: "triangle.fill", value: "1", label: "Reportes validados", backgroundColor: cardbackColor)
-                        ProfileStatBox(icon: "shield.fill", value: "59", label: "Usuarios Alertados", backgroundColor: cardbackColor)
-                    }
-
-                    // Menú
-                    VStack(spacing: 0) {
-                        NavigationLink(destination: PrivacyView()) {
-                            ProfileMenuItem(icon: "lock.fill", iconColor: .gray, title: "Privacidad y seguridad")
-                        }
-                        Divider()
                         
-                        NavigationLink(destination: MyReportsView()) {
-                            ProfileMenuItem(icon: "doc.text.fill", iconColor: .gray, title: "Todos mis reportes")
+                        // Botón Cerrar Sesión
+                        Button(action: {
+                            // Acción pendiente
+                        }) {
+                            Text("Cerrar sesión")
+                                .font(.headline)
+                                .foregroundColor(primaryColor)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(primaryColor.opacity(0.12))
+                                .cornerRadius(16)
                         }
-                        Divider()
-                        
-                        NavigationLink(destination: GuidesView()) {
-                            ProfileMenuItem(icon: "diamond.fill", iconColor: .black, title: "Guías y consejos")
-                        }
-                        Divider()
-                        
-                        NavigationLink(destination: SupportView()) {
-                            ProfileMenuItem(icon: "questionmark", iconColor: primaryColor, title: "Ayuda y soporte")
-                        }
+                        .padding(.top, 8)
                     }
-                    .background(cardbackColor)
-                    .cornerRadius(18)
-                    
-                    Button(action: {
-                        // FUNCIONALIDAD PENDIENTE
-                    }) {
-                        Text("Cerrar sesión")
-                            .font(.headline)
-                            .foregroundColor(primaryColor)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(primaryColor.opacity(0.12))
-                            .cornerRadius(16)
-                    }
-                    
-                    Spacer() // Mantiene todo el contenido fijo arriba
+                    .padding(.horizontal, 20)
+                    .padding(.top, 8)
+                    .padding(.bottom, 30)
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 8)
-                .padding(.bottom, 24)
             }
         }
     }
 }
-
 struct ProfileStatBox: View {
     let icon: String
     let value: String
@@ -157,14 +163,16 @@ struct ProfileStatBox: View {
                 .font(.system(size: 11))
                 .foregroundColor(.gray)
                 .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.8)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 14)
+        .padding(.horizontal, 4)
         .background(backgroundColor)
         .cornerRadius(16)
     }
 }
-
 struct ProfileMenuItem: View {
     let icon: String
     let iconColor: Color
@@ -188,7 +196,6 @@ struct ProfileMenuItem: View {
         .padding(.vertical, 14)
     }
 }
-
 #Preview {
     ProfileView()
 }

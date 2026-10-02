@@ -28,7 +28,7 @@ struct CreateReportView: View {
     private let rojo = Color("BrandPrimaryColor")
     private let verde = Color("VerificateColor")
     private let fondo = Color("FondoApp")
-    private let borde = Color("Borde")
+    private let borde = Color("Border")
     private let textoPrincipal = Color(.black)
     private let textoGris = Color(.lightGray)
     

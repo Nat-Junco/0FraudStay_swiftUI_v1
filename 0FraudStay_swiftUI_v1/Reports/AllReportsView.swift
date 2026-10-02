@@ -12,7 +12,7 @@ struct AllReportsView: View {
     private let revision = Color("ReviewColor")
     private let fondo = Color("FondoApp")
     private let tarjeta = Color(.secondarySystemGroupedBackground)
-    private let borde = Color("Borde")
+    private let borde = Color("Border")
     @State private var busqueda = ""
     @State private var filtro = "Todos"
     private let filtros = ["Todos", "Verificados", "En Revisión", "Pendientes"]
