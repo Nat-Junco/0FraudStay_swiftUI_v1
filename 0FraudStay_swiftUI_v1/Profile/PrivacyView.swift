@@ -88,19 +88,6 @@ struct PrivacyView: View {
         }
         .background(Color(.systemGroupedBackground).ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    dismiss()
-                } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "chevron.left")
-                        Text("Atrás")
-                    }
-                    .foregroundStyle(.primary)
-                }
-            }
-        }
     }
 }
 // Función para mostrar el texto
