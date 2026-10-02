@@ -6,7 +6,21 @@
 //
 
 import SwiftUI
-
+struct ReportDetail: Identifiable {
+    let id: String
+    let imageUrls: [String]
+    let estado: String
+    let tipoFraude: String
+    let titulo: String
+    let plataforma: String
+    let ubicacion: String
+    let fecha: String
+    let montoDefraudado: String
+    let descripcion: String
+    let nombreEstafador: String
+    let linkEstafador: String
+    var evidenciaUrls: [String]?
+}
 enum Tab {
     case inicio
     case reportes
@@ -15,48 +29,88 @@ enum Tab {
     case perfil
 }
 
+struct MiReporteItem: Identifiable {
+    let id = UUID()
+    let systemIcon: String
+    let titulo: String
+    let estado: String
+    let colorEstado: Color
+    let plataforma: String
+    let fecha: String
+    let codigo: String
+}
 struct StartView: View {
-
-    // Pestaña seleccionada de la barra de abajo
+    
     @State private var selectedTab: Tab = .inicio
-
-    // Colores de la app
+    
     private let rojo = Color("BrandPrimaryColor")
     private let verde = Color("VerificateColor")
     private let fondo = Color("FondoApp")
     private let borde = Color("Border")
     private let textoPrincipal = Color(.black)
     private let textoGris = Color(.lightGray)
-
-    // DATOS DE EJEMPLO — se reemplazan con lo que venga de la base de datos
-    private let misReportes: [(icono: String, titulo: String, estado: String, colorEstado: Color,
-                               plataforma: String, fecha: String, codigo: String)] = [
-        ("⏳", "Depto Condesa — anfitrión desapareció tras cobro", "EN REVISIÓN",
-         Color("ReviewColor"), "Facebook Marketplace", "12 mar 2026", "RS-2026-0089"),
-        ("📋", "Penthouse Roma Norte — cambio de último minuto", "PENDIENTE",
-         Color.gray, "WhatsApp", "1 mar 2026", "RS-2026-0086")
+    
+    private let misReportes: [MiReporteItem] = [
+        MiReporteItem(
+            systemIcon: "clock.fill",
+            titulo: "Depto Condesa — anfitrión desapareció tras cobro",
+            estado: "EN REVISIÓN",
+            colorEstado: Color("ReviewColor"),
+            plataforma: "Facebook Marketplace",
+            fecha: "12 mar 2026",
+            codigo: "RS-2026-0089"
+        ),
+        MiReporteItem(
+            systemIcon: "doc.text.fill",
+            titulo: "Penthouse Roma Norte — cambio de último minuto",
+            estado: "PENDIENTE",
+            colorEstado: .gray,
+            plataforma: "WhatsApp",
+            fecha: "1 mar 2026",
+            codigo: "RS-2026-0086"
+        )
     ]
-
-    private let reportesRecientes: [(imagen: String, precio: String, titulo: String, plataforma: String,
-                                     ubicacion: String, fecha: String, etiqueta: String, votos: String)] = [
-        ("https://images.unsplash.com/photo-1512917774080-9991f1c4c750", "$4,200",
-         "Depto amueblado Condesa — nunca existió", "Facebook Marketplace",
-         "Condesa, CDMX", "12 mar 2026", "Propiedad fantasma", "47"),
-        ("https://images.unsplash.com/photo-1600585154340-be6161a56a0c", "$8,500",
-         "Casa en Tulum — fotos robadas de Airbnb", "Airbnb (cuenta clonada)",
-         "Aldea Zama, Tulum", "28 feb 2026", "Clonación de anuncio", "63")
+    
+    private let reportesRecientes: [ReportDetail] = [
+        ReportDetail(
+            id: "1",
+            imageUrls: ["https://images.unsplash.com/photo-1512917774080-9991f1c4c750"],
+            estado: "VERIFICADO",
+            tipoFraude: "PROPIEDAD FANTASMA",
+            titulo: "Depto amueblado Condesa — nunca existió",
+            plataforma: "Facebook Marketplace",
+            ubicacion: "Condesa, CDMX",
+            fecha: "12 mar 2026",
+            montoDefraudado: "$4,200 MXN",
+            descripcion: "Publicación de departamento en Condesa por $4,200. Al enviar anticipo por transferencia, el anfitrión desapareció.",
+            nombreEstafador: "Carlos R. / 'Rentas CDMX'",
+            linkEstafador: "facebook.com/marketplace/item/839201"
+        ),
+        ReportDetail(
+            id: "2",
+            imageUrls: ["https://images.unsplash.com/photo-1600585154340-be6161a56a0c"],
+            estado: "VERIFICADO",
+            tipoFraude: "CLONACIÓN DE ANUNCIO",
+            titulo: "Casa en Tulum — fotos robadas de Airbnb",
+            plataforma: "Airbnb (cuenta clonada)",
+            ubicacion: "Aldea Zama, Tulum",
+            fecha: "28 feb 2026",
+            montoDefraudado: "$8,500 MXN",
+            descripcion: "Cuenta clonada ofreciendo villa en Tulum a la mitad del precio del mercado.",
+            nombreEstafador: "Rentas Tulum Exclusivas",
+            linkEstafador: "instagram.com/tulum_rentas_fake"
+        )
     ]
-
-    // TabView
+    
     var body: some View {
         TabView(selection: $selectedTab) {
-
+            
             pantallaInicio
                 .tabItem {
                     Label("Inicio", systemImage: "house")
                 }
                 .tag(Tab.inicio)
-
+            
             NavigationStack {
                 AllReportsView()
             }
@@ -64,15 +118,15 @@ struct StartView: View {
                 Label("Reportes", systemImage: "exclamationmark.triangle")
             }
             .tag(Tab.reportes)
-
+            
             NavigationStack {
                 CreateReportView()
             }
             .tabItem {
-                Label(".", systemImage: "plus.app.fill")
+                Label("Crear", systemImage: "plus.app.fill")
             }
             .tag(Tab.crear)
-
+            
             NavigationStack {
                 GuidesView()
             }
@@ -80,7 +134,7 @@ struct StartView: View {
                 Label("Guías", systemImage: "book")
             }
             .tag(Tab.guides)
-
+            
             NavigationStack {
                 ProfileView()
             }
@@ -91,13 +145,12 @@ struct StartView: View {
         }
         .tint(.red)
     }
-
-    // Contenido de la pestaña Inicio
+    
     private var pantallaInicio: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 20) {
-
+                    
                     HStack(alignment: .center) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("OFRAUD STAY")
@@ -112,11 +165,11 @@ struct StartView: View {
                         Image("appLogo")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 70, height:70)
+                            .frame(width: 70, height: 70)
                             .background(fondo)
                     }
                     .padding(.top, 8)
-
+                    
                     // Tarjeta de alerta
                     VStack(alignment: .leading, spacing: 12) {
                         HStack(spacing: 10) {
@@ -132,16 +185,15 @@ struct StartView: View {
                                 .font(.system(size: 13))
                                 .foregroundStyle(textoGris)
                         }
-
+                        
                         HStack(spacing: 10) {
-                            // DATOS DINÁMICOS: la cifra vendrá de la base de datos
                             Text("+1,600 afectados por fraudes en rentas vacacionales")
                                 .font(.system(size: 17, weight: .bold, design: .serif))
                                 .foregroundStyle(textoPrincipal)
                                 .fixedSize(horizontal: false, vertical: true)
-
+                            
                             Spacer(minLength: 4)
-
+                            
                             VStack(spacing: 2) {
                                 Text("4")
                                     .font(.system(size: 18, weight: .bold))
@@ -153,7 +205,7 @@ struct StartView: View {
                             .frame(width: 50, height: 52)
                             .background(rojo.opacity(0.12))
                             .clipShape(RoundedRectangle(cornerRadius: 8))
-
+                            
                             VStack(spacing: 2) {
                                 Text("2")
                                     .font(.system(size: 18, weight: .bold))
@@ -182,14 +234,16 @@ struct StartView: View {
                         RoundedRectangle(cornerRadius: 16)
                             .stroke(rojo.opacity(0.2), lineWidth: 1)
                     )
-
+                    
                     // Guías de seguridad
                     NavigationLink {
                         GuidesView()
                     } label: {
                         HStack(spacing: 14) {
-                            Text("📖")
+                            Image(systemName: "book.closed.fill")
                                 .font(.system(size: 20))
+                                .foregroundStyle(verde)
+                            
                             VStack(alignment: .leading, spacing: 3) {
                                 Text("Guías de seguridad")
                                     .font(.system(size: 15, weight: .semibold))
@@ -212,14 +266,17 @@ struct StartView: View {
                         )
                     }
                     .buttonStyle(.plain)
-
-                    // Botones Denunciar / Consultar
+                    
+                    // Botones Denunciar y consultar
                     HStack(spacing: 12) {
                         NavigationLink {
                             CreateReportView()
                         } label: {
-                            VStack(spacing: 12) {
-                                Text("📋").font(.system(size: 26))
+                            VStack(spacing: 10) {
+                                Image(systemName: "square.and.pencil")
+                                    .font(.system(size: 24, weight: .semibold))
+                                    .foregroundStyle(.white)
+                                
                                 Text("Denunciar")
                                     .font(.system(size: 17, weight: .semibold))
                                     .foregroundStyle(.white)
@@ -230,12 +287,15 @@ struct StartView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 16))
                         }
                         .buttonStyle(.plain)
-
+                        
                         NavigationLink {
                             AllReportsView()
                         } label: {
-                            VStack(spacing: 12) {
-                                Text("🔍").font(.system(size: 26))
+                            VStack(spacing: 10) {
+                                Image(systemName: "magnifyingglass")
+                                    .font(.system(size: 24, weight: .semibold))
+                                    .foregroundStyle(textoPrincipal)
+                                
                                 Text("Consultar")
                                     .font(.system(size: 17, weight: .semibold))
                                     .foregroundStyle(textoPrincipal)
@@ -251,7 +311,7 @@ struct StartView: View {
                         }
                         .buttonStyle(.plain)
                     }
-
+                    
                     // Mis reportes
                     VStack(alignment: .leading, spacing: 6) {
                         HStack {
@@ -272,20 +332,19 @@ struct StartView: View {
                             .foregroundStyle(textoGris)
                     }
                     .padding(.top, 8)
-
-                    // Una tarjeta por cada reporte del usuario
-                    ForEach(misReportes.indices, id: \.self) { i in
-                        let reporte = misReportes[i]
-
+                    
+                    // Lista de Mis Reportes
+                    ForEach(misReportes) { reporte in
                         VStack(alignment: .leading, spacing: 14) {
                             HStack(alignment: .top, spacing: 14) {
-
-                                Text(reporte.icono)
-                                    .font(.system(size: 24))
+                                
+                                Image(systemName: reporte.systemIcon)
+                                    .font(.system(size: 20, weight: .medium))
+                                    .foregroundStyle(reporte.colorEstado)
                                     .frame(width: 48, height: 48)
                                     .background(reporte.colorEstado.opacity(0.1))
                                     .clipShape(RoundedRectangle(cornerRadius: 12))
-
+                                
                                 VStack(alignment: .leading, spacing: 6) {
                                     Text(reporte.titulo)
                                         .font(.system(size: 16, weight: .semibold))
@@ -298,9 +357,9 @@ struct StartView: View {
                                         .font(.system(size: 12, design: .monospaced))
                                         .foregroundStyle(textoGris)
                                 }
-
+                                
                                 Spacer(minLength: 4)
-
+                                
                                 Text(reporte.estado)
                                     .font(.system(size: 11, weight: .bold))
                                     .foregroundStyle(reporte.colorEstado)
@@ -309,12 +368,12 @@ struct StartView: View {
                                     .background(reporte.colorEstado.opacity(0.12))
                                     .clipShape(RoundedRectangle(cornerRadius: 6))
                             }
-
+                            
                             HStack(spacing: 10) {
                                 Button {
-                                    // PENDIENTE: abrir pantalla para editar el reporte
+                                    // Agregar funcionalidad
                                 } label: {
-                                    Text("✏️ Editar")
+                                    Text("Editar")
                                         .font(.system(size: 14, weight: .semibold))
                                         .foregroundStyle(textoPrincipal)
                                         .frame(maxWidth: .infinity)
@@ -326,11 +385,11 @@ struct StartView: View {
                                                 .stroke(borde, lineWidth: 1)
                                         )
                                 }
-
+                                
                                 Button {
-                                    // PENDIENTE: confirmar y eliminar en la base de datos
+                                    // Agregar funcionalidad
                                 } label: {
-                                    Text("🗑️ Eliminar")
+                                    Text("Eliminar")
                                         .font(.system(size: 14, weight: .semibold))
                                         .foregroundStyle(rojo)
                                         .frame(maxWidth: .infinity)
@@ -353,49 +412,52 @@ struct StartView: View {
                                 .stroke(borde, lineWidth: 1)
                         )
                     }
-
-                    // Reportes recientes
-                    HStack {
-                        Text("Reportes recientes")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundStyle(textoPrincipal)
-                        Spacer()
-                        NavigationLink {
-                            AllReportsView()
-                        } label: {
-                            Text("Ver todos →")
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundStyle(rojo)
+                
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack {
+                            Text("Reportes Recientes")
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundStyle(textoPrincipal)
+                            Spacer()
+                            NavigationLink {
+                                AllReportsView()
+                            } label: {
+                                Text("Ver más →")
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .foregroundStyle(rojo)
+                            }
                         }
+                        Text("Últimas denuncias y alertas registradas")
+                            .font(.system(size: 13))
+                            .foregroundStyle(textoGris)
                     }
-                    .padding(.top, 8)
-
-                    // Reportes verificados de la comunidad
-                    ForEach(reportesRecientes.indices, id: \.self) { i in
-                        let reporte = reportesRecientes[i]
-
+                    .padding(.top, 12)
+                    
+                    //Reportes Recientes
+                    ForEach(reportesRecientes) { reporte in
                         NavigationLink {
-                            Text("Detalle de \(reporte.titulo)")
+                            ReportDetailView(reporte: reporte)
                         } label: {
                             VStack(alignment: .leading, spacing: 12) {
-
                                 ZStack(alignment: .top) {
-                                    AsyncImage(url: URL(string: reporte.imagen)) { fase in
-                                        if let imagen = fase.image {
-                                            imagen
-                                                .resizable()
-                                                .aspectRatio(contentMode: .fill)
-                                        } else {
-                                            Rectangle().fill(borde)
+                                    if let firstUrl = reporte.imageUrls.first {
+                                        AsyncImage(url: URL(string: firstUrl)) { fase in
+                                            if let imagen = fase.image {
+                                                imagen
+                                                    .resizable()
+                                                    .aspectRatio(contentMode: .fill)
+                                            } else {
+                                                Rectangle().fill(borde)
+                                            }
                                         }
+                                        .frame(maxWidth: .infinity)
+                                        .frame(height: 150)
+                                        .clipped()
+                                        .clipShape(RoundedRectangle(cornerRadius: 12))
                                     }
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 150)
-                                    .clipped()
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
-
+                                    
                                     HStack {
-                                        Text("VERIFICADO")
+                                        Text(reporte.estado)
                                             .font(.system(size: 11, weight: .bold))
                                             .foregroundStyle(verde)
                                             .padding(.horizontal, 8)
@@ -403,7 +465,7 @@ struct StartView: View {
                                             .background(Color.white.opacity(0.9))
                                             .clipShape(RoundedRectangle(cornerRadius: 6))
                                         Spacer()
-                                        Text(reporte.precio)
+                                        Text(reporte.montoDefraudado)
                                             .font(.system(size: 13, weight: .bold))
                                             .foregroundStyle(.white)
                                             .padding(.horizontal, 8)
@@ -413,12 +475,12 @@ struct StartView: View {
                                     }
                                     .padding(10)
                                 }
-
+                                
                                 Text(reporte.titulo)
                                     .font(.system(size: 16, weight: .semibold))
                                     .foregroundStyle(textoPrincipal)
                                     .multilineTextAlignment(.leading)
-
+                                
                                 HStack {
                                     Text(reporte.plataforma)
                                     Spacer()
@@ -426,9 +488,9 @@ struct StartView: View {
                                 }
                                 .font(.system(size: 13))
                                 .foregroundStyle(textoGris)
-
+                                
                                 HStack(spacing: 8) {
-                                    Text(reporte.etiqueta)
+                                    Text(reporte.tipoFraude)
                                         .font(.system(size: 11, weight: .medium))
                                         .foregroundStyle(textoGris)
                                         .padding(.horizontal, 8)
@@ -437,8 +499,6 @@ struct StartView: View {
                                         .clipShape(RoundedRectangle(cornerRadius: 6))
                                     Spacer()
                                     Text(reporte.fecha)
-                                    Text("▲ \(reporte.votos)")
-                                        .fontWeight(.bold)
                                 }
                                 .font(.system(size: 12))
                                 .foregroundStyle(textoGris)
@@ -461,7 +521,7 @@ struct StartView: View {
         }
     }
 }
-
 #Preview {
     StartView()
 }
+
