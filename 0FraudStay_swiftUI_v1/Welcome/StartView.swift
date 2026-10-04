@@ -42,6 +42,8 @@ struct MiReporteItem: Identifiable {
 struct StartView: View {
     
     @State private var selectedTab: Tab = .inicio
+    @State private var mostrarConfirmacion = false
+    @State private var reporteSeleccionado: MiReporteItem? = nil
     
     private let rojo = Color("BrandPrimaryColor")
     private let verde = Color("VerificateColor")
@@ -49,6 +51,7 @@ struct StartView: View {
     private let borde = Color("Border")
     private let textoPrincipal = Color(.black)
     private let textoGris = Color(.lightGray)
+    
     
     private let misReportes: [MiReporteItem] = [
         MiReporteItem(
@@ -385,10 +388,12 @@ struct StartView: View {
                                                 .stroke(borde, lineWidth: 1)
                                         )
                                 }
-                                
                                 Button {
-                                    // Agregar funcionalidad
-                                } label: {
+                                    reporteSeleccionado = reporte
+                                    mostrarConfirmacion = true
+                                }
+                                label: {
+                                    
                                     Text("Eliminar")
                                         .font(.system(size: 14, weight: .semibold))
                                         .foregroundStyle(rojo)
@@ -400,6 +405,14 @@ struct StartView: View {
                                             RoundedRectangle(cornerRadius: 10)
                                                 .stroke(rojo.opacity(0.25), lineWidth: 1)
                                         )
+                                }
+                                .sheet(isPresented: $mostrarConfirmacion) {
+                                    DeleteReportView(onDelete: {
+                                        if let reporte = reporteSeleccionado {
+                                            print("Eliminando reporte: \(reporte.titulo)")
+                                        }
+                                    })
+                                    .presentationDetents([.height(348)])
                                 }
                             }
                             .padding(.leading, 62)
