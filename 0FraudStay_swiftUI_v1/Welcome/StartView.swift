@@ -384,33 +384,41 @@ struct StartView: View {
                                 Button {
                                     // Agregar funcionalidad
                                 } label: {
-                                    Text("Editar")
-                                        .font(.system(size: 14, weight: .semibold))
-                                        .foregroundStyle(textoPrincipal)
-                                        .frame(maxWidth: .infinity)
-                                        .frame(height: 38)
-                                        .background(fondo)
-                                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 10)
-                                                .stroke(borde, lineWidth: 1)
-                                        )
+                                    HStack(spacing: 6) {
+                                        Image(systemName: "square.and.pencil")
+                                            .font(.system(size: 14, weight: .semibold))
+                                        Text("Editar")
+                                            .font(.system(size: 14, weight: .semibold))
+                                    }
+                                    .foregroundStyle(textoPrincipal)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 38)
+                                    .background(fondo)
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(borde, lineWidth: 1)
+                                    )
                                 }
                                 
                                 Button {
                                     // Agregar funcionalidad
                                 } label: {
-                                    Text("Eliminar")
-                                        .font(.system(size: 14, weight: .semibold))
-                                        .foregroundStyle(rojo)
-                                        .frame(maxWidth: .infinity)
-                                        .frame(height: 38)
-                                        .background(rojo.opacity(0.06))
-                                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 10)
-                                                .stroke(rojo.opacity(0.25), lineWidth: 1)
-                                        )
+                                    HStack(spacing: 6) {
+                                        Image(systemName: "trash")
+                                            .font(.system(size: 14, weight: .semibold))
+                                        Text("Eliminar")
+                                            .font(.system(size: 14, weight: .semibold))
+                                    }
+                                    .foregroundStyle(rojo)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 38)
+                                    .background(rojo.opacity(0.06))
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(rojo.opacity(0.25), lineWidth: 1)
+                                    )
                                 }
                             }
                             .padding(.leading, 62)
