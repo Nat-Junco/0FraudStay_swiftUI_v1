@@ -10,11 +10,6 @@ struct DeleteReportSheetView: View {
     var body: some View {
         VStack(spacing: 20) {
             
-            Capsule()
-                .fill(Color.secondary.opacity(0.3))
-                .frame(width: 36, height: 5)
-                .padding(.top, 12)
-            
             ZStack {
                 Circle()
                     .fill(rojoPrimary.opacity(0.08))
@@ -40,7 +35,6 @@ struct DeleteReportSheetView: View {
             
             Spacer().frame(height: 10)
             
-            // Botón Principal: Eliminar
             Button(action: {
                 onDelete?()
                 dismiss()
@@ -54,8 +48,25 @@ struct DeleteReportSheetView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 14))
             }
             .padding(.horizontal, 20)
-            
-        }}}
+            Button(action: {
+                dismiss()
+            }) {
+                Text("Cancelar")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(.primary)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 52)
+                    .foregroundStyle(.black)
+                    .background(Color(.systemGroupedBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+            }
+            .padding(.horizontal, 20)
+        }
+        .padding(.bottom, 20)
+        .background(Color(.secondarySystemGroupedBackground).ignoresSafeArea())
+    }
+}
+
 
 #Preview {
     DeleteReportSheetView()
