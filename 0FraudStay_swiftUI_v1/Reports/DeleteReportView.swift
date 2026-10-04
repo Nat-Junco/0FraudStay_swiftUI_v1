@@ -1,7 +1,7 @@
 
 import SwiftUI
 
-struct DeleteReportSheetView: View {
+struct DeleteReportView: View {
     @Environment(\.dismiss) private var dismiss
     
     private let rojoPrimary = Color("BrandPrimaryColor")
@@ -69,5 +69,5 @@ struct DeleteReportSheetView: View {
 
 
 #Preview {
-    DeleteReportSheetView()
+    DeleteReportView()
 }

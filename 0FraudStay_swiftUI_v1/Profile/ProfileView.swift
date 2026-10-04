@@ -28,7 +28,7 @@ struct ProfileView: View {
                         // Header
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("OFRAUD STAY")
+                                Text("0FRAUD STAY")
                                     .font(.caption)
                                     .bold()
                                     .foregroundColor(primaryColor)

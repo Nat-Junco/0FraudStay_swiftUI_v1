@@ -38,11 +38,11 @@ struct WelcomeView: View {
                     Spacer()
                     
                     HStack(spacing: 12) {
-                        Text("⚠️")
-                            .font(.title2)
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundStyle(.red)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
                         VStack(alignment: .leading, spacing: 2) {
-                            
-                            // Este dato hay que modificarlo por uno verdadero
                             (Text("+1,600 reportes ")
                                 .bold().foregroundColor(.red)).font(.system(size: 13))
                                 .foregroundColor(.primary)
