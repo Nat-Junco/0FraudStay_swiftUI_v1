@@ -16,8 +16,24 @@ struct ReportDetailView: View {
     private let textoGris = Color(.lightGray)
     private let verde = Color("VerificateColor")
     private let rojo = Color("BrandPrimaryColor")
+    private let revision = Color("ReviewColor")
     private let borde = Color("Border")
     
+    private func colorDeEstado(_ estado: String) -> Color {
+        switch estado.uppercased() {
+        case "FRAUDE": return rojo
+        case "EN REVISIÓN": return revision
+        default: return Color.gray
+        }
+    }
+    
+    private func iconoDeEstado(_ estado: String) -> String {
+        switch estado.uppercased() {
+        case "FRAUDE": return "exclamationmark.triangle.fill"
+        case "EN REVISIÓN": return "clock.fill"
+        default: return "questionmark.circle.fill"
+        }
+    }
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 20) {
@@ -41,15 +57,15 @@ struct ReportDetailView: View {
                 // Estado y Monto Defraudado
                 HStack(alignment: .center) {
                     HStack(spacing: 6) {
-                        Image(systemName: "checkmark.seal.fill")
-                            .foregroundStyle(verde)
+                        Image(systemName: iconoDeEstado(reporte.estado))
+                            .foregroundStyle(colorDeEstado(reporte.estado))
                         Text(reporte.estado)
                             .font(.system(size: 12, weight: .bold))
-                            .foregroundStyle(verde)
+                            .foregroundStyle(colorDeEstado(reporte.estado))
                     }
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
-                    .background(verde.opacity(0.12))
+                    .background(colorDeEstado(reporte.estado).opacity(0.12))
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                     
                     Spacer()
@@ -153,6 +169,7 @@ struct ReportDetailView: View {
                 }
                 
                 Divider()
+                
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Evidencias del fraude")
                         .font(.system(size: 16, weight: .bold))
@@ -178,7 +195,6 @@ struct ReportDetailView: View {
                                     .clipped()
                                     .clipShape(RoundedRectangle(cornerRadius: 12))
                                 } else {
-                                    // Placeholder si no hay evidencia subida
                                     RoundedRectangle(cornerRadius: 12)
                                         .stroke(borde, style: StrokeStyle(lineWidth: 1, dash: [4]))
                                         .background(fondo.clipShape(RoundedRectangle(cornerRadius: 12)))
@@ -201,42 +217,5 @@ struct ReportDetailView: View {
             }
             .padding(16)
         }
-        .background(Color.white.ignoresSafeArea())
-        .navigationBarBackButtonHidden(true)
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    dismiss()
-                } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "chevron.left")
-                        Text("Atrás")
-                    }
-                    .foregroundStyle(textoPrincipal)
-                }
-            }
-        }
-    }
-}
-#Preview {
-    NavigationStack {
-        ReportDetailView(reporte: ReportDetail(
-            id: "1",
-            imageUrls: ["https://images.unsplash.com/photo-1512917774080-9991f1c4c750"],
-            estado: "VERIFICADO",
-            tipoFraude: "PROPIEDAD FANTASMA",
-            titulo: "Depto amueblado Condesa — nunca existió",
-            plataforma: "Facebook Marketplace",
-            ubicacion: "Condesa, CDMX",
-            fecha: "12 mar 2026",
-            montoDefraudado: "$4,200 MXN",
-            descripcion: "Publicación de departamento amueblado en Condesa a un precio bajo. Al contactar al supuesto dueño, solicitó un anticipo por transferencia para apartar la propiedad. Después de realizar el pago, bloqueó la comunicación.",
-            nombreEstafador: "Carlos R. / 'Rentas CDMX'",
-            linkEstafador: "facebook.com/marketplace/item/839201",
-            evidenciaUrls: [
-                "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c",
-                "https://images.unsplash.com/photo-1586281380349-632531db7ed4"
-            ]
-        ))
     }
 }

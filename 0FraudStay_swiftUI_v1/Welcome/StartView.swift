@@ -5,6 +5,7 @@
 //  Created by alumno on 23/09/26.
 //
 
+
 import SwiftUI
 struct ReportDetail: Identifiable {
     let id: String
@@ -20,6 +21,17 @@ struct ReportDetail: Identifiable {
     let nombreEstafador: String
     let linkEstafador: String
     var evidenciaUrls: [String]?
+    
+    var colorEstado: Color {
+        switch estado.uppercased() {
+        case "FRAUDE":
+            return Color("BrandPrimaryColor")
+        case "EN REVISIÓN":
+            return Color("ReviewColor")
+        default:
+            return .gray
+        }
+    }
 }
 enum Tab {
     case inicio
@@ -28,7 +40,6 @@ enum Tab {
     case guides
     case perfil
 }
-
 struct MiReporteItem: Identifiable {
     let id = UUID()
     let systemIcon: String
@@ -42,8 +53,6 @@ struct MiReporteItem: Identifiable {
 struct StartView: View {
     
     @State private var selectedTab: Tab = .inicio
-    @State private var mostrarConfirmacion = false
-    @State private var reporteSeleccionado: MiReporteItem? = nil
     
     private let rojo = Color("BrandPrimaryColor")
     private let verde = Color("VerificateColor")
@@ -51,7 +60,6 @@ struct StartView: View {
     private let borde = Color("Border")
     private let textoPrincipal = Color(.black)
     private let textoGris = Color(.lightGray)
-    
     
     private let misReportes: [MiReporteItem] = [
         MiReporteItem(
@@ -78,7 +86,7 @@ struct StartView: View {
         ReportDetail(
             id: "1",
             imageUrls: ["https://images.unsplash.com/photo-1512917774080-9991f1c4c750"],
-            estado: "VERIFICADO",
+            estado: "FRAUDE",
             tipoFraude: "PROPIEDAD FANTASMA",
             titulo: "Depto amueblado Condesa — nunca existió",
             plataforma: "Facebook Marketplace",
@@ -92,7 +100,7 @@ struct StartView: View {
         ReportDetail(
             id: "2",
             imageUrls: ["https://images.unsplash.com/photo-1600585154340-be6161a56a0c"],
-            estado: "VERIFICADO",
+            estado: "FRAUDE",
             tipoFraude: "CLONACIÓN DE ANUNCIO",
             titulo: "Casa en Tulum — fotos robadas de Airbnb",
             plataforma: "Airbnb (cuenta clonada)",
@@ -376,43 +384,41 @@ struct StartView: View {
                                 Button {
                                     // Agregar funcionalidad
                                 } label: {
-                                    Text("Editar")
-                                        .font(.system(size: 14, weight: .semibold))
-                                        .foregroundStyle(textoPrincipal)
-                                        .frame(maxWidth: .infinity)
-                                        .frame(height: 38)
-                                        .background(fondo)
-                                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 10)
-                                                .stroke(borde, lineWidth: 1)
-                                        )
+                                    HStack(spacing: 6) {
+                                        Image(systemName: "square.and.pencil")
+                                            .font(.system(size: 14, weight: .semibold))
+                                        Text("Editar")
+                                            .font(.system(size: 14, weight: .semibold))
+                                    }
+                                    .foregroundStyle(textoPrincipal)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 38)
+                                    .background(fondo)
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(borde, lineWidth: 1)
+                                    )
                                 }
+                                
                                 Button {
-                                    reporteSeleccionado = reporte
-                                    mostrarConfirmacion = true
-                                }
-                                label: {
-                                    
-                                    Text("Eliminar")
-                                        .font(.system(size: 14, weight: .semibold))
-                                        .foregroundStyle(rojo)
-                                        .frame(maxWidth: .infinity)
-                                        .frame(height: 38)
-                                        .background(rojo.opacity(0.06))
-                                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 10)
-                                                .stroke(rojo.opacity(0.25), lineWidth: 1)
-                                        )
-                                }
-                                .sheet(isPresented: $mostrarConfirmacion) {
-                                    DeleteReportView(onDelete: {
-                                        if let reporte = reporteSeleccionado {
-                                            print("Eliminando reporte: \(reporte.titulo)")
-                                        }
-                                    })
-                                    .presentationDetents([.height(348)])
+                                    // Agregar funcionalidad
+                                } label: {
+                                    HStack(spacing: 6) {
+                                        Image(systemName: "trash")
+                                            .font(.system(size: 14, weight: .semibold))
+                                        Text("Eliminar")
+                                            .font(.system(size: 14, weight: .semibold))
+                                    }
+                                    .foregroundStyle(rojo)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 38)
+                                    .background(rojo.opacity(0.06))
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(rojo.opacity(0.25), lineWidth: 1)
+                                    )
                                 }
                             }
                             .padding(.leading, 62)
@@ -472,7 +478,7 @@ struct StartView: View {
                                     HStack {
                                         Text(reporte.estado)
                                             .font(.system(size: 11, weight: .bold))
-                                            .foregroundStyle(verde)
+                                            .foregroundStyle(reporte.colorEstado)
                                             .padding(.horizontal, 8)
                                             .padding(.vertical, 4)
                                             .background(Color.white.opacity(0.9))
@@ -537,4 +543,3 @@ struct StartView: View {
 #Preview {
     StartView()
 }
-

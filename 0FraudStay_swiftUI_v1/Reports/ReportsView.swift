@@ -31,28 +31,37 @@ struct UserReport: Codable, Identifiable {
 
 enum ReportStatus: String, Codable, CaseIterable {
     case todos = "Todos"
-    case pendiente = "Pendiente"
-    case enRevision = "En revisión"
     case fraude = "Fraude"
+    case enRevision = "En revisión"
+    case pendiente = "Pendiente"
     
     var colorTexto: Color {
         switch self {
-        case .todos: return .white
-        case .pendiente: return Color(red: 0.45, green: 0.45, blue: 0.48)
-        case .enRevision: return Color(red: 0.85, green: 0.55, blue: 0.15)
-        case .fraude: return Color("BrandPrimaryColor", bundle: nil) != Color.clear ? Color("BrandPrimaryColor") : .red
+        case .todos:
+            return .white
+        case .pendiente:
+            return Color("MissingColor")
+        case .enRevision:
+            return Color("ReviewColor")
+        case .fraude:
+            return Color.red
         }
     }
     
     var colorFondo: Color {
         switch self {
-        case .todos: return Color("BrandPrimaryColor", bundle: nil) != Color.clear ? Color("BrandPrimaryColor") : .red
-        case .pendiente: return Color(red: 0.94, green: 0.94, blue: 0.96)
-        case .enRevision: return Color(red: 1.0, green: 0.95, blue: 0.88)
-        case .fraude: return Color.red.opacity(0.1)
+        case .todos:
+            return Color.red
+        case .pendiente:
+            return Color.gray.opacity(0.15)
+        case .enRevision:
+            return Color.orange.opacity(0.15)
+        case .fraude:
+            return Color.red.opacity(0.12)
         }
     }
 }
+
 
 // SERVICIO API (BACKEND)
 class ReportService {
@@ -84,7 +93,6 @@ class MyReportsViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
     
-    // Cambia a 'true' cuando tengas listo tu backend real
     private let usarBackendReal = false
     private let service = ReportService()
     
@@ -101,7 +109,8 @@ class MyReportsViewModel: ObservableObject {
             }
         } else {
             // MODO ESTÁTICO / MOCK
-            try? await Task.sleep(nanoseconds: 400_000_000) // Simula tiempo de respuesta
+            try? await Task.sleep(nanoseconds: 400_000_000)
+            // Simula tiempo de respuesta
             self.reportes = [
                 UserReport(id: "1", folio: "RS-2026-0089", titulo: "Depto Condesa — anfitrión desapareció tras cobro", plataforma: "Facebook Marketplace", ubicacion: "CDMX", fecha: "12 mar 2026", monto: "$8,500 MXN", estado: .enRevision, esEditable: true, imageUrl: nil),
                 UserReport(id: "2", folio: "RS-2026-0086", titulo: "Penthouse Roma Norte — cambio de último minuto", plataforma: "WhatsApp", ubicacion: "CDMX", fecha: "1 mar 2026", monto: "$14,000 MXN", estado: .pendiente, esEditable: true, imageUrl: nil),
@@ -114,7 +123,6 @@ class MyReportsViewModel: ObservableObject {
     }
 }
 
-// VISTA SWIFTUI
 struct MyReportsView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel = MyReportsViewModel()
@@ -131,21 +139,11 @@ struct MyReportsView: View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 18) {
                 
-                // Cabecera
                 VStack(alignment: .leading, spacing: 6) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "arrow.left")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundStyle(Color.red)
-                    }
-                    .padding(.bottom, 4)
-                    
                     Text("MI PERFIL")
                         .font(.system(size: 11, weight: .bold))
                         .kerning(0.8)
-                        .foregroundStyle(Color.gray)
+                        .foregroundStyle(Color("BrandPrimaryColor"))
                     
                     Text("Mis reportes")
                         .font(.system(size: 22, weight: .bold))
@@ -159,7 +157,7 @@ struct MyReportsView: View {
                     MetricCard(valor: "$51k", titulo: "PÉRDIDAS", colorTexto: .red)
                 }
 
-                // Selector de Filtros
+                // Filtros
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
                         ForEach(ReportStatus.allCases, id: \.self) { status in
@@ -184,7 +182,6 @@ struct MyReportsView: View {
                     }
                 }
 
-                // Contenido principal
                 if viewModel.isLoading {
                     ProgressView()
                         .frame(maxWidth: .infinity)
@@ -211,14 +208,12 @@ struct MyReportsView: View {
             .padding(20)
         }
         .background(Color(red: 0.97, green: 0.97, blue: 0.98).ignoresSafeArea())
-        .navigationBarBackButtonHidden(true)
         .task {
             await viewModel.cargarReportes()
         }
     }
 }
 
-// COMPONENTES SECUNDARIOS
 struct MetricCard: View {
     let valor: String
     let titulo: String
@@ -248,7 +243,7 @@ struct ReportRowCard: View {
     let reporte: UserReport
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top, spacing: 10) {
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Color.gray.opacity(0.18))
@@ -291,7 +286,54 @@ struct ReportRowCard: View {
                     .foregroundStyle(Color.gray.opacity(0.8))
             }
             
-            if !reporte.esEditable {
+            if reporte.esEditable {
+                Divider()
+                    .padding(.vertical, 2)
+                
+                HStack(spacing: 10) {
+                    // Botón Editar
+                    Button {
+                        // Falta funcionalidad
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "square.and.pencil")
+                                .font(.system(size: 12, weight: .bold))
+                            Text("Editar")
+                                .font(.system(size: 12, weight: .bold))
+                        }
+                        .foregroundStyle(Color.black)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 9)
+                        .background(Color.gray.opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.gray.opacity(0.25), lineWidth: 1)
+                        )
+                    }
+                    
+                    // Botón Eliminar
+                    Button {
+                        // falta funcionalidad
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "trash")
+                                .font(.system(size: 12, weight: .bold))
+                            Text("Eliminar")
+                                .font(.system(size: 12, weight: .bold))
+                        }
+                        .foregroundStyle(Color.red.opacity(0.85))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 9)
+                        .background(Color.red.opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.red.opacity(0.25), lineWidth: 1)
+                        )
+                    }
+                }
+            } else {
                 Divider()
                     .padding(.vertical, 2)
                 
