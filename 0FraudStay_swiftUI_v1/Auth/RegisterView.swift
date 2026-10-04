@@ -77,21 +77,23 @@ struct RegisterView: View {
                 Button(action: {
                     // Acción al presionar el botón
                 }) {
-                    Text("Registrarme")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(primaryColor)
-                        .cornerRadius(12)
-                }
-                .padding(.bottom, 10)
+                    NavigationLink {
+                        TermsView()
+                    } label: {
+                        Text("Registrarme")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(primaryColor)
+                            .cornerRadius(12)
+                    }
+                    .padding(.bottom, 10)            }
+                .padding(.horizontal, 24)
             }
-            .padding(.horizontal, 24)
+            .tint(primaryColor)
         }
-        .tint(primaryColor)
-    }
-}
+    }}
 #Preview {
     NavigationStack {
         RegisterView()
