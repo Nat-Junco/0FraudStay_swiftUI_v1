@@ -28,9 +28,6 @@ struct GuidesView: View {
                             .font(.system(size: 12, weight: .bold))
                             .kerning(1.2)
                             .foregroundStyle(rojo)
-                        Text("Guías")
-                            .font(.system(size: 22, weight: .bold, design: .serif))
-                            .foregroundStyle(.primary)
                     }
                     Spacer()
                     Image("appLogo")
@@ -56,7 +53,7 @@ struct GuidesView: View {
                     VerifiedPlatformsView()
                 } label: {
                     VStack(spacing: 0) {
-                        // Foto con capa verde y textos encima
+                        
                         ZStack(alignment: .bottomLeading) {
                             AsyncImage(url: URL(string: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800")) { fase in
                                 if let imagen = fase.image {
@@ -69,7 +66,7 @@ struct GuidesView: View {
                             .frame(height: 130)
                             .clipped()
 
-                            verde.opacity(0.6) // capa de color encima de la foto
+                            verde.opacity(0.6)
 
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("Plataformas Verificadas")
@@ -137,7 +134,7 @@ struct GuidesView: View {
                             .frame(height: 130)
                             .clipped()
 
-                            rojo.opacity(0.55) // capa de color encima de la foto
+                            rojo.opacity(0.55)
 
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("Guía Antifraude")
