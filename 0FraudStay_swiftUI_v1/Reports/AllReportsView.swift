@@ -13,54 +13,61 @@ struct AllReportsView: View {
     private let fondo = Color("FondoApp")
     private let tarjeta = Color(.secondarySystemGroupedBackground)
     private let borde = Color("Border")
+    
     @State private var busqueda = ""
     @State private var filtro = "Todos"
-    private let filtros = ["Todos", "Verificados", "En Revisión", "Pendientes"]
+    
+    private let filtros = ["Todos", "Fraude", "En Revisión", "Pendiente"]
+
     private let reportes: [ReporteEjemplo] = [
         ReporteEjemplo(imagen: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800",
-                       estado: "VERIFICADO", precio: "$4,200",
+                       estado: "FRAUDE", precio: "$4,200",
                        titulo: "Depto amueblado Condesa — nunca existió",
                        plataforma: "Facebook Marketplace", ubicacion: "Condesa, Ciudad de México",
-                       fecha: "12 mar 2026", etiqueta: "Propiedad Fantasma", votos: 47),
+                       fecha: "12 mar 2026", etiqueta: "Propiedad Fantasma"),
         ReporteEjemplo(imagen: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800",
-                       estado: "VERIFICADO", precio: "$8,500",
+                       estado: "FRAUDE", precio: "$8,500",
                        titulo: "Casa en Tulum — fotos robadas de Airbnb",
                        plataforma: "Airbnb (cuenta clonada)", ubicacion: "Aldea Zama, Tulum",
-                       fecha: "28 feb 2026", etiqueta: "Clonación de Anuncio", votos: 63),
+                       fecha: "28 feb 2026", etiqueta: "Clonación de Anuncio"),
         ReporteEjemplo(imagen: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800",
                        estado: "EN REVISIÓN", precio: "$14,000",
                        titulo: "Penthouse Roma Norte — cambio de último minuto",
                        plataforma: "WhatsApp", ubicacion: "Roma Norte, Ciudad de México",
-                       fecha: "1 mar 2026", etiqueta: "Cambio de Propiedad", votos: 21),
+                       fecha: "1 mar 2026", etiqueta: "Cambio de Propiedad"),
         ReporteEjemplo(imagen: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800",
                        estado: "PENDIENTE", precio: "$6,200",
                        titulo: "Studio Polanco — propietario inexistente",
                        plataforma: "Inmuebles24", ubicacion: "Polanco, Ciudad de México",
-                       fecha: "4 feb 2026", etiqueta: "Anfitrión Falso", votos: 12)
+                       fecha: "4 feb 2026", etiqueta: "Anfitrión Falso")
     ]
+    
     private var filtrados: [ReporteEjemplo] {
         reportes.filter { r in
             let coincideTexto = busqueda.isEmpty
                 || r.titulo.localizedCaseInsensitiveContains(busqueda)
                 || r.ubicacion.localizedCaseInsensitiveContains(busqueda)
                 || r.plataforma.localizedCaseInsensitiveContains(busqueda)
+            
             let coincideEstado: Bool
             switch filtro {
-            case "Verificados": coincideEstado = r.estado == "VERIFICADO"
+            case "Fraude": coincideEstado = r.estado == "FRAUDE"
             case "En Revisión": coincideEstado = r.estado == "EN REVISIÓN"
-            case "Pendientes":  coincideEstado = r.estado == "PENDIENTE"
+            case "Pendiente":  coincideEstado = r.estado == "PENDIENTE"
             default:            coincideEstado = true
             }
             return coincideTexto && coincideEstado
         }
     }
+  
     private func colorDe(_ estado: String) -> Color {
         switch estado {
-        case "VERIFICADO":  return verde
+        case "FRAUDE":  return rojo
         case "EN REVISIÓN": return revision
         default:            return Color.gray
         }
     }
+    
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 18) {
@@ -131,11 +138,8 @@ struct AllReportsView: View {
                         }
                     }
                 }
-
                 if filtrados.isEmpty {
                     VStack(spacing: 8) {
-                        Text("🔎")
-                            .font(.system(size: 32))
                         Text("Sin resultados")
                             .font(.system(size: 17, weight: .semibold))
                         Text("No hay reportes que coincidan con tu búsqueda.")
@@ -213,9 +217,6 @@ struct AllReportsView: View {
                                             .background(fondo)
                                             .clipShape(RoundedRectangle(cornerRadius: 6))
                                         Spacer()
-                                        Text("▲ \(reporte.votos)")
-                                            .font(.system(size: 13, weight: .medium))
-                                            .foregroundStyle(.secondary)
                                     }
                                 }
                                 .padding(16)
@@ -238,7 +239,6 @@ struct AllReportsView: View {
         .background(fondo.ignoresSafeArea())
     }
 }
-
 struct ReporteEjemplo: Identifiable {
     let id = UUID()
     let imagen: String
@@ -249,9 +249,8 @@ struct ReporteEjemplo: Identifiable {
     let ubicacion: String
     let fecha: String
     let etiqueta: String
-    let votos: Int
 }
-// Conversión a ReportDetail
+
 extension ReportDetail {
     init(from ejemplo: ReporteEjemplo) {
         self.id = ejemplo.id.uuidString
@@ -273,5 +272,3 @@ extension ReportDetail {
         AllReportsView()
     }
 }
-
-
