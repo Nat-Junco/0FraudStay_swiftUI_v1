@@ -2,8 +2,21 @@ import SwiftUI
 
 struct TermsView: View {
     @Environment(\.dismiss) private var dismiss
+    @Binding var isAccepted: Bool
+    var onAccept: (() -> Void)? = nil
+    @State private var localIsAccepted: Bool = false
     
     private let rojoPrimary = Color("BrandPrimaryColor")
+    private var acceptedBinding: Binding<Bool> {
+            Binding(
+                get: { $isAccepted.wrappedValue },
+                set: { isAccepted = $0 }
+            )
+        }
+    init(isAccepted: Binding<Bool> = .constant(false), onAccept: (() -> Void)? = nil) {
+            self._isAccepted = isAccepted
+            self.onAccept = onAccept
+        }
     
     var body: some View {
         NavigationStack {
@@ -64,22 +77,89 @@ struct TermsView: View {
                     .padding(20)
                     .background(Color(.secondarySystemGroupedBackground))
                     .clipShape(RoundedRectangle(cornerRadius: 18))
-                    
-                }}}}}
-@ViewBuilder
-private func seccionTexto(titulo: String, contenido: String) -> some View {
-    VStack(alignment: .leading, spacing: 6) {
-        Text(titulo)
-            .font(.system(size: 15, weight: .bold))
-            .foregroundStyle(.primary)
-        
-        Text(contenido)
-            .font(.system(size: 13))
-            .foregroundStyle(.secondary)
-            .lineSpacing(3)
+                    VStack(spacing: 16) {
+                                            
+                                            // Checkbox
+                                            Button {
+                                                withAnimation(.easeInOut(duration: 0.2)) {
+                                                    isAccepted.toggle()
+                                                }
+                                            } label: {
+                                                HStack(alignment: .top, spacing: 12) {
+                                                    Image(systemName: isAccepted ? "checkmark.square.fill" : "square")
+                                                        .font(.system(size: 20, weight: .semibold))
+                                                        .foregroundStyle(isAccepted ? rojoPrimary : .secondary)
+                                                    
+                                                    Text("He leído y acepto expresamente los Términos y Condiciones de Uso de 0FRAUD STAY.")
+                                                        .font(.subheadline)
+                                                        .foregroundStyle(.primary)
+                                                        .multilineTextAlignment(.leading)
+                                                }
+                                            }
+                                            .buttonStyle(.plain)
+                                            
+                                            Button {
+                                                onAccept?()
+                                                dismiss()
+                                            } label: {
+                                                Text("Continuar")
+                                                    .font(.headline)
+                                                    .foregroundStyle(.white)
+                                                    .frame(maxWidth: .infinity)
+                                                    .frame(height: 50)
+                                                    .background(isAccepted ? rojoPrimary : Color.gray.opacity(0.4))
+                                                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                                            }
+                                            .disabled(!isAccepted)
+                                        }
+                                        .padding(20)
+                                        .background(Color(.secondarySystemGroupedBackground))
+                                        .clipShape(RoundedRectangle(cornerRadius: 18))
+                    HStack(spacing: 8) {
+                                            Image(systemName: "doc.badge.checkmark")
+                                                .foregroundStyle(rojoPrimary)
+                                                .font(.system(size: 16))
+                                            
+                                            Text("Al usar la aplicación aceptas operar bajo principios de buena fe y respeto comunitario.")
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
+                                        }
+                                        .padding(.horizontal, 4)
+                                        .padding(.bottom, 20)
+                                    }
+                                    .padding(.horizontal, 20)
+                                }
+                                .background(Color(.systemGroupedBackground).ignoresSafeArea())
+                                .navigationBarTitleDisplayMode(.inline)
+                                .toolbar {
+                                    ToolbarItem(placement: .topBarLeading) {
+                                        Button {
+                                            dismiss()
+                                        } label: {
+                                            HStack(spacing: 4) {
+                                                Image(systemName: "chevron.left")
+                                                Text("Atrás")
+                                            }
+                                            .foregroundStyle(.primary)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+    @ViewBuilder
+    private func seccionTexto(titulo: String, contenido: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(titulo)
+                .font(.system(size: 15, weight: .bold))
+                .foregroundStyle(.primary)
+            
+            Text(contenido)
+                .font(.system(size: 13))
+                .foregroundStyle(.secondary)
+                .lineSpacing(3)
+        }
     }
 }
-
 
 #Preview {
     TermsView()
