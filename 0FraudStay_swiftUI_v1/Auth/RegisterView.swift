@@ -13,7 +13,7 @@ struct RegisterView: View {
     @State private var erroresFormulario: [String] = []
     @State private var registroExitoso = false
     private let primaryColor = Color("BrandPrimaryColor")
-
+    
     func registroUsuario() async {
         do {
             let response = try await controladorRegistro.registerUser(
@@ -82,7 +82,10 @@ struct RegisterView: View {
                             .background(Color(.systemGray6))
                             .cornerRadius(12)
                     }
-                    // Confirm Password
+                    if !erroresFormulario.isEmpty {
+                         ResumenErrores(errores: erroresFormulario)
+                     }
+                    
                     VStack(alignment: .leading, spacing: 6) {
                         Text("CONFIRMAR CONTRASEÑA")
                             .font(.caption)
@@ -94,39 +97,37 @@ struct RegisterView: View {
                             .cornerRadius(12)
                     }
                 }
-                if !erroresFormulario.isEmpty {
-                    ResumenErrores(errores: erroresFormulario)
-                }
                 Spacer()
                 Button(action: {
-                     erroresFormulario = usuario.validarDatos()
-                    if erroresFormulario.isEmpty {
-                        Task {
-                            await registroUsuario()
-                        }
-                    }
+                    erroresFormulario = usuario.validarDatos()
+                   if erroresFormulario.isEmpty {
+                       Task {
+                           await registroUsuario()
+                       }
+                   }
                 }) {
-                    Text("Registrarme")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(primaryColor)
-                        .cornerRadius(12)
-                }
-                .padding(.bottom, 10)
-            }
-            .padding(.horizontal, 24)
-        }
-        .tint(primaryColor)
-        .alert("¡Cuenta creada!", isPresented: $registroExitoso) {
-                                                                  Button("Iniciar sesión") { dismiss() }
-        } message: {
-            Text("Ya puedes entrar con tu correo y contraseña.")
-        }
-    }
-}
+                    NavigationLink {
 
+                    } label: {
+                        Text("Registrarme")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(primaryColor)
+                            .cornerRadius(12)
+                    }
+                    .padding(.bottom, 10)            }
+                .padding(.horizontal, 24)
+            }
+            .tint(primaryColor)
+            .alert("¡Cuenta creada!", isPresented: $registroExitoso) {
+                                                                      Button("Iniciar sesión") { dismiss() }
+            } message: {
+                Text("Ya puedes entrar con tu correo y contraseña.")
+            }
+        }
+    }}
 #Preview {
     NavigationStack {
         RegisterView()
