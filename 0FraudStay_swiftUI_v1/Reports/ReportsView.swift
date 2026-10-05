@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 import Combine
 
-// MODELO DE DATOS
+// MARK: - MODELO DE DATOS
 struct UserReport: Codable, Identifiable {
     let id: String
     let folio: String
@@ -26,6 +26,36 @@ struct UserReport: Codable, Identifiable {
         case id, folio, titulo, plataforma, ubicacion, fecha, monto, estado
         case esEditable = "es_editable"
         case imageUrl = "image_url"
+    }
+}
+
+// EXTENSIÓN PARA MAPEAR DTO A USERREPORT
+extension UserReport {
+    init(dto: DTOReporteResponse, plataforma: String) {
+        let estado: ReportStatus
+        switch dto.estadoId {
+        case 2:
+            estado = .enRevision
+        case 3:
+            estado = .fraude
+        default:
+            estado = .pendiente
+        }
+
+        let formato = NumberFormatter()
+        formato.numberStyle = .currency
+        formato.locale = Locale(identifier: "es_MX")
+
+        self.id = String(dto.id)
+        self.folio = "RS-\(String(format: "%04d", dto.id))"
+        self.titulo = dto.nombre
+        self.plataforma = plataforma
+        self.ubicacion = dto.zona ?? "Sin zona"
+        self.fecha = dto.fecha
+        self.monto = (formato.string(from: NSNumber(value: dto.precio ?? 0)) ?? "$0") + " MXN"
+        self.estado = estado
+        self.esEditable = dto.esEditable
+        self.imageUrl = dto.fotoURLCompleta?.absoluteString
     }
 }
 
@@ -62,8 +92,7 @@ enum ReportStatus: String, Codable, CaseIterable {
     }
 }
 
-
-// SERVICIO API (BACKEND)
+// MARK: - SERVICIO API
 class ReportService {
     private let baseURL = "https://api.tudominio.com/v1"
     
@@ -71,7 +100,7 @@ class ReportService {
         guard let url = URL(string: "\(baseURL)/reports/me") else {
             throw URLError(.badURL)
         }
-        
+
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
@@ -86,7 +115,7 @@ class ReportService {
     }
 }
 
-// VIEWMODEL
+// MARK: - VIEWMODEL
 @MainActor
 class MyReportsViewModel: ObservableObject {
     @Published var reportes: [UserReport] = []
@@ -110,7 +139,6 @@ class MyReportsViewModel: ObservableObject {
         } else {
             // MODO ESTÁTICO / MOCK
             try? await Task.sleep(nanoseconds: 400_000_000)
-            // Simula tiempo de respuesta
             self.reportes = [
                 UserReport(id: "1", folio: "RS-2026-0089", titulo: "Depto Condesa — anfitrión desapareció tras cobro", plataforma: "Facebook Marketplace", ubicacion: "CDMX", fecha: "12 mar 2026", monto: "$8,500 MXN", estado: .enRevision, esEditable: true, imageUrl: nil),
                 UserReport(id: "2", folio: "RS-2026-0086", titulo: "Penthouse Roma Norte — cambio de último minuto", plataforma: "WhatsApp", ubicacion: "CDMX", fecha: "1 mar 2026", monto: "$14,000 MXN", estado: .pendiente, esEditable: true, imageUrl: nil),
@@ -123,16 +151,29 @@ class MyReportsViewModel: ObservableObject {
     }
 }
 
+// MARK: - VISTAS
 struct MyReportsView: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var viewModel = MyReportsViewModel()
+    @EnvironmentObject var vm: ReportesViewModel
     @State private var filtroSeleccionado: ReportStatus = .todos
+    
+    private var reportes: [UserReport] {
+        vm.mios.map {
+            UserReport(dto: $0, plataforma: vm.nombreFuente($0.fuenteId))
+        }
+    }
+    
+    private var perdidas: String {
+        let confirmados = vm.mios.filter { $0.estadoId == 3 }
+        let total: Double = confirmados.reduce(0.0) { suma, r in suma + (r.precio ?? 0) }
+        return total >= 1000 ? "$\(Int(total / 1000))k" : "$\(Int(total))"
+    }
 
     private var reportesFiltrados: [UserReport] {
         if filtroSeleccionado == .todos {
-            return viewModel.reportes
+            return reportes
         }
-        return viewModel.reportes.filter { $0.estado == filtroSeleccionado }
+        return reportes.filter { $0.estado == filtroSeleccionado }
     }
 
     var body: some View {
@@ -151,10 +192,10 @@ struct MyReportsView: View {
                 
                 // Tarjetas Métricas
                 HStack(spacing: 8) {
-                    MetricCard(valor: "\(viewModel.reportes.count)", titulo: "TOTAL", colorTexto: .black)
-                    MetricCard(valor: "\(viewModel.reportes.filter { $0.estado == .fraude }.count)", titulo: "FRAUDE CONF.", colorTexto: .red)
-                    MetricCard(valor: "\(viewModel.reportes.filter { $0.estado == .enRevision }.count)", titulo: "EN REVISIÓN", colorTexto: .orange)
-                    MetricCard(valor: "$51k", titulo: "PÉRDIDAS", colorTexto: .red)
+                    MetricCard(valor: "\(reportes.count)", titulo: "TOTAL", colorTexto: .black)
+                    MetricCard(valor: "\(reportes.filter { $0.estado == .fraude }.count)", titulo: "FRAUDE CONF.", colorTexto: .red)
+                    MetricCard(valor: "\(reportes.filter { $0.estado == .enRevision }.count)", titulo: "EN REVISIÓN", colorTexto: .orange)
+                    MetricCard(valor: perdidas, titulo: "PÉRDIDAS", colorTexto: .red)
                 }
 
                 // Filtros
@@ -182,21 +223,24 @@ struct MyReportsView: View {
                     }
                 }
 
-                if viewModel.isLoading {
+                // Contenido principal
+                if vm.isLoading && reportes.isEmpty {
                     ProgressView()
                         .frame(maxWidth: .infinity)
                         .padding(.top, 30)
-                } else if let error = viewModel.errorMessage {
+                } else if let error = vm.errorMessage, reportes.isEmpty {
                     VStack(spacing: 8) {
                         Text(error)
                             .font(.system(size: 13))
                             .foregroundStyle(Color.red)
                         Button("Reintentar") {
-                            Task { await viewModel.cargarReportes() }
+                            Task { await vm.cargarTodo() }
                         }
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.top, 20)
+                } else if reportes.isEmpty {
+                    ContentUnavailableView("Sin reportes", systemImage: "tray", description: Text("Aún no has creado ningún reporte."))
                 } else {
                     VStack(spacing: 12) {
                         ForEach(reportesFiltrados) { reporte in
@@ -209,7 +253,10 @@ struct MyReportsView: View {
         }
         .background(Color(red: 0.97, green: 0.97, blue: 0.98).ignoresSafeArea())
         .task {
-            await viewModel.cargarReportes()
+            await vm.cargarTodo()
+        }
+        .refreshable {
+            await vm.cargarTodo()
         }
     }
 }
@@ -291,7 +338,6 @@ struct ReportRowCard: View {
                     .padding(.vertical, 2)
                 
                 HStack(spacing: 10) {
-                    // Botón Editar
                     Button {
                         // Falta funcionalidad
                     } label: {
@@ -312,9 +358,8 @@ struct ReportRowCard: View {
                         )
                     }
                     
-                    // Botón Eliminar
                     Button {
-                        // falta funcionalidad
+                        // Falta funcionalidad
                     } label: {
                         HStack(spacing: 6) {
                             Image(systemName: "trash")
@@ -356,5 +401,7 @@ struct ReportRowCard: View {
 #Preview {
     NavigationStack {
         MyReportsView()
+            .environmentObject(ReportesViewModel())
     }
 }
+;
