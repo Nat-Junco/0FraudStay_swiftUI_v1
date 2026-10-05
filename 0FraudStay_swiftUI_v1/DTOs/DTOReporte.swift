@@ -24,12 +24,23 @@ struct DTOReporteResponse: Codable, Identifiable, Hashable {
     let createdAt: String
     let updatedAt: String?
 
+    /// Mapea el `estadoId` numérico del backend al String que esperan las funciones de la vista
+    var estado: String {
+        switch estadoId {
+        case 1: return "EN REVISIÓN"
+        case 2: return "FRAUDE"
+        default: return "PENDIENTE"
+        }
+    }
+
     /// URL completa de la foto (el back regresa solo la ruta "/uploads/...").
     var fotoURLCompleta: URL? { URL(string: HTTPClient.baseURL + fotoUrl) }
     /// "2026-09-21T17:00:00.000Z" → "2026-09-21"
     var fecha: String { String(createdAt.prefix(10)) }
     /// Solo Pendiente (1) y En revisión (2) se pueden editar/eliminar.
     var esEditable: Bool { estadoId == 1 || estadoId == 2 }
+    
+    
 }
 
 

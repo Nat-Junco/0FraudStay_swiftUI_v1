@@ -151,7 +151,7 @@ struct AllReportsView: View {
                 } else {
                     ForEach(filtrados) { reporte in
                         NavigationLink {
-                            ReportDetailView(reporte: ReportDetail(from: reporte))
+                            ReportDetailView(reporte: DTOReporteResponse(from: reporte))
                         } label: {
                             VStack(alignment: .leading, spacing: 0) {
                                 ZStack(alignment: .top) {
@@ -251,22 +251,28 @@ struct ReporteEjemplo: Identifiable {
     let etiqueta: String
 }
 
-extension ReportDetail {
+extension DTOReporteResponse {
     init(from ejemplo: ReporteEjemplo) {
-        self.id = ejemplo.id.uuidString
-        self.imageUrls = [ejemplo.imagen]
-        self.estado = ejemplo.estado
-        self.tipoFraude = ejemplo.etiqueta.uppercased()
-        self.titulo = ejemplo.titulo
-        self.plataforma = ejemplo.plataforma
-        self.ubicacion = ejemplo.ubicacion
-        self.fecha = ejemplo.fecha
-        self.montoDefraudado = ejemplo.precio
-        self.descripcion = "Publicación con irregularidades detectadas. No realices transferencias ni depósitos de anticipo sin antes verificar la autenticidad del inmueble."
-        self.nombreEstafador = "En investigación"
-        self.linkEstafador = "No especificado"
+        self.id = 1
+        self.nombre = ejemplo.titulo
+        self.descripcion = "Descripción de ejemplo"
+        self.longitud = 0.0
+        self.latitud = 0.0
+        self.fotoUrl = ejemplo.imagen
+        self.precio = nil
+        self.zona = nil
+        self.contactoOfetante = nil // <-- Esta propiedad faltaba
+        self.usuarioId = "1"
+        self.fuenteId = 1
+        self.estadoId = ejemplo.estado == "FRAUDE" ? 1 : (ejemplo.estado == "EN REVISIÓN" ? 2 : 3)
+        self.tipoPropiedadId = 1
+        self.tipoFraudeId = 1
+        self.createdAt = ejemplo.fecha
+        self.updatedAt = nil
     }
 }
+
+
 #Preview {
     NavigationStack {
         AllReportsView()
