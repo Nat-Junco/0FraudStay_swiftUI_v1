@@ -5,8 +5,8 @@
 //  Created by alumno on 23/09/26.
 //
 
-
 import SwiftUI
+
 struct ReportDetail: Identifiable {
     let id: String
     let imageUrls: [String]
@@ -33,16 +33,15 @@ struct ReportDetail: Identifiable {
         }
     }
 }
+
 enum Tab {
     case inicio
     case reportes
     case crear
-<<<<<<< HEAD
     case guides
-=======
->>>>>>> e8f4934ce681b25dd01726ca7bd00d5bd67b100b
     case perfil
 }
+
 struct MiReporteItem: Identifiable {
     let id = UUID()
     let systemIcon: String
@@ -53,6 +52,7 @@ struct MiReporteItem: Identifiable {
     let fecha: String
     let codigo: String
 }
+
 struct StartView: View {
     
     @State private var selectedTab: Tab = .inicio
@@ -64,72 +64,15 @@ struct StartView: View {
     private let textoPrincipal = Color(.black)
     private let textoGris = Color(.lightGray)
     
-<<<<<<< HEAD
-    private let misReportes: [MiReporteItem] = [
-        MiReporteItem(
-            systemIcon: "clock.fill",
-            titulo: "Depto Condesa — anfitrión desapareció tras cobro",
-            estado: "EN REVISIÓN",
-            colorEstado: Color("ReviewColor"),
-            plataforma: "Facebook Marketplace",
-            fecha: "12 mar 2026",
-            codigo: "RS-2026-0089"
-        ),
-        MiReporteItem(
-            systemIcon: "doc.text.fill",
-            titulo: "Penthouse Roma Norte — cambio de último minuto",
-            estado: "PENDIENTE",
-            colorEstado: .gray,
-            plataforma: "WhatsApp",
-            fecha: "1 mar 2026",
-            codigo: "RS-2026-0086"
-        )
-    ]
-    
-    private let reportesRecientes: [ReportDetail] = [
-        ReportDetail(
-            id: "1",
-            imageUrls: ["https://images.unsplash.com/photo-1512917774080-9991f1c4c750"],
-            estado: "FRAUDE",
-            tipoFraude: "PROPIEDAD FANTASMA",
-            titulo: "Depto amueblado Condesa — nunca existió",
-            plataforma: "Facebook Marketplace",
-            ubicacion: "Condesa, CDMX",
-            fecha: "12 mar 2026",
-            montoDefraudado: "$4,200 MXN",
-            descripcion: "Publicación de departamento en Condesa por $4,200. Al enviar anticipo por transferencia, el anfitrión desapareció.",
-            nombreEstafador: "Carlos R. / 'Rentas CDMX'",
-            linkEstafador: "facebook.com/marketplace/item/839201"
-        ),
-        ReportDetail(
-            id: "2",
-            imageUrls: ["https://images.unsplash.com/photo-1600585154340-be6161a56a0c"],
-            estado: "FRAUDE",
-            tipoFraude: "CLONACIÓN DE ANUNCIO",
-            titulo: "Casa en Tulum — fotos robadas de Airbnb",
-            plataforma: "Airbnb (cuenta clonada)",
-            ubicacion: "Aldea Zama, Tulum",
-            fecha: "28 feb 2026",
-            montoDefraudado: "$8,500 MXN",
-            descripcion: "Cuenta clonada ofreciendo villa en Tulum a la mitad del precio del mercado.",
-            nombreEstafador: "Rentas Tulum Exclusivas",
-            linkEstafador: "instagram.com/tulum_rentas_fake"
-        )
-    ]
-    
-=======
     @StateObject private var vm = ReportesViewModel()
     @State private var reporteAEditar: DTOReporteResponse?
     @State private var reporteAEliminar: DTOReporteResponse?
     
-
     // DATOS DE EJEMPLO — se reemplazan con lo que venga de la base de datos
-    private var misReportesEditables: [DTOReporteResponse]{
-        Array(vm.mios.filter {$0.esEditable}.prefix(3))
+    private var misReportesEditables: [DTOReporteResponse] {
+        Array(vm.mios.filter { $0.esEditable }.prefix(3))
     }
 
-    // TabView
->>>>>>> e8f4934ce681b25dd01726ca7bd00d5bd67b100b
     var body: some View {
         TabView(selection: $selectedTab) {
             
@@ -154,7 +97,6 @@ struct StartView: View {
                 Label("Crear", systemImage: "plus.app.fill")
             }
             .tag(Tab.crear)
-<<<<<<< HEAD
             
             NavigationStack {
                 GuidesView()
@@ -164,10 +106,6 @@ struct StartView: View {
             }
             .tag(Tab.guides)
             
-=======
-
-
->>>>>>> e8f4934ce681b25dd01726ca7bd00d5bd67b100b
             NavigationStack {
                 ProfileView()
             }
@@ -178,7 +116,9 @@ struct StartView: View {
         }
         .tint(.red)
         .environmentObject(vm)
-        .task {await vm.cargarTodo()}
+        .task {
+            await vm.cargarTodo()
+        }
     }
     
     private var pantallaInicio: some View {
@@ -186,6 +126,7 @@ struct StartView: View {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 20) {
                     
+                    // Encabezado
                     HStack(alignment: .center) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("OFRAUD STAY")
@@ -367,125 +308,119 @@ struct StartView: View {
                             .foregroundStyle(textoGris)
                     }
                     .padding(.top, 8)
-<<<<<<< HEAD
                     
-                    // Lista de Mis Reportes
-                    ForEach(misReportes) { reporte in
-                        VStack(alignment: .leading, spacing: 14) {
-                            HStack(alignment: .top, spacing: 14) {
-                                
-                                Image(systemName: reporte.systemIcon)
-                                    .font(.system(size: 20, weight: .medium))
-                                    .foregroundStyle(reporte.colorEstado)
-                                    .frame(width: 48, height: 48)
-                                    .background(reporte.colorEstado.opacity(0.1))
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                                
-                                VStack(alignment: .leading, spacing: 6) {
-                                    Text(reporte.titulo)
-                                        .font(.system(size: 16, weight: .semibold))
-                                        .foregroundStyle(textoPrincipal)
-                                        .fixedSize(horizontal: false, vertical: true)
-                                    Text("\(reporte.plataforma) · \(reporte.fecha)")
-                                        .font(.system(size: 14))
-                                        .foregroundStyle(textoGris)
-                                    Text(reporte.codigo)
-                                        .font(.system(size: 12, design: .monospaced))
-                                        .foregroundStyle(textoGris)
-                                }
-                                
-                                Spacer(minLength: 4)
-                                
-                                Text(reporte.estado)
-                                    .font(.system(size: 11, weight: .bold))
-                                    .foregroundStyle(reporte.colorEstado)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(reporte.colorEstado.opacity(0.12))
-                                    .clipShape(RoundedRectangle(cornerRadius: 6))
-                            }
-                            
-                            HStack(spacing: 10) {
-                                Button {
-                                    // Agregar funcionalidad
-                                } label: {
-                                    HStack(spacing: 6) {
-                                        Image(systemName: "square.and.pencil")
-                                            .font(.system(size: 14, weight: .semibold))
-                                        Text("Editar")
-                                            .font(.system(size: 14, weight: .semibold))
-                                    }
-                                    .foregroundStyle(textoPrincipal)
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 38)
-                                    .background(fondo)
-                                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(borde, lineWidth: 1)
-                                    )
-                                }
-                                
-                                Button {
-                                    // Agregar funcionalidad
-                                } label: {
-                                    HStack(spacing: 6) {
-                                        Image(systemName: "trash")
-                                            .font(.system(size: 14, weight: .semibold))
-                                        Text("Eliminar")
-                                            .font(.system(size: 14, weight: .semibold))
-                                    }
-                                    .foregroundStyle(rojo)
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 38)
-                                    .background(rojo.opacity(0.06))
-                                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(rojo.opacity(0.25), lineWidth: 1)
-                                    )
-                                }
-                            }
-                            .padding(.leading, 62)
-                        }
-                        .padding(18)
-                        .background(Color.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 18))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 18)
-                                .stroke(borde, lineWidth: 1)
-                        )
-                    }
-                
-                    VStack(alignment: .leading, spacing: 6) {
-                        HStack {
-                            Text("Reportes Recientes")
-                                .font(.system(size: 20, weight: .semibold))
-                                .foregroundStyle(textoPrincipal)
-                            Spacer()
-                            NavigationLink {
-                                AllReportsView()
-                            } label: {
-                                Text("Ver más →")
-                                    .font(.system(size: 16, weight: .semibold))
-                                    .foregroundStyle(rojo)
-                            }
-                        }
-                        Text("Últimas denuncias y alertas registradas")
-                            .font(.system(size: 13))
+                    if misReportesEditables.isEmpty {
+                        Text(vm.isLoading ? "Cargando..." : "No tienes reportes")
+                            .font(.system(size: 14))
                             .foregroundStyle(textoGris)
+                    } else {
+                        ForEach(misReportesEditables) { reporte in
+                            VStack(alignment: .leading, spacing: 14) {
+                                HStack(alignment: .top, spacing: 14) {
+                                    Text(reporte.estadoId == 2 ? "⏳" : "📋")
+                                        .font(.system(size: 24))
+                                        .frame(width: 48, height: 48)
+                                        .background(reporte.colorEstado.opacity(0.1))
+                                        .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                                    VStack(alignment: .leading, spacing: 6) {
+                                        Text(reporte.nombre)
+                                            .font(.system(size: 16, weight: .semibold))
+                                            .foregroundStyle(textoPrincipal)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                        Text("\(vm.nombreFuente(reporte.fuenteId)) · \(reporte.fecha)")
+                                            .font(.system(size: 14))
+                                            .foregroundStyle(textoGris)
+                                        Text("RS-\(String(format: "%04d", reporte.id))")
+                                            .font(.system(size: 12, design: .monospaced))
+                                            .foregroundStyle(textoGris)
+                                    }
+
+                                    Spacer(minLength: 4)
+
+                                    Text(reporte.nombreEstado)
+                                        .font(.system(size: 11, weight: .bold))
+                                        .foregroundStyle(reporte.colorEstado)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(reporte.colorEstado.opacity(0.12))
+                                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                                }
+
+                                HStack(spacing: 10) {
+                                    Button {
+                                        reporteAEditar = reporte
+                                    } label: {
+                                        Text("✏️ Editar")
+                                            .font(.system(size: 14, weight: .semibold))
+                                            .foregroundStyle(textoPrincipal)
+                                            .frame(maxWidth: .infinity)
+                                            .frame(height: 38)
+                                            .background(fondo)
+                                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 10)
+                                                    .stroke(borde, lineWidth: 1)
+                                            )
+                                    }
+
+                                    Button {
+                                        reporteAEliminar = reporte
+                                    } label: {
+                                        Text("🗑️ Eliminar")
+                                            .font(.system(size: 14, weight: .semibold))
+                                            .foregroundStyle(rojo)
+                                            .frame(maxWidth: .infinity)
+                                            .frame(height: 38)
+                                            .background(rojo.opacity(0.06))
+                                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 10)
+                                                    .stroke(rojo.opacity(0.25), lineWidth: 1)
+                                            )
+                                    }
+                                }
+                                .padding(.leading, 62)
+                            }
+                            .padding(18)
+                            .background(Color.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 18))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 18)
+                                    .stroke(borde, lineWidth: 1)
+                            )
+                        }
                     }
-                    .padding(.top, 12)
-                    
-                    //Reportes Recientes
-                    ForEach(reportesRecientes) { reporte in
+
+                    // Reportes recientes
+                    HStack {
+                        Text("Reportes recientes")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundStyle(textoPrincipal)
+                        Spacer()
                         NavigationLink {
-                            ReportDetailView(reporte: reporte)
+                            AllReportsView()
                         } label: {
-                            VStack(alignment: .leading, spacing: 12) {
-                                ZStack(alignment: .top) {
-                                    if let firstUrl = reporte.imageUrls.first {
-                                        AsyncImage(url: URL(string: firstUrl)) { fase in
+                            Text("Ver todos →")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundStyle(rojo)
+                        }
+                    }
+                    .padding(.top, 8)
+
+                    // Reportes verificados de la comunidad
+                    if vm.verificadosRecientes.isEmpty {
+                        Text(vm.isLoading ? "Cargando…" : "Aún no hay reportes verificados")
+                            .font(.system(size: 14))
+                            .foregroundStyle(textoGris)
+                    } else {
+                        ForEach(vm.verificadosRecientes) { reporte in
+                            NavigationLink {
+                                // ReporteDetalleView(reporte: reporte)
+                            } label: {
+                                VStack(alignment: .leading, spacing: 12) {
+                                    ZStack(alignment: .top) {
+                                        AsyncImage(url: reporte.fotoURLCompleta) { fase in
                                             if let imagen = fase.image {
                                                 imagen
                                                     .resizable()
@@ -493,263 +428,81 @@ struct StartView: View {
                                             } else {
                                                 Rectangle().fill(borde)
                                             }
-=======
-
-                    // Una tarjeta por cada reporte del usuario
-                    if misReportesEditables.isEmpty{
-                        Text(vm.isLoading ? "Cargando..." : "No tienes reportes")
-                    }
-                    
-                    ForEach(misReportesEditables) { reporte in
-                                            VStack(alignment: .leading, spacing: 14) {
-                                                HStack(alignment: .top, spacing: 14) {
-
-                                                    Text(reporte.estadoId == 2 ? "⏳" : "📋")
-                                                        .font(.system(size: 24))
-                                                        .frame(width: 48, height: 48)
-                                                        .background(reporte.colorEstado.opacity(0.1))
-                                                        .clipShape(RoundedRectangle(cornerRadius: 12))
-
-                                                    VStack(alignment: .leading, spacing: 6) {
-                                                        Text(reporte.nombre)
-                                                            .font(.system(size: 16, weight: .semibold))
-                                                            .foregroundStyle(textoPrincipal)
-                                                            .fixedSize(horizontal: false, vertical: true)
-                                                        Text("\(vm.nombreFuente(reporte.fuenteId)) · \(reporte.fecha)")
-                                                            .font(.system(size: 14))
-                                                            .foregroundStyle(textoGris)
-                                                        Text("RS-\(String(format: "%04d", reporte.id))")
-                                                            .font(.system(size: 12, design: .monospaced))
-                                                            .foregroundStyle(textoGris)
-                                                    }
-
-                                                    Spacer(minLength: 4)
-
-                                                    Text(reporte.nombreEstado)
-                                                        .font(.system(size: 11, weight: .bold))
-                                                        .foregroundStyle(reporte.colorEstado)
-                                                        .padding(.horizontal, 8)
-                                                        .padding(.vertical, 4)
-                                                        .background(reporte.colorEstado.opacity(0.12))
-                                                        .clipShape(RoundedRectangle(cornerRadius: 6))
-                                                }
-
-                                                HStack(spacing: 10) {
-                                                    Button {
-                                                        reporteAEditar = reporte
-                                                    } label: {
-                                                        Text("✏️ Editar")
-                                                            .font(.system(size: 14, weight: .semibold))
-                                                            .foregroundStyle(textoPrincipal)
-                                                            .frame(maxWidth: .infinity)
-                                                            .frame(height: 38)
-                                                            .background(fondo)
-                                                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                                                            .overlay(
-                                                                RoundedRectangle(cornerRadius: 10)
-                                                                    .stroke(borde, lineWidth: 1)
-                                                            )
-                                                    }
-
-                                                    Button {
-                                                        reporteAEliminar = reporte
-                                                    } label: {
-                                                        Text("🗑️ Eliminar")
-                                                            .font(.system(size: 14, weight: .semibold))
-                                                            .foregroundStyle(rojo)
-                                                            .frame(maxWidth: .infinity)
-                                                            .frame(height: 38)
-                                                            .background(rojo.opacity(0.06))
-                                                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                                                            .overlay(
-                                                                RoundedRectangle(cornerRadius: 10)
-                                                                    .stroke(rojo.opacity(0.25), lineWidth: 1)
-                                                            )
-                                                    }
-                                                }
-                                                .padding(.leading, 62)
-                                            }
-                                            .padding(18)
-                                            .background(Color.white)
-                                            .clipShape(RoundedRectangle(cornerRadius: 18))
-                                            .overlay(
-                                                RoundedRectangle(cornerRadius: 18)
-                                                    .stroke(borde, lineWidth: 1)
-                                            )
-                                        }
-
-                                        // Reportes recientes
-                                        HStack {
-                                            Text("Reportes recientes")
-                                                .font(.system(size: 20, weight: .semibold))
-                                                .foregroundStyle(textoPrincipal)
-                                            Spacer()
-                                            NavigationLink {
-                                                AllReportsView()
-                                            } label: {
-                                                Text("Ver todos →")
-                                                    .font(.system(size: 16, weight: .semibold))
-                                                    .foregroundStyle(rojo)
-                                            }
-                                        }
-                                        .padding(.top, 8)
-
-                                        // Reportes verificados de la comunidad (GET /reportes, estado 3)
-                                        if vm.verificadosRecientes.isEmpty {
-                                            Text(vm.isLoading ? "Cargando…" : "Aún no hay reportes verificados")
-                                                .font(.system(size: 14))
-                                                .foregroundStyle(textoGris)
-                                        }
-                                        ForEach(vm.verificadosRecientes) { reporte in
-                                            NavigationLink {
-                                                //ReporteDetalleView(reporte: reporte)
-                                            } label: {
-                                                VStack(alignment: .leading, spacing: 12) {
-
-                                                    ZStack(alignment: .top) {
-                                                        AsyncImage(url: reporte.fotoURLCompleta) { fase in
-                                                            if let imagen = fase.image {
-                                                                imagen
-                                                                    .resizable()
-                                                                    .aspectRatio(contentMode: .fill)
-                                                            } else {
-                                                                Rectangle().fill(borde)
-                                                            }
-                                                        }
-                                                        .frame(maxWidth: .infinity)
-                                                        .frame(height: 150)
-                                                        .clipped()
-                                                        .clipShape(RoundedRectangle(cornerRadius: 12))
-
-                                                        HStack {
-                                                            Text("VERIFICADO")
-                                                                .font(.system(size: 11, weight: .bold))
-                                                                .foregroundStyle(verde)
-                                                                .padding(.horizontal, 8)
-                                                                .padding(.vertical, 4)
-                                                                .background(Color.white.opacity(0.9))
-                                                                .clipShape(RoundedRectangle(cornerRadius: 6))
-                                                            Spacer()
-                                                        }
-                                                        .padding(10)
-                                                    }
-
-                                                    Text(reporte.nombre)
-                                                        .font(.system(size: 16, weight: .semibold))
-                                                        .foregroundStyle(textoPrincipal)
-                                                        .multilineTextAlignment(.leading)
-
-                                                    HStack {
-                                                        Text(vm.nombreFuente(reporte.fuenteId))
-                                                        Spacer()
-                                                        Text(vm.nombreTipoPropiedad(reporte.tipoPropiedadId))
-                                                    }
-                                                    .font(.system(size: 13))
-                                                    .foregroundStyle(textoGris)
-
-                                                    HStack(spacing: 8) {
-                                                        Text(vm.nombreTipoFraude(reporte.tipoFraudeId))
-                                                            .font(.system(size: 11, weight: .medium))
-                                                            .foregroundStyle(textoGris)
-                                                            .padding(.horizontal, 8)
-                                                            .padding(.vertical, 4)
-                                                            .background(fondo)
-                                                            .clipShape(RoundedRectangle(cornerRadius: 6))
-                                                        Spacer()
-                                                        Text(reporte.fecha)
-                                                    }
-                                                    .font(.system(size: 12))
-                                                    .foregroundStyle(textoGris)
-                                                }
-                                                .padding(14)
-                                                .background(Color.white)
-                                                .clipShape(RoundedRectangle(cornerRadius: 18))
-                                                .overlay(
-                                                    RoundedRectangle(cornerRadius: 18)
-                                                        .stroke(borde, lineWidth: 1)
-                                                )
-                                            }
-                                            .buttonStyle(.plain)
->>>>>>> e8f4934ce681b25dd01726ca7bd00d5bd67b100b
                                         }
                                         .frame(maxWidth: .infinity)
                                         .frame(height: 150)
                                         .clipped()
                                         .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                                        HStack {
+                                            Text("VERIFICADO")
+                                                .font(.system(size: 11, weight: .bold))
+                                                .foregroundStyle(verde)
+                                                .padding(.horizontal, 8)
+                                                .padding(.vertical, 4)
+                                                .background(Color.white.opacity(0.9))
+                                                .clipShape(RoundedRectangle(cornerRadius: 6))
+                                            Spacer()
+                                        }
+                                        .padding(10)
                                     }
-<<<<<<< HEAD
-                                    
+
+                                    Text(reporte.nombre)
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .foregroundStyle(textoPrincipal)
+                                        .multilineTextAlignment(.leading)
+
                                     HStack {
-                                        Text(reporte.estado)
-                                            .font(.system(size: 11, weight: .bold))
-                                            .foregroundStyle(reporte.colorEstado)
+                                        Text(vm.nombreFuente(reporte.fuenteId))
+                                        Spacer()
+                                        Text(vm.nombreTipoPropiedad(reporte.tipoPropiedadId))
+                                    }
+                                    .font(.system(size: 13))
+                                    .foregroundStyle(textoGris)
+
+                                    HStack(spacing: 8) {
+                                        Text(vm.nombreTipoFraude(reporte.tipoFraudeId))
+                                            .font(.system(size: 11, weight: .medium))
+                                            .foregroundStyle(textoGris)
                                             .padding(.horizontal, 8)
                                             .padding(.vertical, 4)
-                                            .background(Color.white.opacity(0.9))
+                                            .background(fondo)
                                             .clipShape(RoundedRectangle(cornerRadius: 6))
                                         Spacer()
-                                        Text(reporte.montoDefraudado)
-                                            .font(.system(size: 13, weight: .bold))
-                                            .foregroundStyle(.white)
-                                            .padding(.horizontal, 8)
-                                            .padding(.vertical, 4)
-                                            .background(rojo)
-                                            .clipShape(RoundedRectangle(cornerRadius: 6))
+                                        Text(reporte.fecha)
                                     }
-                                    .padding(10)
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(textoGris)
                                 }
-                                
-                                Text(reporte.titulo)
-                                    .font(.system(size: 16, weight: .semibold))
-                                    .foregroundStyle(textoPrincipal)
-                                    .multilineTextAlignment(.leading)
-                                
-                                HStack {
-                                    Text(reporte.plataforma)
-                                    Spacer()
-                                    Text(reporte.ubicacion)
-                                }
-                                .font(.system(size: 13))
-                                .foregroundStyle(textoGris)
-                                
-                                HStack(spacing: 8) {
-                                    Text(reporte.tipoFraude)
-                                        .font(.system(size: 11, weight: .medium))
-                                        .foregroundStyle(textoGris)
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 4)
-                                        .background(fondo)
-                                        .clipShape(RoundedRectangle(cornerRadius: 6))
-                                    Spacer()
-                                    Text(reporte.fecha)
-                                }
-                                .font(.system(size: 12))
-                                .foregroundStyle(textoGris)
-=======
-                                    .padding(.horizontal, 20)
-                                    .padding(.bottom, 32)
-                                }
-                                .background(fondo.ignoresSafeArea())
-                                .refreshable { await vm.cargarTodo() }
->>>>>>> e8f4934ce681b25dd01726ca7bd00d5bd67b100b
+                                .padding(14)
+                                .background(Color.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 18))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 18)
+                                        .stroke(borde, lineWidth: 1)
+                                )
                             }
+                            .buttonStyle(.plain)
                         }
                     }
-<<<<<<< HEAD
                 }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 32)
+                .padding(.horizontal, 16)
+                .padding(.bottom, 24)
             }
-            .background(fondo.ignoresSafeArea())
+        }
+        .sheet(item: $reporteAEditar) { reporte in
+            // Vista modal para editar el reporte
+            Text("Editar reporte: \(reporte.nombre)")
+        }
+        .alert(item: $reporteAEliminar) { reporte in
+            Alert(
+                title: Text("Eliminar reporte"),
+                message: Text("¿Estás seguro de que deseas eliminar este reporte?"),
+                primaryButton: .destructive(Text("Eliminar")) {
+                    // Lógica para eliminar mediante vm
+                },
+                secondaryButton: .cancel()
+            )
         }
     }
 }
-#Preview {
-    StartView()
-}
-=======
-
-                    #Preview {
-                        StartView()
-                    }
->>>>>>> e8f4934ce681b25dd01726ca7bd00d5bd67b100b

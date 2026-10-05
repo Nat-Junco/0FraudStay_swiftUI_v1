@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4504FB11307331F800113AE8 /* 0FraudStay_swiftUI_v1.app in Sources */ = {isa = PBXBuildFile; fileRef = 7F74F73E3064884D00DEE9CE /* 0FraudStay_swiftUI_v1.app */; };
 		FBEA74A230648AC500D2BE5C /* .gitignore  in Resources */ = {isa = PBXBuildFile; fileRef = FBEA74A130648AB900D2BE5C /* .gitignore  */; };
 		FBEA74A430648ADE00D2BE5C /* README in Resources */ = {isa = PBXBuildFile; fileRef = FBEA74A330648AD400D2BE5C /* README */; };
 /* End PBXBuildFile section */
@@ -130,6 +131,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4504FB11307331F800113AE8 /* 0FraudStay_swiftUI_v1.app in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
