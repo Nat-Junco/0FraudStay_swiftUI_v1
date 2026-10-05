@@ -8,6 +8,8 @@
 import SwiftUI
 struct ProfileView: View {
     
+    @AppStorage("isLoggedIn") private var isLoggedIn: Bool = true
+    
     @State private var nombre: String = "Nombre del usuario"
     @State private var correo: String = "ejemplo@correo.com"
     @State private var alertasHabilitadas: Bool = true
@@ -126,17 +128,17 @@ struct ProfileView: View {
                         
                         // Botón Cerrar Sesión
                         Button(action: {
-                            // Acción pendiente
-                        }) {
-                            Text("Cerrar sesión")
-                                .font(.headline)
-                                .foregroundColor(primaryColor)
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(primaryColor.opacity(0.12))
-                                .cornerRadius(16)
-                        }
-                        .padding(.top, 8)
+                                    isLoggedIn = false
+                                }) {
+                                    Text("Cerrar sesión")
+                                        .font(.headline)
+                                        .foregroundColor(primaryColor)
+                                        .frame(maxWidth: .infinity)
+                                        .padding()
+                                        .background(primaryColor.opacity(0.12))
+                                        .cornerRadius(16)
+                                }
+                                .padding(.top, 8)
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 8)
@@ -199,4 +201,3 @@ struct ProfileMenuItem: View {
 #Preview {
     ProfileView()
 }
-

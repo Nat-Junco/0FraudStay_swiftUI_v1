@@ -15,11 +15,8 @@ struct ContentView: View {
             }
         }
         .task {
-            // 🔴 LÍNEA CLAVE PARA PRUEBAS:
-            // Forzamos la sesión a cerrada para que no recuerde el estado anterior
             isLoggedIn = true
             
-            // Espera de 4 segundos para el WelcomeView
             try? await Task.sleep(for: .seconds(4))
             
             withAnimation(.easeInOut) {
