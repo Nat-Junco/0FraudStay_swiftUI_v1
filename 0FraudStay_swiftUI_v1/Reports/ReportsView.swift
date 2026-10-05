@@ -50,9 +50,9 @@ extension UserReport {
         self.folio = "RS-\(String(format: "%04d", dto.id))"
         self.titulo = dto.nombre
         self.plataforma = plataforma
-        self.ubicacion = dto.zona ?? "Sin zona"
+        self.ubicacion = "\(dto.latitud), \(dto.longitud)"
         self.fecha = dto.fecha
-        self.monto = (formato.string(from: NSNumber(value: dto.precio ?? 0)) ?? "$0") + " MXN"
+        self.monto = "Sin costo registrado"
         self.estado = estado
         self.esEditable = dto.esEditable
         self.imageUrl = dto.fotoURLCompleta?.absoluteString
@@ -165,8 +165,8 @@ struct MyReportsView: View {
     
     private var perdidas: String {
         let confirmados = vm.mios.filter { $0.estadoId == 3 }
-        let total: Double = confirmados.reduce(0.0) { suma, r in suma + (r.precio ?? 0) }
-        return total >= 1000 ? "$\(Int(total / 1000))k" : "$\(Int(total))"
+        let totalReportes: Int = confirmados.count
+        return "\(totalReportes) reportes" // 👈 Agregamos el return con formato String
     }
 
     private var reportesFiltrados: [UserReport] {

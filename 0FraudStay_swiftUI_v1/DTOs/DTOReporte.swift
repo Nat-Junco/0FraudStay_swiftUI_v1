@@ -6,16 +6,14 @@
 
 import Foundation
 
+
 struct DTOReporteResponse: Codable, Identifiable, Hashable {
     let id: Int
     let nombre: String
     let descripcion: String
     let longitud: Double
     let latitud: Double
-    let fotoUrl: String
-    let precio: Double?
-    let zona: String?
-    let contactoOfetante: String?
+    let fotoUrl: String?
     let usuarioId: String
     let fuenteId: Int
     let estadoId: Int
@@ -24,12 +22,37 @@ struct DTOReporteResponse: Codable, Identifiable, Hashable {
     let createdAt: String
     let updatedAt: String?
 
-    /// URL completa de la foto (el back regresa solo la ruta "/uploads/...").
-    var fotoURLCompleta: URL? { URL(string: HTTPClient.baseURL + fotoUrl) }
+    enum CodingKeys: String, CodingKey {
+        case id
+        case nombre
+        case descripcion
+        case longitud
+        case latitud
+        case fotoUrl = "foto_url"
+        case usuarioId = "usuario_id"
+        case fuenteId = "fuente_id"
+        case estadoId = "estado_id"
+        case tipoPropiedadId = "tipo_propiedad_id"
+        case tipoFraudeId = "tipo_fraude_id"
+        case createdAt = "created_at"
+        case updatedAt = "updated_at"
+    }
+
+    /// URL completa para cargar la imagen en la app
+    var fotoURLCompleta: URL? {
+        guard let foto = fotoUrl, !foto.isEmpty else { return nil }
+        return URL(string: HTTPClient.baseURL + foto)
+    }
+
     /// "2026-09-21T17:00:00.000Z" → "2026-09-21"
-    var fecha: String { String(createdAt.prefix(10)) }
-    /// Solo Pendiente (1) y En revisión (2) se pueden editar/eliminar.
-    var esEditable: Bool { estadoId == 1 || estadoId == 2 }
+    var fecha: String {
+        String(createdAt.prefix(10))
+    }
+
+    /// Solo Pendiente (1) y En revisión (2) se pueden editar/eliminar
+    var esEditable: Bool {
+        estadoId == 1 || estadoId == 2
+    }
 }
 
 

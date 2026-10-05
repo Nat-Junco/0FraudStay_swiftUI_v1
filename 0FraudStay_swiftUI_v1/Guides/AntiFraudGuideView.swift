@@ -10,7 +10,7 @@ struct AntiFraudGuideView: View {
             VStack(alignment: .leading, spacing: 18) {
                 // MARK: 1. Título
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("OFRAUD STAY")
+                    Text("0FRAUD STAY")
                         .font(.system(size: 12, weight: .bold))
                         .kerning(1.2)
                         .foregroundStyle(rojo)

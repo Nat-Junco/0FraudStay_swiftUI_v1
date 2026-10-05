@@ -73,7 +73,7 @@ struct AllReportsView: View {
             VStack(alignment: .leading, spacing: 18) {
                 HStack(alignment: .center) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("OFRAUD STAY")
+                        Text("0FRAUD STAY")
                             .font(.system(size: 12, weight: .bold))
                             .kerning(1.2)
                             .foregroundStyle(rojo)

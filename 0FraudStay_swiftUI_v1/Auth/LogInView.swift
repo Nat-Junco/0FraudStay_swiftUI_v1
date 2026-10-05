@@ -42,7 +42,7 @@ struct LogInView: View {
                     VStack(alignment: .leading, spacing: 20) {
                         
                         VStack(alignment: .leading, spacing: 6) {
-                            Text("OFRAUD STAY")
+                            Text("0FRAUD STAY")
                                 .font(.caption)
                                 .bold()
                                 .foregroundColor(primaryColor)
@@ -62,6 +62,7 @@ struct LogInView: View {
                                     .bold()
                                     .foregroundColor(.gray)
                                 TextField("Introduce tu correo o tu usuario", text: $email)
+                                    .keyboardType(.emailAddress)
                                     .textInputAutocapitalization(.never)
                                     .autocorrectionDisabled()
                                     .foregroundColor(.black)
@@ -71,6 +72,7 @@ struct LogInView: View {
                             }
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("CONTRASEÑA")
+                                    .keyboardType(.asciiCapable)
                                     .font(.caption)
                                     .bold()
                                     .foregroundColor(.gray)
