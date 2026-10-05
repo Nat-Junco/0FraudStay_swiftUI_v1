@@ -1,12 +1,3 @@
-//
-//  HTTPClient.swift
-//  0FraudStay_swiftUI_v1
-//
-//  Created by Javier Padilla Marcial on 04/10/26.
-//
-
-
-//
 //  HTTPCliente.swift
 //  0FraudStay_swiftUI_v1
 //
