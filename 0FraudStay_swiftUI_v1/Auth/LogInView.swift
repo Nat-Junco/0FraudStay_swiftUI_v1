@@ -5,11 +5,32 @@
 
 import SwiftUI
 struct LogInView: View {
-    @State private var isLoggedIn = false
+    @AppStorage("isLoggedIn") private var isLoggedIn = false
     @State private var email = ""
     @State private var password = ""
+    @State private var errorLogin: String?
+    @State private var cargando = false
+    @Environment(\.authController) var controladorRegistro
     
     let primaryColor = Color("BrandPrimaryColor")
+    
+    private func login() async {
+        cargando = true
+        errorLogin = nil
+        do {
+            let exito = try await controladorRegistro.loginUser(email: email, password: password)
+            withAnimation {isLoggedIn = exito}
+        } catch ErrorAPI.status(401){
+            errorLogin = "Correo o password incorrectos"
+        } catch ErrorAPI.status(400){
+            errorLogin = "Revisa que el correo tenga formato valido"
+        } catch {
+        errorLogin = "No se pudo actualizar en el servidor"
+            print(error.localizedDescription)
+        }
+        cargando = false
+    }
+    
     var body: some View {
         if isLoggedIn {
             StartView()
@@ -67,15 +88,20 @@ struct LogInView: View {
                                 }
                             }
                         }
+                        if let errorLogin{
+                            Text(errorLogin)
+                                .font(.caption)
+                                .foregroundColor(.red)
+                        }
                         Spacer()
                         VStack(spacing: 12) {
                             
                             Button(action: {
-                                withAnimation {
-                                    isLoggedIn = true
+                                Task {
+                                    await login()
                                 }
                             }) {
-                                Text("Entrar")
+                                Text(cargando ? "Entrando" : "Entrar")
                                     .font(.headline)
                                     .foregroundColor(.white)
                                     .frame(maxWidth: .infinity)
@@ -83,6 +109,7 @@ struct LogInView: View {
                                     .background(primaryColor)
                                     .cornerRadius(14)
                             }
+                            .disabled(cargando)
                             NavigationLink(destination: RegisterView()) {
                                 Text("¿No tienes cuenta? Regístrate")
                                     .font(.subheadline)

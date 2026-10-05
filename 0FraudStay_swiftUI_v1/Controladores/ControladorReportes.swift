@@ -15,7 +15,7 @@ struct ControladorReportes {
     async let f = httpClient.Fuentes()
     async let tf = httpClient.TiposFraude()
     async let tp = httpClient.TiposPropiedad()
-    return try await (f, tf, tp)
+    return try await (f, tf, tp)   
   }
      func todos() async throws -> [DTOReporteResponse] {
         try await httpClient.TodosReportes()
