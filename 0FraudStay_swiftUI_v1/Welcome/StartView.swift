@@ -1,38 +1,4 @@
-//
-//  StartView.swift
-//  0FraudStay_swiftUI_v1
-//
-//  Created by alumno on 23/09/26.
-//
-
 import SwiftUI
-
-struct ReportDetail: Identifiable {
-    let id: String
-    let imageUrls: [String]
-    let estado: String
-    let tipoFraude: String
-    let titulo: String
-    let plataforma: String
-    let ubicacion: String
-    let fecha: String
-    let montoDefraudado: String
-    let descripcion: String
-    let nombreEstafador: String
-    let linkEstafador: String
-    var evidenciaUrls: [String]?
-    
-    var colorEstado: Color {
-        switch estado.uppercased() {
-        case "FRAUDE":
-            return Color("BrandPrimaryColor")
-        case "EN REVISIÓN":
-            return Color("ReviewColor")
-        default:
-            return .gray
-        }
-    }
-}
 
 enum Tab {
     case inicio
@@ -40,17 +6,6 @@ enum Tab {
     case crear
     case guides
     case perfil
-}
-
-struct MiReporteItem: Identifiable {
-    let id = UUID()
-    let systemIcon: String
-    let titulo: String
-    let estado: String
-    let colorEstado: Color
-    let plataforma: String
-    let fecha: String
-    let codigo: String
 }
 
 struct StartView: View {
@@ -68,7 +23,7 @@ struct StartView: View {
     @State private var reporteAEditar: DTOReporteResponse?
     @State private var reporteAEliminar: DTOReporteResponse?
     
-    // DATOS DE EJEMPLO — se reemplazan con lo que venga de la base de datos
+
     private var misReportesEditables: [DTOReporteResponse] {
         Array(vm.mios.filter { $0.esEditable }.prefix(3))
     }
@@ -416,7 +371,7 @@ struct StartView: View {
                     } else {
                         ForEach(vm.verificadosRecientes) { reporte in
                             NavigationLink {
-                                // ReporteDetalleView(reporte: reporte)
+                                ReportDetailView(reporte: reporte)
                             } label: {
                                 VStack(alignment: .leading, spacing: 12) {
                                     ZStack(alignment: .top) {
@@ -491,18 +446,15 @@ struct StartView: View {
             }
         }
         .sheet(item: $reporteAEditar) { reporte in
-            // Vista modal para editar el reporte
-            Text("Editar reporte: \(reporte.nombre)")
+            // PATCH /reportes/:id
+            EditReportView(reporte: reporte)
+                .environmentObject(vm)
         }
-        .alert(item: $reporteAEliminar) { reporte in
-            Alert(
-                title: Text("Eliminar reporte"),
-                message: Text("¿Estás seguro de que deseas eliminar este reporte?"),
-                primaryButton: .destructive(Text("Eliminar")) {
-                    // Lógica para eliminar mediante vm
-                },
-                secondaryButton: .cancel()
-            )
+        .sheet(item: $reporteAEliminar) { reporte in
+            DeleteReportView(onDelete: {
+                Task { await vm.eliminar(reporte) }
+            })
+            .presentationDetents([.height(340)])
         }
     }
 }

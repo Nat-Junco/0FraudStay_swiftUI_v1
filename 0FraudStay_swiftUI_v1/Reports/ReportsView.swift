@@ -1,10 +1,3 @@
-//
-//  ReportsView.swift
-//  0FraudStay_swiftUI_v1
-//
-//  Created by alumno on 23/09/26.
-//
-
 import Foundation
 import SwiftUI
 import Combine
@@ -29,7 +22,6 @@ struct UserReport: Codable, Identifiable {
     }
 }
 
-// EXTENSIÓN PARA MAPEAR DTO A USERREPORT
 extension UserReport {
     init(dto: DTOReporteResponse, plataforma: String) {
         let estado: ReportStatus
@@ -42,17 +34,13 @@ extension UserReport {
             estado = .pendiente
         }
 
-        let formato = NumberFormatter()
-        formato.numberStyle = .currency
-        formato.locale = Locale(identifier: "es_MX")
-
         self.id = String(dto.id)
         self.folio = "RS-\(String(format: "%04d", dto.id))"
         self.titulo = dto.nombre
         self.plataforma = plataforma
-        self.ubicacion = "\(dto.latitud), \(dto.longitud)"
+        self.ubicacion = dto.zona ?? "Sin zona"
         self.fecha = dto.fecha
-        self.monto = "Sin costo registrado"
+        self.monto = dto.precioTexto
         self.estado = estado
         self.esEditable = dto.esEditable
         self.imageUrl = dto.fotoURLCompleta?.absoluteString
@@ -92,70 +80,17 @@ enum ReportStatus: String, Codable, CaseIterable {
     }
 }
 
-// MARK: - SERVICIO API
-class ReportService {
-    private let baseURL = "https://api.tudominio.com/v1"
-    
-    func fetchUserReports(token: String) async throws -> [UserReport] {
-        guard let url = URL(string: "\(baseURL)/reports/me") else {
-            throw URLError(.badURL)
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        
-        let (data, response) = try await URLSession.shared.data(for: request)
-        
-        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-            throw URLError(.badServerResponse)
-        }
-        
-        return try JSONDecoder().decode([UserReport].self, from: data)
-    }
-}
-
-// MARK: - VIEWMODEL
-@MainActor
-class MyReportsViewModel: ObservableObject {
-    @Published var reportes: [UserReport] = []
-    @Published var isLoading: Bool = false
-    @Published var errorMessage: String? = nil
-    
-    private let usarBackendReal = false
-    private let service = ReportService()
-    
-    func cargarReportes() async {
-        self.isLoading = true
-        self.errorMessage = nil
-        
-        if usarBackendReal {
-            do {
-                let token = "TOKEN_JWT_AQUI"
-                self.reportes = try await service.fetchUserReports(token: token)
-            } catch {
-                self.errorMessage = "No se pudo conectar con el servidor."
-            }
-        } else {
-            // MODO ESTÁTICO / MOCK
-            try? await Task.sleep(nanoseconds: 400_000_000)
-            self.reportes = [
-                UserReport(id: "1", folio: "RS-2026-0089", titulo: "Depto Condesa — anfitrión desapareció tras cobro", plataforma: "Facebook Marketplace", ubicacion: "CDMX", fecha: "12 mar 2026", monto: "$8,500 MXN", estado: .enRevision, esEditable: true, imageUrl: nil),
-                UserReport(id: "2", folio: "RS-2026-0086", titulo: "Penthouse Roma Norte — cambio de último minuto", plataforma: "WhatsApp", ubicacion: "CDMX", fecha: "1 mar 2026", monto: "$14,000 MXN", estado: .pendiente, esEditable: true, imageUrl: nil),
-                UserReport(id: "3", folio: "RS-2026-0071", titulo: "Casa Tulum — fotos falsas, nunca entregaron llaves", plataforma: "Airbnb", ubicacion: "Tulum", fecha: "18 feb 2026", monto: "$22,000 MXN", estado: .fraude, esEditable: false, imageUrl: nil),
-                UserReport(id: "4", folio: "RS-2026-0058", titulo: "Studio Polanco — propietario inexistente", plataforma: "Inmuebles24", ubicacion: "CDMX", fecha: "4 feb 2026", monto: "$6,200 MXN", estado: .fraude, esEditable: false, imageUrl: nil)
-            ]
-        }
-        
-        self.isLoading = false
-    }
-}
-
 // MARK: - VISTAS
 struct MyReportsView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var vm: ReportesViewModel
     @State private var filtroSeleccionado: ReportStatus = .todos
+    @State private var reporteAEditar: DTOReporteResponse?
+    @State private var reporteAEliminar: DTOReporteResponse?
+
+    private func dto(de reporte: UserReport) -> DTOReporteResponse? {
+        vm.mios.first { String($0.id) == reporte.id }
+    }
     
     private var reportes: [UserReport] {
         vm.mios.map {
@@ -165,8 +100,8 @@ struct MyReportsView: View {
     
     private var perdidas: String {
         let confirmados = vm.mios.filter { $0.estadoId == 3 }
-        let totalReportes: Int = confirmados.count
-        return "\(totalReportes) reportes" // 👈 Agregamos el return con formato String
+        let total: Double = confirmados.reduce(0.0) { suma, r in suma + (r.precio ?? 0) }
+        return total >= 1000 ? "$\(Int(total / 1000))k" : "$\(Int(total))"
     }
 
     private var reportesFiltrados: [UserReport] {
@@ -244,7 +179,11 @@ struct MyReportsView: View {
                 } else {
                     VStack(spacing: 12) {
                         ForEach(reportesFiltrados) { reporte in
-                            ReportRowCard(reporte: reporte)
+                            ReportRowCard(
+                                reporte: reporte,
+                                onEditar: { reporteAEditar = dto(de: reporte) },
+                                onEliminar: { reporteAEliminar = dto(de: reporte) }
+                            )
                         }
                     }
                 }
@@ -257,6 +196,18 @@ struct MyReportsView: View {
         }
         .refreshable {
             await vm.cargarTodo()
+        }
+        .sheet(item: $reporteAEditar) { reporte in
+            // PATCH /reportes/:id
+            EditReportView(reporte: reporte)
+                .environmentObject(vm)
+        }
+        .sheet(item: $reporteAEliminar) { reporte in
+            // DELETE /reportes/:id con el diseño de DeleteReportView
+            DeleteReportView(onDelete: {
+                Task { await vm.eliminar(reporte) }
+            })
+            .presentationDetents([.height(340)])
         }
     }
 }
@@ -288,6 +239,8 @@ struct MetricCard: View {
 
 struct ReportRowCard: View {
     let reporte: UserReport
+    var onEditar: (() -> Void)? = nil
+    var onEliminar: (() -> Void)? = nil
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -339,7 +292,7 @@ struct ReportRowCard: View {
                 
                 HStack(spacing: 10) {
                     Button {
-                        // Falta funcionalidad
+                        onEditar?()
                     } label: {
                         HStack(spacing: 6) {
                             Image(systemName: "square.and.pencil")
@@ -359,7 +312,7 @@ struct ReportRowCard: View {
                     }
                     
                     Button {
-                        // Falta funcionalidad
+                        onEliminar?()
                     } label: {
                         HStack(spacing: 6) {
                             Image(systemName: "trash")
@@ -404,4 +357,3 @@ struct ReportRowCard: View {
             .environmentObject(ReportesViewModel())
     }
 }
-;
