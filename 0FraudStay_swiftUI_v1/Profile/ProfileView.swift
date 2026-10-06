@@ -96,8 +96,8 @@ struct ProfileView: View {
                         // Estadísticas
                         HStack(spacing: 12) {
                             ProfileStatBox(icon: "doc.text", value: "\(vm.mios.count)", label: "Reportes", backgroundColor: cardbackColor)
-                            ProfileStatBox(icon: "triangle.fill", value: "\(vm.mios.filter {$0.estadoId == 2}.count)", label: "En revisión", backgroundColor: cardbackColor)
-                            ProfileStatBox(icon: "shield.fill", value: "\(vm.mios.filter {$0.estadoId == 3}.count)", label: "Validados", backgroundColor: cardbackColor)
+                            ProfileStatBox(icon: "triangle.fill", value: "\(vm.mios.filter {$0.estadoId == 1}.count)", label: "En revisión", backgroundColor: cardbackColor)
+                            ProfileStatBox(icon: "shield.fill", value: "\(vm.mios.filter {$0.estadoId == 2}.count)", label: "Fraudes Confirmados", backgroundColor: cardbackColor)
                         }
                         
                         // Menú Opciones
