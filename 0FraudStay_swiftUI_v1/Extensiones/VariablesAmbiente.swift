@@ -11,6 +11,7 @@ import SwiftUI
 extension EnvironmentValues {
     @Entry var authController = ControladorRegistroUsuario(httpClient: HTTPClient())
     @Entry var reportesController = ControladorReportes(httpClient: HTTPClient())
+    @Entry var usuarioController = ControladorUsuario(httpClient: HTTPClient())
 }
 
 

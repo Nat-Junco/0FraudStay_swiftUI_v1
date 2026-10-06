@@ -3,10 +3,12 @@ import SwiftUI
 struct EditProfileView: View {
     @Environment(\.dismiss) private var dismiss
     
-    // Bindings para sincronizar con la pantalla principal de Perfil
-    @Binding var nombre: String
-    @Binding var correo: String
+    @ObservedObject var perfil: PerfilViewModel
     @Binding var alertasHabilitadas: Bool
+    // Bindings para sincronizar con la pantalla principal de Perfil
+    @State var nombre: String = ""
+    @State var correo: String = ""
+    @State private var guardando = false
     
     // Variable local para la contraseña
     @State private var contrasena: String = ""
@@ -108,12 +110,25 @@ struct EditProfileView: View {
                         .background(Color(.secondarySystemGroupedBackground))
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                     }
+                    if let error = perfil.errorMessage{
+                        Text(error)
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                            .frame(maxWidth: .infinity, alignment:.leading)
+                    }
                     
                     // MARK: - Botón Guardar Cambios
                     Button(action: {
-                        dismiss() // Cierra la vista manteniendo el estado actualizado del Toggle y TextFields
+                        Task{
+                            guardando = true
+                            if await perfil.guardar(nombre: nombre, correo: correo){
+                                dismiss()
+                            }
+                            guardando = false
+                        }
+                      
                     }) {
-                        Text("Guardar Cambios")
+                        Text(guardando ? "Guardando..." : "Guardar Cambios")
                             .font(.system(size: 16, weight: .bold))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
@@ -122,6 +137,7 @@ struct EditProfileView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
                     .padding(.top, 12)
+                    .disabled(guardando)
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 30)
@@ -129,6 +145,11 @@ struct EditProfileView: View {
             .background(Color(.systemGroupedBackground).ignoresSafeArea())
             .navigationTitle("Editar Perfil")
             .navigationBarTitleDisplayMode(.inline)
+            .onAppear{
+                nombre = perfil.nombre
+                correo = perfil.correo
+                perfil.errorMessage = nil
+            }
         }
     }
     
@@ -169,8 +190,7 @@ struct EditProfileView: View {
 
 #Preview {
     EditProfileView(
-        nombre: .constant("Usuario"),
-        correo: .constant("correo@ejemplo.com"),
+        perfil: PerfilViewModel(),
         alertasHabilitadas: .constant(true)
     )
 }
