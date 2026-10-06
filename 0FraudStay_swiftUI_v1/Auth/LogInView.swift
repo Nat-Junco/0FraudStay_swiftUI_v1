@@ -5,7 +5,7 @@
 
 import SwiftUI
 struct LogInView: View {
-    @AppStorage("isLoggedIn") private var isLoggedIn = false
+    @AppStorage("isLoggedIn") private var isLoggedIn = true
     @State private var email = ""
     @State private var password = ""
     @State private var errorLogin: String?
