@@ -11,7 +11,7 @@ struct HTTPClient {
 
     // En el simulador `localhost` apunta a tu Mac. En un iPhone físico
     // cámbialo por la IP de tu Mac, p. ej. "http://192.168.1.20:3000".
-    static let baseURL = "http://10.48.251.221:3000"
+    static let baseURL = "http://10.48.249.209:3000"
 
     //Auth (sin token)
 

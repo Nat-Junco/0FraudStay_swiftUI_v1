@@ -2,6 +2,7 @@
 //  EditReportView.swift
 //  0FraudStay_swiftUI_v1
 //
+//  Created by Javier Padilla Marcial on 06/10/26.
 //  Editar reporte (PATCH /reportes/:id). Solo se pueden editar reportes
 //  Pendientes o En revisión. El estado NO se edita aquí: lo cambia el admin.
 //  Las fotos y la ubicación tampoco se editan en esta pantalla.
@@ -29,7 +30,6 @@ struct EditReportView: View {
 
     private let rojo = Color("BrandPrimaryColor")
 
-    /// "4200.50" → 4200.5 ; vacío → nil
     private var precioNumero: Double? {
         Double(precio.trimmingCharacters(in: .whitespaces))
     }
@@ -130,7 +130,6 @@ struct EditReportView: View {
                 }
             }
             .tint(rojo)
-            // Filtros: no dejar escribir letras en precio ni en contacto
             .onChange(of: precio) { _, nuevo in
                 var filtrado = nuevo.filter { "0123456789.".contains($0) }
                 if filtrado.filter({ $0 == "." }).count > 1 {
