@@ -11,7 +11,7 @@ struct HTTPClient {
 
     // En el simulador `localhost` apunta a tu Mac. En un iPhone físico
     // cámbialo por la IP de tu Mac, p. ej. "http://192.168.1.20:3000".
-    static let baseURL = "http://10.48.251.221:3000"
+    static let baseURL = "http://10.48.249.209:3000"
 
     //Auth (sin token)
 
@@ -134,7 +134,24 @@ struct HTTPClient {
          urlRequest.httpMethod = "DELETE"
          _ = try await enviarConToken(urlRequest)
      }
-
+    
+    //Usuarios
+    
+    /// GET /usuarios/:id
+    func ObtenerUsuario(id:String) async throws -> DTOUsuarioResponse{
+        let data = try await enviarConToken(URLRequest(url: url("/usuarios/\(id)")))
+        return try JSONDecoder().decode(DTOUsuarioResponse.self, from: data)
+    }
+    
+    /// PATCH /usuarios/:id
+    func ActualizarUsuario(id:String, cambios:DTOActualizarUsuarioRequest) async throws -> DTOUsuarioResponse{
+        var urlRequest = URLRequest(url: url("/usuarios/\(id)"))
+        urlRequest.httpMethod = "PATCH"
+        urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.httpBody = try JSONEncoder().encode(cambios)
+        let data = try await enviarConToken(urlRequest)
+        return try JSONDecoder().decode(DTOUsuarioResponse.self, from: data)
+    }
 
     // Usuarios (Perfil)
 
