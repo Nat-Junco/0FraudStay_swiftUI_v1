@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var mostrandoSplash = true
-    @AppStorage("isLoggedIn") private var isLoggedIn = true
+    @AppStorage("isLoggedIn") private var isLoggedIn = false
     
     var body: some View {
         ZStack {
@@ -15,9 +15,7 @@ struct ContentView: View {
             }
         }
         .task {
-            // 🔴 LÍNEA CLAVE PARA PRUEBAS:
-            // Forzamos la sesión a cerrada para que no recuerde el estado anterior
-            isLoggedIn = true
+            isLoggedIn = false
             
             // Espera de 4 segundos para el WelcomeView
             try? await Task.sleep(for: .seconds(4))

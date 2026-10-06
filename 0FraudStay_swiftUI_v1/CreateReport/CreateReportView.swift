@@ -5,6 +5,14 @@
 
 
 
+//  Flujo de 3 pasos conectado al back:
+//  Paso 1 — Fotos (portada + evidencia) y datos del anuncio. Las 2 fotos se
+//           suben juntas a POST /reportes/fotos en cuanto están las dos.
+//  Paso 2 — ¿Qué sucedió?: tipo de fraude, descripción, precio, contacto.
+//  Paso 3 — Ubicación: pin en el mapa (autollena la zona) y se envía
+//           POST /reportes con los `fotoTemps` del paso 1.
+//
+
 import SwiftUI
 import PhotosUI
 import MapKit
@@ -17,9 +25,13 @@ struct CreateReportView: View {
     @State private var pasoActual = 1
     
     // Paso 1
-    @State private var fotoItem: PhotosPickerItem?
-    @State private var fotoPreview: UIImage?
-    @State private var fotoTemp: String?
+    @State private var portadaItem: PhotosPickerItem?
+    @State private var evidenciaItem: PhotosPickerItem?
+    @State private var portadaPreview: UIImage?
+    @State private var evidenciaPreview: UIImage?
+    @State private var portadaJPEG: Data?
+    @State private var evidenciaJPEG: Data?
+    @State private var fotoTemps: [String]?      // [portada, evidencia] ya subidas
     @State private var subiendoFoto = false
     @State private var errorFoto: String?
     @State private var titulo = ""
@@ -35,6 +47,7 @@ struct CreateReportView: View {
     // Paso 3
     @State private var zona = ""
     @State private var coordenada: CLLocationCoordinate2D?
+    @State private var buscandoZona = false
     @State private var camara: MapCameraPosition = .region(MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 19.4326, longitude: -99.1332),
         span: MKCoordinateSpan(latitudeDelta: 0.15, longitudeDelta: 0.15)))
@@ -64,45 +77,96 @@ struct CreateReportView: View {
         var errores: [String] = []
         switch paso {
         case 1:
-            if subiendoFoto { errores.append("Espera a que termine de subir la foto") }
-            else if fotoTemp == nil { errores.append("Adjunta una foto de evidencia") }
+            if subiendoFoto { errores.append("Espera a que terminen de subir las fotos") }
+            else if portadaJPEG == nil { errores.append("Selecciona la foto de portada") }
+            else if evidenciaJPEG == nil { errores.append("Selecciona la foto de evidencia") }
+            else if fotoTemps == nil { errores.append("Las fotos no se subieron, selecciona una de nuevo para reintentar") }
             if titulo.esVacio { errores.append("Escribe el título del anuncio") }
             if fuenteId == nil { errores.append("Selecciona la plataforma") }
             if tipoPropiedadId == nil { errores.append("Selecciona el tipo de propiedad") }
         case 2:
             if tipoFraudeId == nil { errores.append("Selecciona el tipo de fraude") }
             if descripcion.esVacio { errores.append("Describe lo que sucedió") }
-            if !precio.esVacio && precioNumero == nil { errores.append("El precio debe ser un número") }
+            if !precio.esVacio && !precio.esPrecioValido {
+                errores.append("El precio solo puede tener números y máximo 2 decimales")
+            }
+            if !contactoOfertante.esVacio && !contactoOfertante.esTelefonoValido {
+                errores.append("El contacto debe ser un teléfono válido (10 dígitos o más, sin letras)")
+            }
         default:
+            if !zona.esVacio && !zona.esZonaValida {
+                errores.append("La zona solo puede tener letras, números, espacios y . , # -")
+            }
             if coordenada == nil { errores.append("Toca el mapa para marcar la ubicación") }
         }
         return errores
     }
     
-    // MARK: - Subir foto (paso 1, al elegirla)
-    private func subirFoto(_ item: PhotosPickerItem?) async {
-        guard let item else { return }
-        errorFoto = nil
-        fotoTemp = nil
-        guard let data = try? await item.loadTransferable(type: Data.self),
+    // MARK: - Fotos (paso 1)
+    /// Convierte lo elegido en la galería a imagen + JPEG comprimido (70%)
+    private func cargarImagen(_ item: PhotosPickerItem?) async -> (imagen: UIImage, jpeg: Data)? {
+        guard let item,
+              let data = try? await item.loadTransferable(type: Data.self),
               let imagen = UIImage(data: data),
-              let jpeg = imagen.jpegData(compressionQuality: 0.7) else {
-            errorFoto = "No se pudo leer la imagen"
+              let jpeg = imagen.jpegData(compressionQuality: 0.7) else { return nil }
+        return (imagen, jpeg)
+    }
+
+    /// Se llama cuando cambia la portada o la evidencia
+    private func fotoSeleccionada(_ item: PhotosPickerItem?, esPortada: Bool) async {
+        guard let resultado = await cargarImagen(item) else {
+            if item != nil { errorFoto = "No se pudo leer la imagen" }
             return
         }
-        fotoPreview = imagen
+        if esPortada {
+            portadaPreview = resultado.imagen
+            portadaJPEG = resultado.jpeg
+        } else {
+            evidenciaPreview = resultado.imagen
+            evidenciaJPEG = resultado.jpeg
+        }
+        await subirFotosSiEstanListas()
+    }
+
+    /// El back pide exactamente 2 fotos juntas: se suben cuando ya están las dos.
+    /// Si el usuario cambia una, se vuelven a subir ambas.
+    private func subirFotosSiEstanListas() async {
+        fotoTemps = nil
+        errorFoto = nil
+        guard let portadaJPEG, let evidenciaJPEG else { return }
         subiendoFoto = true
         do {
-            fotoTemp = try await controladorReportes.subirFoto(jpeg)
+            fotoTemps = try await controladorReportes.subirFotos(portada: portadaJPEG, evidencia: evidenciaJPEG)
         } catch {
-            errorFoto = "No se pudo subir la foto. Toca para intentar de nuevo."
+            errorFoto = "No se pudieron subir las fotos. Selecciona una de nuevo para reintentar."
         }
         subiendoFoto = false
     }
-    
+
+    // MARK: - Autollenar zona con el pin (geocodificación inversa)
+    private func autocompletarZona(_ c: CLLocationCoordinate2D) async {
+        buscandoZona = true
+        let ubicacion = CLLocation(latitude: c.latitude, longitude: c.longitude)
+        do {
+            let lugares = try await CLGeocoder().reverseGeocodeLocation(
+                ubicacion, preferredLocale: Locale(identifier: "es_MX"))
+            if let lugar = lugares.first {
+                // "Condesa, Ciudad de México" → solo las partes que existan
+                let partes = [lugar.subLocality, lugar.locality].compactMap { $0 }
+                if !partes.isEmpty {
+                    zona = partes.joined(separator: ", ")
+                }
+            }
+        } catch {
+            // Sin internet o sin resultado: el usuario puede escribirla a mano
+            print("No se pudo obtener la zona: \(error.localizedDescription)")
+        }
+        buscandoZona = false
+    }
+
     // MARK: - Enviar reporte (paso 3)
     private func enviarReporte() async {
-        guard let fotoTemp, let fuenteId, let tipoPropiedadId,
+        guard let fotoTemps, let fuenteId, let tipoPropiedadId,
               let tipoFraudeId, let coordenada else { return }
         enviando = true
         do {
@@ -111,7 +175,7 @@ struct CreateReportView: View {
                 descripcion: descripcion,
                 latitud: coordenada.latitude,
                 longitud: coordenada.longitude,
-                fotoTemp: fotoTemp,
+                fotoTemps: fotoTemps,
                 fuenteId: fuenteId,
                 tipoPropiedadId: tipoPropiedadId,
                 tipoFraudeId: tipoFraudeId,
@@ -122,8 +186,7 @@ struct CreateReportView: View {
             await vm.cargarTodo()
             reporteCreado = true
         } catch ErrorAPI.status(400) {
-            erroresFormulario = ["El servidor rechazó el reporte. Vuelve a subir la foto en el paso 1."]
-            self.fotoTemp = nil
+            erroresFormulario = ["El servidor rechazó el reporte. Revisa los datos o vuelve a seleccionar las fotos en el paso 1."]
         } catch ErrorAPI.status(409) {
             erroresFormulario = ["Plataforma, tipo de propiedad o tipo de fraude inválidos."]
         } catch {
@@ -134,7 +197,10 @@ struct CreateReportView: View {
     
     private func limpiarFormulario() {
         pasoActual = 1
-        fotoItem = nil; fotoPreview = nil; fotoTemp = nil; errorFoto = nil
+        portadaItem = nil; evidenciaItem = nil
+        portadaPreview = nil; evidenciaPreview = nil
+        portadaJPEG = nil; evidenciaJPEG = nil
+        fotoTemps = nil; errorFoto = nil
         titulo = ""; fuenteId = nil; tipoPropiedadId = nil
         tipoFraudeId = nil; descripcion = ""; precio = ""; contactoOfertante = ""
         zona = ""; coordenada = nil
@@ -260,8 +326,24 @@ struct CreateReportView: View {
         .task {
             if vm.fuentes.isEmpty { await vm.cargarTodo() }
         }
-        .onChange(of: fotoItem) { _, nuevo in
-            Task { await subirFoto(nuevo) }
+        .onChange(of: portadaItem) { _, nuevo in
+            Task { await fotoSeleccionada(nuevo, esPortada: true) }
+        }
+        .onChange(of: evidenciaItem) { _, nuevo in
+            Task { await fotoSeleccionada(nuevo, esPortada: false) }
+        }
+        .onChange(of: precio) { _, nuevo in
+            // Solo dígitos y un punto decimal
+            var filtrado = nuevo.filter { "0123456789.".contains($0) }
+            if filtrado.filter({ $0 == "." }).count > 1 {
+                filtrado = String(filtrado.dropLast())
+            }
+            if filtrado != nuevo { precio = filtrado }
+        }
+        .onChange(of: contactoOfertante) { _, nuevo in
+            // Solo dígitos, +, espacios y guiones
+            let filtrado = nuevo.filter { "0123456789+ -".contains($0) }
+            if filtrado != nuevo { contactoOfertante = filtrado }
         }
         .alert("Reporte enviado", isPresented: $reporteCreado) {
             Button("Aceptar") {
@@ -336,80 +418,87 @@ struct CreateReportView: View {
         .overlay(RoundedRectangle(cornerRadius: 10).stroke(borde, lineWidth: 1))
     }
     
+    /// Recuadro para elegir una foto (se usa 2 veces: portada y evidencia)
+    private func selectorFoto(_ titulo: String, _ ayuda: String,
+                              _ item: Binding<PhotosPickerItem?>, _ preview: UIImage?) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(titulo.uppercased())
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(textoGris)
+            PhotosPicker(selection: item, matching: .images) {
+                ZStack {
+                    if let preview {
+                        Image(uiImage: preview)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 140)
+                            .clipped()
+                    } else {
+                        VStack(spacing: 6) {
+                            Image(systemName: "photo.badge.plus")
+                                .font(.system(size: 24))
+                                .foregroundStyle(rojo)
+                            Text(ayuda)
+                                .font(.system(size: 11))
+                                .foregroundStyle(textoGris)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 6)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 140)
+                        .background(fondo)
+                    }
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(fotoTemps != nil ? verde.opacity(0.5) : borde,
+                                style: StrokeStyle(lineWidth: 1, dash: preview == nil ? [6] : []))
+                )
+            }
+            .disabled(subiendoFoto)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    /// Texto de estado debajo de las 2 fotos
+    @ViewBuilder private var estadoFotos: some View {
+        if subiendoFoto {
+            HStack(spacing: 6) {
+                ProgressView()
+                Text("Subiendo fotos…")
+            }
+            .font(.caption)
+            .foregroundStyle(.gray)
+        } else if fotoTemps != nil {
+            Label("Fotos subidas · toca una para cambiarla", systemImage: "checkmark.circle.fill")
+                .font(.caption)
+                .foregroundStyle(verde)
+        } else if let errorFoto {
+            Text(errorFoto)
+                .font(.caption)
+                .foregroundStyle(.red)
+        } else if portadaJPEG != nil || evidenciaJPEG != nil {
+            Text("Selecciona las dos fotos para subirlas")
+                .font(.caption)
+                .foregroundStyle(.gray)
+        }
+    }
+
     // MARK: - PASO 1: Evidencia y anuncio
     private var pasoUnoVista: some View {
         VStack(alignment: .leading, spacing: 20) {
             encabezadoPaso(1, "Evidencia y datos del anuncio")
             
             tarjeta {
-                VStack(alignment: .leading, spacing: 6) {
-                    etiqueta("Foto o captura de evidencia")
-                    
-                    PhotosPicker(selection: $fotoItem, matching: .images) {
-                        ZStack {
-                            if let fotoPreview {
-                                Image(uiImage: fotoPreview)
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(height: 170)
-                                    .frame(maxWidth: .infinity)
-                                    .clipped()
-                                
-                                VStack {
-                                    Spacer()
-                                    HStack(spacing: 6) {
-                                        if subiendoFoto {
-                                            ProgressView().tint(.white)
-                                            Text("Subiendo…")
-                                        } else if fotoTemp != nil {
-                                            Image(systemName: "checkmark.circle.fill")
-                                            Text("Foto subida · toca para cambiar")
-                                        } else {
-                                            Image(systemName: "exclamationmark.triangle.fill")
-                                            Text("Toca para intentar de nuevo")
-                                        }
-                                    }
-                                    .font(.system(size: 12, weight: .semibold))
-                                    .foregroundStyle(.white)
-                                    .padding(.horizontal, 10)
-                                    .padding(.vertical, 6)
-                                    .background(
-                                        (subiendoFoto ? Color.black : (fotoTemp != nil ? verde : rojo)).opacity(0.85)
-                                    )
-                                    .clipShape(Capsule())
-                                    .padding(10)
-                                }
-                            } else {
-                                VStack(spacing: 8) {
-                                    Image(systemName: "photo.badge.plus")
-                                        .font(.system(size: 28))
-                                        .foregroundStyle(rojo)
-                                    Text("Seleccionar imagen")
-                                        .font(.system(size: 14, weight: .medium))
-                                        .foregroundStyle(textoPrincipal)
-                                    Text("Captura del anuncio, chat o comprobante")
-                                        .font(.system(size: 11))
-                                        .foregroundStyle(textoGris)
-                                }
-                                .frame(height: 170)
-                                .frame(maxWidth: .infinity)
-                                .background(fondo)
-                            }
-                        }
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(fotoTemp != nil ? verde.opacity(0.5) : borde,
-                                        style: StrokeStyle(lineWidth: 1, dash: fotoPreview == nil ? [6] : []))
-                        )
+                VStack(alignment: .leading, spacing: 8) {
+                    etiqueta("Fotos del reporte")
+                    HStack(spacing: 12) {
+                        selectorFoto("Portada", "Foto del anuncio", $portadaItem, portadaPreview)
+                        selectorFoto("Evidencia", "Chat, pago o comprobante", $evidenciaItem, evidenciaPreview)
                     }
-                    .disabled(subiendoFoto)
-                    
-                    if let errorFoto {
-                        Text(errorFoto)
-                            .font(.caption)
-                            .foregroundStyle(.red)
-                    }
+                    estadoFotos
                 }
                 
                 VStack(alignment: .leading, spacing: 6) {
@@ -462,7 +551,7 @@ struct CreateReportView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         etiqueta("Contacto", opcional: true)
                         campoTexto("+52 55 0000 0000", $contactoOfertante)
-                            .textInputAutocapitalization(.never)
+                            .keyboardType(.phonePad)
                     }
                 }
             }
@@ -478,10 +567,15 @@ struct CreateReportView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     etiqueta("Zona / Colonia", opcional: true)
                     campoTexto("Ej. Condesa, CDMX", $zona)
+                    if buscandoZona {
+                        Text("Buscando zona…")
+                            .font(.caption)
+                            .foregroundStyle(.gray)
+                    }
                 }
                 
                 VStack(alignment: .leading, spacing: 6) {
-                    etiqueta("Marca la ubicación en el mapa")
+                    etiqueta("Marca la ubicación en el mapa (llena la zona automáticamente)")
                     MapReader { proxy in
                         Map(position: $camara) {
                             if let coordenada {
@@ -492,6 +586,7 @@ struct CreateReportView: View {
                         .onTapGesture { punto in
                             if let c = proxy.convert(punto, from: .local) {
                                 coordenada = c
+                                Task { await autocompletarZona(c) }
                             }
                         }
                     }

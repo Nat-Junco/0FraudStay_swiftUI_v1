@@ -84,27 +84,31 @@ struct HTTPClient {
          return try JSONDecoder().decode([DTOReporteResponse].self, from: data)
      }
 
-     /// POST /reportes/fotos (paso 1) — sube la foto como multipart/form-data
-     /// en el campo "foto" (el mismo nombre que FileInterceptor('foto') en el back).
-     func SubirFoto(_ imagen: Data) async throws -> DTOFotoTempResponse {
+     /// POST /reportes/fotos — sube portada y evidencia en una sola petición
+     /// multipart, las dos en el campo "fotos" (FilesInterceptor('fotos', 2)).
+     /// El back regresa un arreglo en el mismo orden: [portada, evidencia].
+     func SubirFotos(portada: Data, evidencia: Data) async throws -> [DTOFotoTempResponse] {
          let boundary = "Boundary-\(UUID().uuidString)"
          var urlRequest = URLRequest(url: url("/reportes/fotos"))
          urlRequest.httpMethod = "POST"
          urlRequest.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
 
          var body = Data()
-         body.append("--\(boundary)\r\n".data(using: .utf8)!)
-         body.append("Content-Disposition: form-data; name=\"foto\"; filename=\"evidencia.jpg\"\r\n".data(using: .utf8)!)
-         body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
-         body.append(imagen)
-         body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
+         for (nombre, imagen) in [("portada.jpg", portada), ("evidencia.jpg", evidencia)] {
+             body.append("--\(boundary)\r\n".data(using: .utf8)!)
+             body.append("Content-Disposition: form-data; name=\"fotos\"; filename=\"\(nombre)\"\r\n".data(using: .utf8)!)
+             body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
+             body.append(imagen)
+             body.append("\r\n".data(using: .utf8)!)
+         }
+         body.append("--\(boundary)--\r\n".data(using: .utf8)!)
          urlRequest.httpBody = body
 
          let data = try await enviarConToken(urlRequest)
-         return try JSONDecoder().decode(DTOFotoTempResponse.self, from: data)
+         return try JSONDecoder().decode([DTOFotoTempResponse].self, from: data)
      }
 
-     /// POST /reportes (paso 2) — crea el reporte con el `fotoTemp` del paso 1.
+     /// POST /reportes — crea el reporte con los `fotoTemps` de POST /reportes/fotos.
      func CrearReporte(_ reporte: DTOCrearReporteRequest) async throws -> DTOReporteResponse {
          var urlRequest = URLRequest(url: url("/reportes"))
          urlRequest.httpMethod = "POST"
@@ -141,6 +145,24 @@ struct HTTPClient {
     
     /// PATCH /usuarios/:id
     func ActualizarUsuario(id:String, cambios:DTOActualizarUsuarioRequest) async throws -> DTOUsuarioResponse{
+        var urlRequest = URLRequest(url: url("/usuarios/\(id)"))
+        urlRequest.httpMethod = "PATCH"
+        urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.httpBody = try JSONEncoder().encode(cambios)
+        let data = try await enviarConToken(urlRequest)
+        return try JSONDecoder().decode(DTOUsuarioResponse.self, from: data)
+    }
+
+    // Usuarios (Perfil)
+
+    /// GET /usuarios/:id — datos del usuario (nombre, correo, rol).
+    func ObtenerUsuario(id: String) async throws -> DTOUsuarioResponse {
+        let data = try await enviarConToken(URLRequest(url: url("/usuarios/\(id)")))
+        return try JSONDecoder().decode(DTOUsuarioResponse.self, from: data)
+    }
+
+    /// PATCH /usuarios/:id — actualiza nombre y/o correo.
+    func ActualizarUsuario(id: String, cambios: DTOActualizarUsuarioRequest) async throws -> DTOUsuarioResponse {
         var urlRequest = URLRequest(url: url("/usuarios/\(id)"))
         urlRequest.httpMethod = "PATCH"
         urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
