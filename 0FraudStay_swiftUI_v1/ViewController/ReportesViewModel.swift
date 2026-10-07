@@ -65,31 +65,39 @@ final class ReportesViewModel: ObservableObject {
     }
 
     // MARK: - Métricas
-    var totalVerificados: Int { todos.filter { $0.estadoId == 3 }.count }
+    var totalVerificados: Int { todos.filter { $0.estadoId != 1 }.count }
+    var totalFraudes: Int { todos.filter { $0.estadoId == 2 }.count }
     var verificadosRecientes: [DTOReporteResponse] {
-        Array(todos.filter { $0.estadoId == 3 }.sorted { $0.createdAt > $1.createdAt }.prefix(3))
+        Array(todos.filter { $0.estadoId != 1 }.sorted { $0.createdAt > $1.createdAt }.prefix(3))
     }
+
 }
 
-// MARK: - Estado → texto y color 
-
-extension DTOReporteResponse {
-    var nombreEstado: String {
-        switch estadoId {
-        case 1: return "PENDIENTE"
-        case 2: return "EN REVISIÓN"
-        case 3: return "VERIFICADO"
-        case 4: return "RECHAZADO"
-        case 5: return "CERRADO"
-        default: return "—"
+    // MARK: - Estado → texto, color e ícono
+    // 1 = En revisión (amarillo), 2 = Fraude confirmado (rojo), 3 = No es fraude (verde)
+    extension DTOReporteResponse {
+        var nombreEstado: String {
+            switch estadoId {
+            case 1: return "EN REVISIÓN"
+            case 2: return "FRAUDE"
+            case 3: return "NO ES FRAUDE"
+            default: return "—"
+            }
         }
-    }
-    var colorEstado: Color {
-        switch estadoId {
-        case 2: return Color("ReviewColor")
-        case 3: return Color("VerificateColor")
-        case 4: return .red
-        default: return .gray
+        var colorEstado: Color {
+            switch estadoId {
+            case 1: return Color("ReviewColor")
+            case 2: return Color("BrandPrimaryColor")
+            case 3: return Color("VerificateColor")
+            default: return .gray
+            }
+        }
+        var iconoEstado: String {
+            switch estadoId {
+            case 1: return "clock.fill"
+            case 2: return "exclamationmark.triangle.fill"
+            case 3: return "checkmark.shield.fill"
+            default: return "questionmark.circle.fill"
         }
     }
 }

@@ -26,28 +26,9 @@ struct ReportDetailView: View {
     private let revision = Color("ReviewColor")
     private let borde = Color("Border")
 
-    private var textoEstado: String {
-        reporte.estadoId == 3 ? "FRAUDE" : reporte.nombreEstado
-    }
-
-    private var colorDeEstado: Color {
-        switch reporte.estadoId {
-        case 3: return rojo            // Verificado = fraude confirmado
-        case 2: return revision        // En revisión
-        case 4: return Color.gray      // Rechazado
-        default: return Color.gray     // Pendiente / Cerrado
-        }
-    }
-
-    private var iconoDeEstado: String {
-        switch reporte.estadoId {
-        case 3: return "exclamationmark.triangle.fill"
-        case 2: return "clock.fill"
-        case 4: return "xmark.circle.fill"
-        case 5: return "checkmark.circle.fill"
-        default: return "questionmark.circle.fill"
-        }
-    }
+    private var textoEstado: String { reporte.nombreEstado }
+    private var colorDeEstado: Color { reporte.colorEstado }
+    private var iconoDeEstado: String { reporte.iconoEstado }
 
     private var coordenada: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: reporte.latitud, longitude: reporte.longitud)
