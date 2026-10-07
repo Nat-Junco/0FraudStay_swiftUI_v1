@@ -272,7 +272,8 @@ struct StartView: View {
                         ForEach(misReportesEditables) { reporte in
                             VStack(alignment: .leading, spacing: 14) {
                                 HStack(alignment: .top, spacing: 14) {
-                                    Text(reporte.estadoId == 2 ? "⏳" : "📋")
+                                    Text("⏳")
+                                    Text("En revisión · editables hasta que el admin los revise")
                                         .font(.system(size: 24))
                                         .frame(width: 48, height: 48)
                                         .background(reporte.colorEstado.opacity(0.1))
@@ -390,9 +391,7 @@ struct StartView: View {
                                         .clipShape(RoundedRectangle(cornerRadius: 12))
 
                                         HStack {
-                                            Text("VERIFICADO")
-                                                .font(.system(size: 11, weight: .bold))
-                                                .foregroundStyle(verde)
+                                            Text(reporte.nombreEstado)                                                .font(.system(size: 11, weight: .bold))                                  .foregroundStyle(reporte.colorEstado)
                                                 .padding(.horizontal, 8)
                                                 .padding(.vertical, 4)
                                                 .background(Color.white.opacity(0.9))

@@ -30,6 +30,8 @@ struct DTOReporteResponse: Codable, Identifiable, Hashable {
     let tipoFraudeId: Int
     let createdAt: String
     let updatedAt: String?
+    //let colorEstado: Color
+    //let iconoEstado: String
 
     /// URL completa de la portada (el back regresa solo "/uploads/...").
     /// Se mantiene el nombre `fotoURLCompleta` para que las vistas no cambien.
@@ -41,8 +43,8 @@ struct DTOReporteResponse: Codable, Identifiable, Hashable {
     /// "2026-09-21T17:00:00.000Z" → "2026-09-21"
     var fecha: String { String(createdAt.prefix(10)) }
 
-    /// Solo Pendiente (1) y En revisión (2) se pueden editar/eliminar
-    var esEditable: Bool { estadoId == 1 || estadoId == 2 }
+    /// Solo "En revisión" (1) se puede editar/eliminar; ya revisado queda bloqueado
+    var esEditable: Bool { estadoId == 1 }
 
     /// Precio con formato de moneda: "$4,200.00 MXN" o "Sin monto registrado"
     var precioTexto: String {

@@ -25,13 +25,14 @@ struct UserReport: Codable, Identifiable {
 extension UserReport {
     init(dto: DTOReporteResponse, plataforma: String) {
         let estado: ReportStatus
+        // Semáforo: 1 En revisión, 2 Fraude confirmado, 3 No es fraude
         switch dto.estadoId {
         case 2:
-            estado = .enRevision
-        case 3:
             estado = .fraude
+        case 3:
+            estado = .noFraude
         default:
-            estado = .pendiente
+            estado = .enRevision
         }
 
         self.id = String(dto.id)
@@ -49,35 +50,37 @@ extension UserReport {
 
 enum ReportStatus: String, Codable, CaseIterable {
     case todos = "Todos"
-    case fraude = "Fraude"
     case enRevision = "En revisión"
-    case pendiente = "Pendiente"
+    case fraude = "Fraude"
+    case noFraude = "No es fraude"
     
     var colorTexto: Color {
         switch self {
         case .todos:
             return .white
-        case .pendiente:
-            return Color("MissingColor")
         case .enRevision:
             return Color("ReviewColor")
         case .fraude:
             return Color.red
+        case .noFraude:
+            return Color("VerificateColor")
         }
     }
+
     
     var colorFondo: Color {
         switch self {
         case .todos:
             return Color.red
-        case .pendiente:
-            return Color.gray.opacity(0.15)
         case .enRevision:
             return Color.orange.opacity(0.15)
         case .fraude:
             return Color.red.opacity(0.12)
+        case .noFraude:
+            return Color.green.opacity(0.12)
         }
     }
+
 }
 
 // MARK: - VISTAS
@@ -99,7 +102,7 @@ struct MyReportsView: View {
     }
     
     private var perdidas: String {
-        let confirmados = vm.mios.filter { $0.estadoId == 3 }
+        let confirmados = vm.mios.filter { $0.estadoId == 2 }
         let total: Double = confirmados.reduce(0.0) { suma, r in suma + (r.precio ?? 0) }
         return total >= 1000 ? "$\(Int(total / 1000))k" : "$\(Int(total))"
     }
@@ -338,7 +341,7 @@ struct ReportRowCard: View {
                 HStack(spacing: 4) {
                     Image(systemName: "lock.fill")
                         .font(.system(size: 9))
-                    Text("Confirmado como fraude · ya no es editable")
+                    Text("Revisado por un administrador. Ya no es editable")
                         .font(.system(size: 10, weight: .medium))
                 }
                 .foregroundStyle(Color.green)

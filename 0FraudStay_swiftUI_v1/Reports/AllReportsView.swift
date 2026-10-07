@@ -23,7 +23,7 @@ struct AllReportsView: View {
     @State private var busqueda = ""
     @State private var filtro = "Todos"
     
-    private let filtros = ["Todos", "Fraude", "En Revisión", "Pendiente"]
+    private let filtros = ["Todos", "Fraude", "No es fraude"]
 
     private var filtrados: [DTOReporteResponse] {
         vm.todos.filter { r in
@@ -36,27 +36,29 @@ struct AllReportsView: View {
             // ids de la tabla `estado`: 1 Pendiente, 2 En revisión, 3 Verificado (= fraude)
             let coincideEstado: Bool
             switch filtro {
-            case "Fraude":      coincideEstado = r.estadoId == 3
-            case "En Revisión": coincideEstado = r.estadoId == 2
-            case "Pendiente":   coincideEstado = r.estadoId == 1
-            default:            coincideEstado = true
+            case "Fraude":       coincideEstado = r.estadoId == 2
+            case "No es fraude": coincideEstado = r.estadoId == 3
+            default:             coincideEstado = true
             }
-            return coincideTexto && coincideEstado
+
+            return coincideTexto && coincideEstado && r.estadoId != 1
         }
     }
 
     /// Texto del estado como lo usa el diseño ("FRAUDE" para verificados)
     private func estadoTexto(_ r: DTOReporteResponse) -> String {
-        r.estadoId == 3 ? "FRAUDE" : r.nombreEstado
+        r.nombreEstado
     }
 
     private func colorDe(_ estado: String) -> Color {
         switch estado {
-        case "FRAUDE":  return rojo
-        case "EN REVISIÓN": return revision
-        default:            return Color.gray
+        case "FRAUDE":       return rojo
+        case "NO ES FRAUDE": return verde
+        case "EN REVISIÓN":  return revision
+        default:             return Color.gray
         }
     }
+
     
     var body: some View {
         ScrollView(showsIndicators: false) {
