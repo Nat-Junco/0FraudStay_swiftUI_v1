@@ -3,20 +3,51 @@
 //  0FraudStay_swiftUI_v1
 //
 
-
-
-//  Flujo de 3 pasos conectado al back:
-//  Paso 1 — Fotos (portada + evidencia) y datos del anuncio. Las 2 fotos se
-//           suben juntas a POST /reportes/fotos en cuanto están las dos.
-//  Paso 2 — ¿Qué sucedió?: tipo de fraude, descripción, precio, contacto.
-//  Paso 3 — Ubicación: pin en el mapa (autollena la zona) y se envía
-//           POST /reportes con los `fotoTemps` del paso 1.
-//
-
 import SwiftUI
 import PhotosUI
 import MapKit
 
+// MARK: - Componente Representable para la Cámara
+struct ImagePicker: UIViewControllerRepresentable {
+    @Binding var image: UIImage?
+    @Environment(\.dismiss) private var dismiss
+    
+    var sourceType: UIImagePickerController.SourceType = .camera
+
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.sourceType = sourceType
+        picker.delegate = context.coordinator
+        return picker
+    }
+
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
+    class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+        let parent: ImagePicker
+
+        init(_ parent: ImagePicker) {
+            self.parent = parent
+        }
+
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+            if let image = info[.originalImage] as? UIImage {
+                parent.image = image
+            }
+            parent.dismiss()
+        }
+
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            parent.dismiss()
+        }
+    }
+}
+
+// MARK: - Vista Principal
 struct CreateReportView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.reportesController) var controladorReportes
@@ -24,7 +55,7 @@ struct CreateReportView: View {
     
     @State private var pasoActual = 1
     
-    // Paso 1
+    // Paso 1: Datos e Imágenes
     @State private var portadaItem: PhotosPickerItem?
     @State private var evidenciaItem: PhotosPickerItem?
     @State private var portadaPreview: UIImage?
@@ -32,6 +63,17 @@ struct CreateReportView: View {
     @State private var portadaJPEG: Data?
     @State private var evidenciaJPEG: Data?
     @State private var fotoTemps: [String]?      // [portada, evidencia] ya subidas
+    
+    // Modales y Hojas de Acción (Cámara / Galería)
+    @State private var mostrarOpcionesPortada = false
+    @State private var mostrarOpcionesEvidencia = false
+    @State private var abrirCamaraPortada = false
+    @State private var abrirCamaraEvidencia = false
+    @State private var abrirGaleriaPortada = false
+    @State private var abrirGaleriaEvidencia = false
+    @State private var fotoCapturadaPortada: UIImage?
+    @State private var fotoCapturadaEvidencia: UIImage?
+    
     @State private var subiendoFoto = false
     @State private var errorFoto: String?
     @State private var titulo = ""
@@ -56,7 +98,7 @@ struct CreateReportView: View {
     @State private var enviando = false
     @State private var erroresFormulario: [String] = []
     @State private var reporteCreado = false
-    
+
     // Colores
     private let rojo = Color("BrandPrimaryColor")
     private let verde = Color("VerificateColor")
@@ -65,11 +107,10 @@ struct CreateReportView: View {
     private let textoPrincipal = Color(.black)
     private let textoGris = Color(.lightGray)
     
-    /// "4,200.50" → 4200.5 ; vacío → nil
     private var precioNumero: Double? {
         Double(precio.replacingOccurrences(of: ",", with: "")
-                     .replacingOccurrences(of: "$", with: "")
-                     .trimmingCharacters(in: .whitespaces))
+                    .replacingOccurrences(of: "$", with: "")
+                    .trimmingCharacters(in: .whitespaces))
     }
     
     // MARK: - Validación por paso
@@ -102,9 +143,20 @@ struct CreateReportView: View {
         return errores
     }
     
-    // MARK: - Fotos (paso 1)
-    /// Convierte lo elegido en la galería a imagen + JPEG comprimido (70%)
-    private func cargarImagen(_ item: PhotosPickerItem?) async -> (imagen: UIImage, jpeg: Data)? {
+    // MARK: - Procesamiento de Imágenes
+    private func procesarImagenTomada(_ imagen: UIImage, esPortada: Bool) async {
+        guard let jpeg = imagen.jpegData(compressionQuality: 0.7) else { return }
+        if esPortada {
+            portadaPreview = imagen
+            portadaJPEG = jpeg
+        } else {
+            evidenciaPreview = imagen
+            evidenciaJPEG = jpeg
+        }
+        await subirFotosSiEstanListas()
+    }
+
+    private func cargarImagenGaleria(_ item: PhotosPickerItem?) async -> (imagen: UIImage, jpeg: Data)? {
         guard let item,
               let data = try? await item.loadTransferable(type: Data.self),
               let imagen = UIImage(data: data),
@@ -112,9 +164,8 @@ struct CreateReportView: View {
         return (imagen, jpeg)
     }
 
-    /// Se llama cuando cambia la portada o la evidencia
-    private func fotoSeleccionada(_ item: PhotosPickerItem?, esPortada: Bool) async {
-        guard let resultado = await cargarImagen(item) else {
+    private func fotoSeleccionadaGaleria(_ item: PhotosPickerItem?, esPortada: Bool) async {
+        guard let resultado = await cargarImagenGaleria(item) else {
             if item != nil { errorFoto = "No se pudo leer la imagen" }
             return
         }
@@ -128,8 +179,6 @@ struct CreateReportView: View {
         await subirFotosSiEstanListas()
     }
 
-    /// El back pide exactamente 2 fotos juntas: se suben cuando ya están las dos.
-    /// Si el usuario cambia una, se vuelven a subir ambas.
     private func subirFotosSiEstanListas() async {
         fotoTemps = nil
         errorFoto = nil
@@ -143,7 +192,7 @@ struct CreateReportView: View {
         subiendoFoto = false
     }
 
-    // MARK: - Autollenar zona con el pin (geocodificación inversa)
+    // MARK: - Geocodificación Inversa
     private func autocompletarZona(_ c: CLLocationCoordinate2D) async {
         buscandoZona = true
         let ubicacion = CLLocation(latitude: c.latitude, longitude: c.longitude)
@@ -151,20 +200,18 @@ struct CreateReportView: View {
             let lugares = try await CLGeocoder().reverseGeocodeLocation(
                 ubicacion, preferredLocale: Locale(identifier: "es_MX"))
             if let lugar = lugares.first {
-                // "Condesa, Ciudad de México" → solo las partes que existan
                 let partes = [lugar.subLocality, lugar.locality].compactMap { $0 }
                 if !partes.isEmpty {
                     zona = partes.joined(separator: ", ")
                 }
             }
         } catch {
-            // Sin internet o sin resultado: el usuario puede escribirla a mano
             print("No se pudo obtener la zona: \(error.localizedDescription)")
         }
         buscandoZona = false
     }
 
-    // MARK: - Enviar reporte (paso 3)
+    // MARK: - Enviar Reporte
     private func enviarReporte() async {
         guard let fotoTemps, let fuenteId, let tipoPropiedadId,
               let tipoFraudeId, let coordenada else { return }
@@ -327,13 +374,22 @@ struct CreateReportView: View {
             if vm.fuentes.isEmpty { await vm.cargarTodo() }
         }
         .onChange(of: portadaItem) { _, nuevo in
-            Task { await fotoSeleccionada(nuevo, esPortada: true) }
+            Task { await fotoSeleccionadaGaleria(nuevo, esPortada: true) }
         }
         .onChange(of: evidenciaItem) { _, nuevo in
-            Task { await fotoSeleccionada(nuevo, esPortada: false) }
+            Task { await fotoSeleccionadaGaleria(nuevo, esPortada: false) }
+        }
+        .onChange(of: fotoCapturadaPortada) { _, nuevaImagen in
+            if let nuevaImagen {
+                Task { await procesarImagenTomada(nuevaImagen, esPortada: true) }
+            }
+        }
+        .onChange(of: fotoCapturadaEvidencia) { _, nuevaImagen in
+            if let nuevaImagen {
+                Task { await procesarImagenTomada(nuevaImagen, esPortada: false) }
+            }
         }
         .onChange(of: precio) { _, nuevo in
-            // Solo dígitos y un punto decimal
             var filtrado = nuevo.filter { "0123456789.".contains($0) }
             if filtrado.filter({ $0 == "." }).count > 1 {
                 filtrado = String(filtrado.dropLast())
@@ -341,7 +397,6 @@ struct CreateReportView: View {
             if filtrado != nuevo { precio = filtrado }
         }
         .onChange(of: contactoOfertante) { _, nuevo in
-            // Solo dígitos, +, espacios y guiones
             let filtrado = nuevo.filter { "0123456789+ -".contains($0) }
             if filtrado != nuevo { contactoOfertante = filtrado }
         }
@@ -353,9 +408,19 @@ struct CreateReportView: View {
         } message: {
             Text("Tu reporte quedó como Pendiente hasta que un administrador lo revise.")
         }
+        // Modales de Cámara
+        .sheet(isPresented: $abrirCamaraPortada) {
+            ImagePicker(image: $fotoCapturadaPortada, sourceType: .camera)
+        }
+        .sheet(isPresented: $abrirCamaraEvidencia) {
+            ImagePicker(image: $fotoCapturadaEvidencia, sourceType: .camera)
+        }
+        // Modales de Galería (PhotosPicker)
+        .photosPicker(isPresented: $abrirGaleriaPortada, selection: $portadaItem, matching: .images)
+        .photosPicker(isPresented: $abrirGaleriaEvidencia, selection: $evidenciaItem, matching: .images)
     }
     
-    // MARK: - Componentes reutilizables
+    // MARK: - Componentes Reutilizables
     private func etiqueta(_ texto: String, opcional: Bool = false) -> some View {
         HStack(spacing: 4) {
             Text(texto)
@@ -418,14 +483,23 @@ struct CreateReportView: View {
         .overlay(RoundedRectangle(cornerRadius: 10).stroke(borde, lineWidth: 1))
     }
     
-    /// Recuadro para elegir una foto (se usa 2 veces: portada y evidencia)
-    private func selectorFoto(_ titulo: String, _ ayuda: String,
-                              _ item: Binding<PhotosPickerItem?>, _ preview: UIImage?) -> some View {
+    /// Recuadro interactivo para seleccionar foto (Cámara o Galería)
+    private func selectorFotoConOpciones(
+        titulo: String,
+        ayuda: String,
+        preview: UIImage?,
+        mostrarOpciones: Binding<Bool>,
+        abrirCamara: Binding<Bool>,
+        abrirGaleria: Binding<Bool>
+    ) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(titulo.uppercased())
                 .font(.system(size: 10, weight: .bold))
                 .foregroundStyle(textoGris)
-            PhotosPicker(selection: item, matching: .images) {
+            
+            Button {
+                mostrarOpciones.wrappedValue = true
+            } label: {
                 ZStack {
                     if let preview {
                         Image(uiImage: preview)
@@ -436,7 +510,7 @@ struct CreateReportView: View {
                             .clipped()
                     } else {
                         VStack(spacing: 6) {
-                            Image(systemName: "photo.badge.plus")
+                            Image(systemName: "camera.badge.ellipsis")
                                 .font(.system(size: 24))
                                 .foregroundStyle(rojo)
                             Text(ayuda)
@@ -458,6 +532,19 @@ struct CreateReportView: View {
                 )
             }
             .disabled(subiendoFoto)
+            .confirmationDialog("Selecciona una opción", isPresented: mostrarOpciones, titleVisibility: .visible) {
+                if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                    Button("Tomar foto") {
+                        abrirCamara.wrappedValue = true
+                    }
+                }
+                
+                Button("Elegir de la galería") {
+                    abrirGaleria.wrappedValue = true
+                }
+                
+                Button("Cancelar", role: .cancel) {}
+            }
         }
         .frame(maxWidth: .infinity)
     }
@@ -486,7 +573,7 @@ struct CreateReportView: View {
         }
     }
 
-    // MARK: - PASO 1: Evidencia y anuncio
+    // MARK: - PASO 1: Evidencia y Anuncio
     private var pasoUnoVista: some View {
         VStack(alignment: .leading, spacing: 20) {
             encabezadoPaso(1, "Evidencia y datos del anuncio")
@@ -495,8 +582,23 @@ struct CreateReportView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     etiqueta("Fotos del reporte")
                     HStack(spacing: 12) {
-                        selectorFoto("Portada", "Foto del anuncio", $portadaItem, portadaPreview)
-                        selectorFoto("Evidencia", "Chat, pago o comprobante", $evidenciaItem, evidenciaPreview)
+                        selectorFotoConOpciones(
+                            titulo: "Portada",
+                            ayuda: "Foto del anuncio",
+                            preview: portadaPreview,
+                            mostrarOpciones: $mostrarOpcionesPortada,
+                            abrirCamara: $abrirCamaraPortada,
+                            abrirGaleria: $abrirGaleriaPortada
+                        )
+                        
+                        selectorFotoConOpciones(
+                            titulo: "Evidencia",
+                            ayuda: "Chat, pago o comprobante",
+                            preview: evidenciaPreview,
+                            mostrarOpciones: $mostrarOpcionesEvidencia,
+                            abrirCamara: $abrirCamaraEvidencia,
+                            abrirGaleria: $abrirGaleriaEvidencia
+                        )
                     }
                     estadoFotos
                 }
