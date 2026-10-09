@@ -13,6 +13,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		458C08B3307829AA00AE69DF /* -FraudStay-swiftUI-v1-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "-FraudStay-swiftUI-v1-Info.plist"; sourceTree = "<group>"; };
 		7F74F73E3064884D00DEE9CE /* 0FraudStay_swiftUI_v1.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = 0FraudStay_swiftUI_v1.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FBEA74A130648AB900D2BE5C /* .gitignore  */ = {isa = PBXFileReference; lastKnownFileType = text; path = ".gitignore "; sourceTree = "<group>"; };
 		FBEA74A330648AD400D2BE5C /* README */ = {isa = PBXFileReference; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
@@ -40,6 +41,7 @@
 		7F74F7353064884D00DEE9CE = {
 			isa = PBXGroup;
 			children = (
+				458C08B3307829AA00AE69DF /* -FraudStay-swiftUI-v1-Info.plist */,
 				FBEA74A330648AD400D2BE5C /* README */,
 				FBEA74A130648AB900D2BE5C /* .gitignore  */,
 				7F74F7403064884D00DEE9CE /* 0FraudStay_swiftUI_v1 */,
@@ -267,6 +269,8 @@
 				DEVELOPMENT_TEAM = KTPFRF5RAN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "-FraudStay-swiftUI-v1-Info.plist";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Se requiere acceso a la cámara para tomar fotografías de portada y evidencia del reporte.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -299,6 +303,8 @@
 				DEVELOPMENT_TEAM = KTPFRF5RAN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "-FraudStay-swiftUI-v1-Info.plist";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Se requiere acceso a la cámara para tomar fotografías de portada y evidencia del reporte.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
