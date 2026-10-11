@@ -62,7 +62,7 @@ struct CreateReportView: View {
     @State private var evidenciaPreview: UIImage?
     @State private var portadaJPEG: Data?
     @State private var evidenciaJPEG: Data?
-    @State private var fotoTemps: [String]?      // [portada, evidencia] ya subidas
+    @State private var fotoTemps: [String]?
     
     // Modales y Hojas de Acción (Cámara / Galería)
     @State private var mostrarOpcionesPortada = false
@@ -255,120 +255,164 @@ struct CreateReportView: View {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
+        ZStack(alignment: .top) {
+            fondo
+                .ignoresSafeArea()
             
-            // Header
-            VStack(alignment: .leading, spacing: 16) {
-                HStack(alignment: .center) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("0FRAUD STAY")
-                            .font(.system(size: 12, weight: .bold))
-                            .kerning(1.2)
-                            .foregroundStyle(rojo)
-                        Text("Crear reporte")
-                            .font(.system(size: 26, weight: .bold, design: .serif))
-                            .foregroundStyle(textoPrincipal)
-                    }
-                    Spacer()
-                    Image("appLogo")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 70, height: 70)
-                        .background(fondo)
-                }
-                
-                HStack(spacing: 8) {
-                    ForEach(1...3, id: \.self) { paso in
-                        Rectangle()
-                            .fill(paso <= pasoActual ? rojo : borde)
-                            .frame(height: 4)
-                            .clipShape(Capsule())
-                    }
-                }
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 16)
-            .padding(.bottom, 12)
-            .background(fondo)
-            
-            // Contenido dinámico
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 20) {
-                    switch pasoActual {
-                    case 1:
-                        pasoUnoVista
-                            .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
-                    case 2:
-                        pasoDosVista
-                            .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
-                    case 3:
-                        pasoTresVista
-                            .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
-                    default:
-                        EmptyView()
+            VStack(spacing: 0) {
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack(alignment: .center) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("0FRAUD STAY")
+                                .font(.system(size: 12, weight: .bold))
+                                .kerning(1.2)
+                                .foregroundStyle(rojo)
+                            Text("Crear reporte")
+                                .font(.system(size: 26, weight: .bold, design: .serif))
+                                .foregroundStyle(textoPrincipal)
+                        }
+                        Spacer()
+                        Image("appLogo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 70, height: 70)
+                            .background(fondo)
                     }
                     
-                    if !erroresFormulario.isEmpty {
-                        ResumenErrores(errores: erroresFormulario)
+                    HStack(spacing: 8) {
+                        ForEach(1...3, id: \.self) { paso in
+                            Rectangle()
+                                .fill(paso <= pasoActual ? rojo : borde)
+                                .frame(height: 4)
+                                .clipShape(Capsule())
+                        }
                     }
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 20)
-                .padding(.bottom, 24)
-            }
-            .background(fondo)
-            
-            // Botones de navegación
-            HStack(spacing: 12) {
-                if pasoActual > 1 {
+                .padding(.top, 16)
+                .padding(.bottom, 12)
+                .background(fondo)
+                
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 20) {
+                        switch pasoActual {
+                        case 1:
+                            pasoUnoVista
+                                .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
+                        case 2:
+                            pasoDosVista
+                                .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
+                        case 3:
+                            pasoTresVista
+                                .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
+                        default:
+                            EmptyView()
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 20)
+                    .padding(.bottom, 30)
+                }
+                .background(fondo)
+                
+                HStack(spacing: 12) {
+                    if pasoActual > 1 {
+                        Button {
+                            erroresFormulario = []
+                            withAnimation(.easeInOut) { pasoActual -= 1 }
+                        } label: {
+                            HStack {
+                                Image(systemName: "chevron.left")
+                                Text("Atrás")
+                            }
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(textoPrincipal)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 50)
+                            .background(Color.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                            .overlay(RoundedRectangle(cornerRadius: 14).stroke(borde, lineWidth: 1))
+                        }
+                    }
+                    
                     Button {
+                        let validador = erroresDelPaso(pasoActual)
+                        guard validador.isEmpty else {
+                            erroresFormulario = validador
+                            return
+                        }
                         erroresFormulario = []
-                        withAnimation(.easeInOut) { pasoActual -= 1 }
+                        
+                        if pasoActual < 3 {
+                            withAnimation(.easeInOut) { pasoActual += 1 }
+                        } else {
+                            Task { await enviarReporte() }
+                        }
                     } label: {
                         HStack {
-                            Image(systemName: "chevron.left")
-                            Text("Atrás")
+                            if enviando {
+                                ProgressView().tint(.white)
+                            } else {
+                                Text(pasoActual == 3 ? "Enviar Reporte" : "Siguiente")
+                                Image(systemName: pasoActual == 3 ? "paperplane.fill" : "arrow.right")
+                            }
                         }
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(textoPrincipal)
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
-                        .background(Color.white)
+                        .background(rojo)
                         .clipShape(RoundedRectangle(cornerRadius: 14))
-                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(borde, lineWidth: 1))
                     }
+                    .disabled(enviando || subiendoFoto)
                 }
-                
-                Button {
-                    erroresFormulario = erroresDelPaso(pasoActual)
-                    guard erroresFormulario.isEmpty else { return }
-                    if pasoActual < 3 {
-                        withAnimation(.easeInOut) { pasoActual += 1 }
-                    } else {
-                        Task { await enviarReporte() }
-                    }
-                } label: {
-                    HStack {
-                        if enviando {
-                            ProgressView().tint(.white)
-                        } else {
-                            Text(pasoActual == 3 ? "Enviar Reporte" : "Siguiente")
-                            Image(systemName: pasoActual == 3 ? "paperplane.fill" : "arrow.right")
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                .background(Color.white)
+                .overlay(Rectangle().frame(height: 1).foregroundStyle(borde), alignment: .top)
+            }
+            
+            if !erroresFormulario.isEmpty {
+                VStack {
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.white)
+                            .font(.system(size: 18))
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Por favor corrige lo siguiente:")
+                                .font(.subheadline)
+                                .bold()
+                                .foregroundColor(.white)
+                            
+                            ForEach(erroresFormulario, id: \.self) { error in
+                                Text("• \(error)")
+                                    .font(.caption)
+                                    .foregroundColor(.white.opacity(0.95))
+                            }
+                        }
+                        
+                        Spacer()
+                        
+                        Button {
+                            withAnimation { erroresFormulario = [] }
+                        } label: {
+                            Image(systemName: "xmark")
+                                .foregroundColor(.white)
+                                .font(.system(size: 14, weight: .bold))
                         }
                     }
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .background(rojo)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .padding()
+                    .background(rojo.opacity(0.95))
+                    .cornerRadius(14)
+                    .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 4)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 10)
                 }
-                .disabled(enviando || subiendoFoto)
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .animation(.easeInOut(duration: 0.3), value: erroresFormulario)
+                .zIndex(10)
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
-            .background(Color.white)
-            .overlay(Rectangle().frame(height: 1).foregroundStyle(borde), alignment: .top)
         }
         .task {
             if vm.fuentes.isEmpty { await vm.cargarTodo() }
@@ -400,7 +444,7 @@ struct CreateReportView: View {
             let filtrado = nuevo.filter { "0123456789+ -".contains($0) }
             if filtrado != nuevo { contactoOfertante = filtrado }
         }
-        .alert("Reporte enviado", isPresented: $reporteCreado) {
+        .alert("¡Reporte enviado!", isPresented: $reporteCreado) {
             Button("Aceptar") {
                 limpiarFormulario()
                 dismiss()
@@ -408,14 +452,12 @@ struct CreateReportView: View {
         } message: {
             Text("Tu reporte quedó como Pendiente hasta que un administrador lo revise.")
         }
-        // Modales de Cámara
         .sheet(isPresented: $abrirCamaraPortada) {
             ImagePicker(image: $fotoCapturadaPortada, sourceType: .camera)
         }
         .sheet(isPresented: $abrirCamaraEvidencia) {
             ImagePicker(image: $fotoCapturadaEvidencia, sourceType: .camera)
         }
-        // Modales de Galería (PhotosPicker)
         .photosPicker(isPresented: $abrirGaleriaPortada, selection: $portadaItem, matching: .images)
         .photosPicker(isPresented: $abrirGaleriaEvidencia, selection: $evidenciaItem, matching: .images)
     }
@@ -483,7 +525,6 @@ struct CreateReportView: View {
         .overlay(RoundedRectangle(cornerRadius: 10).stroke(borde, lineWidth: 1))
     }
     
-    /// Recuadro interactivo para seleccionar foto (Cámara o Galería)
     private func selectorFotoConOpciones(
         titulo: String,
         ayuda: String,
@@ -504,9 +545,9 @@ struct CreateReportView: View {
                     if let preview {
                         Image(uiImage: preview)
                             .resizable()
-                            .scaledToFill()
+                            .aspectRatio(contentMode: .fill)
                             .frame(maxWidth: .infinity)
-                            .frame(height: 140)
+                            .frame(height: 110)
                             .clipped()
                     } else {
                         VStack(spacing: 6) {
@@ -520,7 +561,7 @@ struct CreateReportView: View {
                                 .padding(.horizontal, 6)
                         }
                         .frame(maxWidth: .infinity)
-                        .frame(height: 140)
+                        .frame(height: 110)
                         .background(fondo)
                     }
                 }
@@ -548,8 +589,7 @@ struct CreateReportView: View {
         }
         .frame(maxWidth: .infinity)
     }
-
-    /// Texto de estado debajo de las 2 fotos
+    
     @ViewBuilder private var estadoFotos: some View {
         if subiendoFoto {
             HStack(spacing: 6) {
@@ -697,7 +737,7 @@ struct CreateReportView: View {
                     .overlay(RoundedRectangle(cornerRadius: 10).stroke(borde, lineWidth: 1))
                     
                     Text(coordenada.map { String(format: "📍 %.5f, %.5f", $0.latitude, $0.longitude) }
-                         ?? "Toca el mapa para colocar el pin")
+                        ?? "Toca el mapa para colocar el pin")
                         .font(.caption)
                         .foregroundStyle(.gray)
                 }
