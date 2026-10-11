@@ -26,4 +26,14 @@ struct ControladorRegistroUsuario {
         TokenStorage.delete(identifier: "accessToken")
         TokenStorage.delete(identifier: "refreshToken")
     }
+    
+    // Pide al back que mande el código al correo
+    func solicitarCodigo(correo: String) async throws {
+        _ = try await httpClient.OlvideContrasena(correo: correo)
+    }
+    // Cambia la contraseña con el código recibido
+    func restablecerContrasena(correo: String, codigo: String, nuevaContrasena:String) async throws {
+        _ = try await httpClient.RestablecerContrasena(
+            correo: correo, codigo: codigo, nuevaContrasena: nuevaContrasena)
+    }
 }
