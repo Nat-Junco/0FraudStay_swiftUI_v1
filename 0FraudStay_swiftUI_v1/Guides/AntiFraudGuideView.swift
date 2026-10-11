@@ -1,8 +1,8 @@
 import SwiftUI
 struct AntiFraudGuideView: View {
     private let rojo = Color("BrandPrimaryColor")
-    private let fondo = Color(.systemGroupedBackground)
-    private let tarjeta = Color(.secondarySystemGroupedBackground)
+    private let fondo = Color("FondoApp")
+    private let tarjeta = Color.white
     private let borde = Color("Border")
 
     var body: some View {

@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct TermsView: View {
+struct TerminosView: View {
     @Environment(\.dismiss) private var dismiss
     private var isAcceptedBinding: Binding<Bool>?
     
@@ -119,10 +119,11 @@ struct TermsView: View {
                 }
             }
             .buttonStyle(.plain)
-            
-            // Botón de Continuar (Navegación a StartView)
-            NavigationLink {
-                StartView()
+            Button {
+                if isAccepted.wrappedValue {
+                    onAccept?()
+                    dismiss()
+                }
             } label: {
                 Text("Continuar")
                     .font(.headline)
@@ -132,11 +133,6 @@ struct TermsView: View {
                     .background(isAccepted.wrappedValue ? rojoPrimary : Color.gray.opacity(0.4))
                     .clipShape(RoundedRectangle(cornerRadius: 14))
             }
-            .simultaneousGesture(TapGesture().onEnded {
-                if isAccepted.wrappedValue {
-                    onAccept?()
-                }
-            })
             .disabled(!isAccepted.wrappedValue)
         }
         .padding(20)
@@ -146,7 +142,7 @@ struct TermsView: View {
     
     private var footerView: some View {
         HStack(spacing: 8) {
-            Image(systemName: "doc.badge.checkmark")
+            Image(systemName: "checkmark.shield.fill")
                 .foregroundStyle(rojoPrimary)
                 .font(.system(size: 16))
             
@@ -174,7 +170,7 @@ struct TermsView: View {
 }
 
 #Preview("Modo Registro") {
-    TermsView {
+    TerminosView {
         print("Términos aceptados correctamente")
     }
 }

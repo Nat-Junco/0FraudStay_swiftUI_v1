@@ -6,12 +6,15 @@
 //
 
 import SwiftUI
+
 struct ProfileView: View {
     @StateObject private var perfil = PerfilViewModel()
-    @EnvironmentObject var vm:ReportesViewModel
+    @EnvironmentObject var vm: ReportesViewModel
     @Environment(\.authController) var controladorRegistro
     @AppStorage("isLoggedIn") private var isLoggedIn = false
     @State private var alertasHabilitadas: Bool = true
+    
+    @State private var mostrarAlertaError = false
     
     let primaryColor = Color("BrandPrimaryColor")
     let cardbackColor = Color(.white)
@@ -148,8 +151,18 @@ struct ProfileView: View {
                     await vm.cargarTodo()
                 }
             }
-            .task{
+            .task {
                 await perfil.cargar()
+            }
+            .alert("Aviso", isPresented: Binding(
+                get: { perfil.errorMessage != nil },
+                set: { if !$0 { perfil.errorMessage = nil } }
+            )) {
+                Button("Aceptar", role: .cancel) {
+                    perfil.errorMessage = nil
+                }
+            } message: {
+                Text(perfil.errorMessage ?? "")
             }
         }
     }
@@ -208,4 +221,3 @@ struct ProfileMenuItem: View {
     ProfileView()
         .environmentObject(ReportesViewModel())
 }
-

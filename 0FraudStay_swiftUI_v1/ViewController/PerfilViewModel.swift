@@ -24,33 +24,37 @@ final class PerfilViewModel: ObservableObject {
             nombre = usuario.nombre
             correo = usuario.correo
         } catch {
-            errorMessage = "No se pudo cargar un perfil. "
+            errorMessage = "No se pudo cargar el perfil. Verifica tu conexión e intenta de nuevo."
         }
         isLoading = false
     }
     
-    func guardar(nombre: String, correo:String) async ->Bool {
+    func guardar(nombre: String, correo: String) async -> Bool {
         errorMessage = nil
-        if nombre.trimmingCharacters(in: .whitespaces).count < 2{
-            errorMessage = "El nombre debe tener al menos 2 caracteres"
+        
+        if nombre.trimmingCharacters(in: .whitespaces).count < 2 {
+            errorMessage = "El nombre debe tener al menos 2 caracteres."
             return false
         }
+        
         if !correo.esCorreoValido {
-            errorMessage = "Ingresa un correo válido"
+            errorMessage = "Ingresa un correo electrónico válido."
             return false
         }
+        
         do {
             let usuario = try await controlador.actualizar(nombre: nombre, correo: correo)
             self.nombre = usuario.nombre
             self.correo = usuario.correo
             return true
-        } catch ErrorAPI.status(409){
-            errorMessage = "Ese correo ya esta registrado"
-        } catch ErrorAPI.status(400){
-            errorMessage = "Revisa los datos e intenta de nuevo"
+        } catch ErrorAPI.status(409) {
+            errorMessage = "Este correo electrónico ya está registrado en otra cuenta."
+        } catch ErrorAPI.status(400) {
+            errorMessage = "Los datos proporcionados no son válidos. Revisa e intenta de nuevo."
         } catch {
-            errorMessage = "No se puedo guardar. \(error.localizedDescription)"
+            errorMessage = "Ocurrió un error al guardar los cambios. Inténtalo más tarde."
         }
+        
         return false
     }
 }
