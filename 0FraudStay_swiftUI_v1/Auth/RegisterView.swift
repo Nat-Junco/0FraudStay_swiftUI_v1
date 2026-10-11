@@ -18,8 +18,9 @@ struct RegisterView: View {
     @State private var confirmarPasswordError: String?
     
     //@State private var erroresFormulario: [String] = []
-    @State private var registroExitoso = false
+    //@State private var registroExitoso = false
     @State private var irATerminos = false
+    @State private var mostrarAlertaExito = false
     @State private var cargando = false
     @State private var errorServidor: String?
     
@@ -64,11 +65,11 @@ struct RegisterView: View {
                 nombre: usuario.nombre
             )
             print("Usuario registrado \(response.id) \(response.email)")
-            registroExitoso = true
+            irATerminos = true
         } catch ErrorAPI.status(409) {
-            correoError = "Este correo electrónico ya está asociado a una cuenta. Puedes iniciar sesión, restablecer tu contraseña o intentar con otro correo"
+            correoError = "Este correo electrónico ya está asociado a una cuenta. Puedes iniciar sesión, restablecer tu contraseña o intentar con otro correo."
         } catch ErrorAPI.status(400) {
-            passwordError = "El servidor rechazó los datos. Revisa la contraseña."
+            passwordError = "Las contraseñas no coinciden, vuelve a intentarlo."
         } catch {
             errorServidor = "No se pudo conectar con el servidor. Por favor, verifica tu conexión a internet o inténtalo más tarde."
             Task {
@@ -102,7 +103,7 @@ struct RegisterView: View {
                                 .font(.caption)
                                 .bold()
                                 .foregroundColor(.gray)
-                            TextField("Escribe tu nombre completo", text: $usuario.nombre)
+                            TextField("Introduce tu nombre completo", text: $usuario.nombre)
                                 .padding()
                                 .background(Color(.white))
                                 .cornerRadius(12)
@@ -119,7 +120,7 @@ struct RegisterView: View {
                                 .font(.caption)
                                 .bold()
                                 .foregroundColor(.gray)
-                            TextField("Escribe tu correo", text: $usuario.correo)
+                            TextField("Introduce tu correo", text: $usuario.correo)
                                 .keyboardType(.emailAddress)
                                 .textInputAutocapitalization(.never)
                                 .autocorrectionDisabled()
@@ -140,7 +141,7 @@ struct RegisterView: View {
                                 .font(.caption)
                                 .bold()
                                 .foregroundColor(.gray)
-                            SecureField("Mín. 10 caracteres", text: $usuario.password)
+                            SecureField("Introduce tu contraseña (mín. 10 caracteres)", text: $usuario.password)
                                 .padding()
                                 .background(Color(.white))
                                 .cornerRadius(12)
@@ -157,7 +158,7 @@ struct RegisterView: View {
                                 .font(.caption)
                                 .bold()
                                 .foregroundColor(.gray)
-                            SecureField("Repite tu contraseña", text: $usuario.confirmarPassword)
+                            SecureField("Introduce tu contraseña", text: $usuario.confirmarPassword)
                                 .padding()
                                 .background(Color(.white))
                                 .cornerRadius(12)
@@ -217,13 +218,17 @@ struct RegisterView: View {
             }
         }
         .navigationDestination(isPresented: $irATerminos) {
-            TermsView()
-        }
-        .alert("¡Cuenta creada!", isPresented: $registroExitoso) {
-            Button("Iniciar sesión") { dismiss() }
-        } message: {
-            Text("Ya puedes entrar con tu correo y contraseña.")
-        }
+                    TerminosView(onAccept: {
+                        mostrarAlertaExito = true
+                    })
+                }
+                .alert("¡Cuenta creada!", isPresented: $mostrarAlertaExito) {
+                    Button("Iniciar Sesión") {
+                        dismiss()
+                    }
+                } message: {
+                    Text("Ya puedes entrar con tu correo y contraseña.")
+                }
     }
 }
 
