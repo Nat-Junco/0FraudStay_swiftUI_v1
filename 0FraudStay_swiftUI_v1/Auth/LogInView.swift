@@ -10,22 +10,28 @@ struct LogInView: View {
     @State private var password = ""
     @State private var errorLogin: String?
     @State private var cargando = false
+    @State private var errorServidor: String?
     @Environment(\.authController) var controladorRegistro
     
-    let primaryColor = Color("BrandPrimaryColor")
+    private let primaryColor = Color("BrandPrimaryColor")
+    private let fondo = Color("FondoApp")
     
     private func login() async {
         cargando = true
         errorLogin = nil
         do {
             let exito = try await controladorRegistro.loginUser(email: email, password: password)
-            withAnimation {isLoggedIn = exito}
+            withAnimation { isLoggedIn = exito }
         } catch ErrorAPI.status(401){
-            errorLogin = "Correo o password incorrectos"
+            errorLogin = "El correo o la contraseña ingresados son incorrectos. Por favor, inténtelo de nuevo."
         } catch ErrorAPI.status(400){
-            errorLogin = "Revisa que el correo tenga formato valido"
+            errorLogin = "Por favor, ingresa una dirección de correo electrónico válida."
         } catch {
-        errorLogin = "No se pudo actualizar en el servidor"
+            errorServidor = "No se pudo conectar con el servidor. Por favor, verifica tu conexión a internet o inténtalo más tarde."
+            Task {
+                try? await Task.sleep(for: .seconds(4))
+                withAnimation { errorServidor = nil }
+            }
             print(error.localizedDescription)
         }
         cargando = false
@@ -37,7 +43,7 @@ struct LogInView: View {
         } else {
             NavigationStack {
                 ZStack {
-                    Color.white
+                    fondo
                         .ignoresSafeArea()
                     VStack(alignment: .leading, spacing: 20) {
                         
@@ -57,29 +63,42 @@ struct LogInView: View {
                         VStack(alignment: .leading, spacing: 16) {
                             
                             VStack(alignment: .leading, spacing: 6) {
-                                Text("CORREO / USUARIO")
+                                Text("CORREO ELECTRÓNICO")
                                     .font(.caption)
                                     .bold()
                                     .foregroundColor(.gray)
-                                TextField("Introduce tu correo o tu usuario", text: $email)
+                                TextField("Introduce tu correo ", text: $email)
                                     .keyboardType(.emailAddress)
                                     .textInputAutocapitalization(.never)
                                     .autocorrectionDisabled()
                                     .foregroundColor(.black)
                                     .padding()
-                                    .background(Color(.systemGray6))
+                                    .background(Color(.white))
                                     .cornerRadius(12)
+                                
+                                if let errorLogin, errorLogin.contains("dirección de correo") {
+                                    Text(errorLogin)
+                                        .font(.caption2)
+                                        .foregroundColor(.red)
+                                        .padding(.leading, 4)
+                                }
                             }
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("CONTRASEÑA")
-                                    .keyboardType(.asciiCapable)
                                     .font(.caption)
                                     .bold()
                                     .foregroundColor(.gray)
-                                SecureField("••••••••", text: $password)
+                                SecureField("••••••••••", text: $password)
                                     .padding()
-                                    .background(Color(.systemGray6))
+                                    .background(Color(.white))
                                     .cornerRadius(12)
+                    
+                                if let errorLogin, !errorLogin.contains("dirección de correo") {
+                                    Text(errorLogin)
+                                        .font(.caption2)
+                                        .foregroundColor(.red)
+                                        .padding(.leading, 4)
+                                }
                             }
                             HStack {
                                 Spacer()
@@ -90,14 +109,8 @@ struct LogInView: View {
                                 }
                             }
                         }
-                        if let errorLogin{
-                            Text(errorLogin)
-                                .font(.caption)
-                                .foregroundColor(.red)
-                        }
                         Spacer()
                         VStack(spacing: 12) {
-                            
                             Button(action: {
                                 Task {
                                     await login()
@@ -119,7 +132,7 @@ struct LogInView: View {
                                     .foregroundColor(.primary)
                                     .frame(maxWidth: .infinity)
                                     .padding()
-                                    .background(Color(.systemGray6))
+                                    .background(Color(fondo))
                                     .cornerRadius(14)
                             }
                             Text("Tus datos están protegidos conforme a la Ley Federal de Protección de Datos Personales")
@@ -132,6 +145,30 @@ struct LogInView: View {
                         .padding(.bottom, 10)
                     }
                     .padding(.horizontal, 24)
+                    
+                    if let errorServidor {
+                        VStack {
+                            HStack(spacing: 12) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(.white)
+                                Text(errorServidor)
+                                    .font(.subheadline)
+                                    .foregroundColor(.white)
+                                    .bold()
+                                Spacer()
+                            }
+                            .padding()
+                            .background(Color.red.opacity(0.9))
+                            .cornerRadius(12)
+                            .shadow(radius: 5)
+                            .padding(.horizontal, 24)
+                            .padding(.top, 10)
+                            
+                            Spacer()
+                        }
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                        .animation(.easeInOut, value: errorServidor)
+                    }
                 }
             }
         }

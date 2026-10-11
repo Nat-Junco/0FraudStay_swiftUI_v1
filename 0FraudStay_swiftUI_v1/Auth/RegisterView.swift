@@ -79,7 +79,7 @@ struct RegisterView: View {
                             .font(.caption)
                             .bold()
                             .foregroundColor(.gray)
-                        SecureField("Mín. 8 caracteres", text: $usuario.password)
+                        SecureField("Mín. 10 caracteres", text: $usuario.password)
                             .padding()
                             .background(Color(.systemGray6))
                             .cornerRadius(12)
@@ -130,9 +130,24 @@ struct RegisterView: View {
                     Text("Ya puedes entrar con tu correo y contraseña.")
                 }
             }
+            .padding(.horizontal, 24)
+        }
+        
+        .navigationDestination(isPresented: $irATerminos) {
+            TermsView()
+        }
+        
+        .alert("¡Cuenta creada!", isPresented: $registroExitoso) {
+            Button("Iniciar sesión") { dismiss() }
+        } message: {
+            Text("Ya puedes entrar con tu correo y contraseña.")
         }
     }
 }
+
+
+
+
 #Preview {
     NavigationStack {
         RegisterView()
