@@ -10,6 +10,8 @@ struct LogInView: View {
     @State private var email = ""
     @State private var password = ""
     @State private var cargando = false
+    @State private var mostrarPassword = false
+    @FocusState private var estaEnfocado: Bool
     
     // Arreglo para almacenar los errores y desplegar el banner de alerta
     @State private var erroresFormulario: [String] = []
@@ -102,10 +104,34 @@ struct LogInView: View {
                                     .font(.caption)
                                     .bold()
                                     .foregroundColor(.gray)
-                                SecureField("••••••••••", text: $password)
-                                    .padding()
-                                    .background(Color(.white))
-                                    .cornerRadius(12)
+                                
+                                HStack {
+                                    ZStack {
+                                                        if mostrarPassword {
+                                                            TextField("••••••••••", text: $password)
+                                                                .textInputAutocapitalization(.never)
+                                                                .autocorrectionDisabled()
+                                                                .focused($estaEnfocado)
+                                                        } else {
+                                                            SecureField("••••••••••", text: $password)
+                                                                .focused($estaEnfocado)
+                                                        }
+                                                    }
+                                                    
+                                                    Button {
+                                                        mostrarPassword.toggle()
+                                                        // Mantiene el foco en el campo activo para que no se pierda el teclado ni el texto
+                                                        estaEnfocado = true
+                                                    } label: {
+                                                        Image(systemName: mostrarPassword ? "eye.slash.fill" : "eye.fill")
+                                                            .renderingMode(.template)
+                                                            .foregroundColor(.gray)
+                                                            .font(.system(size: 16))
+                                                    }
+                                }
+                                .padding()
+                                .background(Color(.white))
+                                .cornerRadius(12)
                             }
                             
                             HStack {

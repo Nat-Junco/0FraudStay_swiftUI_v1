@@ -16,6 +16,7 @@
 
 import SwiftUI
 
+
 // MARK: - Paso 1: correo
 struct ForgotPasswordView: View {
     @Environment(\.dismiss) private var dismiss
@@ -285,6 +286,15 @@ struct EnterTokenView: View {
 struct ResetPasswordView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.authController) var controladorRegistro
+    @State private var mostrarNewPassword = false
+    @State private var mostrarConfirmPassword = false
+
+    private enum CampoPasswordReset {
+        case newPassword
+        case confirmPassword
+    }
+
+    @FocusState private var campoEnfocado: CampoPasswordReset?
 
     let correo: String
     let codigo: String
@@ -365,28 +375,78 @@ struct ResetPasswordView: View {
                 .padding(.top, 16)
 
                 VStack(alignment: .leading, spacing: 16) {
+                    // Nueva Contraseña
                     VStack(alignment: .leading, spacing: 6) {
                         Text("NUEVA CONTRASEÑA")
                             .font(.caption)
                             .bold()
                             .foregroundColor(.gray)
-                        SecureField("Mín. 10 caracteres, mayúscula, número y símbolo", text: $newPassword)
-                            .foregroundColor(.black)
-                            .padding()
-                            .background(Color(.white))
-                            .cornerRadius(12)
+                        
+                        HStack {
+                            ZStack {
+                                if mostrarNewPassword {
+                                    TextField("Mín. 10 caracteres, mayúscula, número y símbolo", text: $newPassword)
+                                        .foregroundColor(.black)
+                                        .textInputAutocapitalization(.never)
+                                        .autocorrectionDisabled()
+                                        .focused($campoEnfocado, equals: .newPassword)
+                                } else {
+                                    SecureField("Mín. 10 caracteres, mayúscula, número y símbolo", text: $newPassword)
+                                        .foregroundColor(.black)
+                                        .focused($campoEnfocado, equals: .newPassword)
+                                }
+                            }
+                            
+                            Button {
+                                mostrarNewPassword.toggle()
+                                campoEnfocado = .newPassword
+                            } label: {
+                                Image(systemName: mostrarNewPassword ? "eye.slash.fill" : "eye.fill")
+                                    .renderingMode(.template)
+                                    .foregroundColor(.gray)
+                                    .font(.system(size: 16))
+                            }
+                        }
+                        .padding()
+                        .background(Color(.white))
+                        .cornerRadius(12)
                     }
 
+                    // Confirmar Contraseña
                     VStack(alignment: .leading, spacing: 6) {
                         Text("CONFIRMAR CONTRASEÑA")
                             .font(.caption)
                             .bold()
                             .foregroundColor(.gray)
-                        SecureField("Confirma tu nueva contraseña", text: $confirmPassword)
-                            .foregroundColor(.black)
-                            .padding()
-                            .background(Color(.white))
-                            .cornerRadius(12)
+                        
+                        HStack {
+                            ZStack {
+                                if mostrarConfirmPassword {
+                                    TextField("Confirma tu nueva contraseña", text: $confirmPassword)
+                                        .foregroundColor(.black)
+                                        .textInputAutocapitalization(.never)
+                                        .autocorrectionDisabled()
+                                        .focused($campoEnfocado, equals: .confirmPassword)
+                                } else {
+                                    SecureField("Confirma tu nueva contraseña", text: $confirmPassword)
+                                        .foregroundColor(.black)
+                                        .focused($campoEnfocado, equals: .confirmPassword)
+                                }
+                            }
+                            
+                            Button {
+                                mostrarConfirmPassword.toggle()
+                                campoEnfocado = .confirmPassword
+                            } label: {
+                                Image(systemName: mostrarConfirmPassword ? "eye.slash.fill" : "eye.fill")
+                                    .renderingMode(.template)
+                                    .foregroundColor(.gray)
+                                    .font(.system(size: 16))
+                            }
+                        }
+                        .padding()
+                        .background(Color(.white))
+                        .cornerRadius(12)
                     }
                 }
 
