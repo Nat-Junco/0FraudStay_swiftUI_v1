@@ -11,7 +11,7 @@ struct HTTPClient {
 
     // En el simulador `localhost` apunta a tu Mac. En un iPhone físico
     // cámbialo por la IP de tu Mac, p. ej. "http://192.168.1.20:3000".
-    static let baseURL = "http://10.48.248.118:3000"
+    static let baseURL = "http://192.168.100.133:3000"
 
     //Auth (sin token)
 
@@ -37,28 +37,34 @@ struct HTTPClient {
         return try JSONDecoder().decode(DTOLoginResponse.self, from: data)
     }
     
-    /// POST /auth/forgot-password — genera un código de 6 caracteres (vigencia 15 min) y lo manda al correo. Es pública: no lleva token.
-        func OlvideContrasena(correo: String) async throws -> DTOMensajeResponse {
-            var urlRequest = URLRequest(url: url("/auth/forgot-password"))
-            urlRequest.httpMethod = "POST"
-            urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
-            urlRequest.httpBody = try JSONEncoder().encode(DTOOlvideContrasenaRequest(correo: correo))
-            let (data, response) = try await URLSession.shared.data(for: urlRequest)
-            try validarRespuesta(response)
-            return try JSONDecoder().decode(DTOMensajeResponse.self, from: data)
-        }
+    /// POST /auth/verify-code — revisa que el código sea correcto y vigente
+    /// SIN cambiar la contraseña. 200 = válido, 401 = inválido o expirado.
+    func VerificarCodigo(correo: String, codigo: String) async throws -> DTOMensajeResponse {
+        var urlRequest = URLRequest(url: url("/auth/verify-code"))
+        urlRequest.httpMethod = "POST"
+        urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.httpBody = try JSONEncoder().encode(DTOVerificarCodigoRequest(correo: correo, codigo: codigo))
+        let (data, response) = try await URLSession.shared.data(for: urlRequest)
+        try validarRespuesta(response)
+        return try JSONDecoder().decode(DTOMensajeResponse.self, from: data)
+    }
 
-        /// POST /auth/reset-password — cambia la contraseña con el código recibido.
-        func RestablecerContrasena(correo: String, codigo: String, nuevaContrasena: String) async throws -> DTOMensajeResponse {
-            var urlRequest = URLRequest(url: url("/auth/reset-password"))
-            urlRequest.httpMethod = "POST"
-            urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
-            urlRequest.httpBody = try JSONEncoder().encode(
-                DTORestablecerContrasenaRequest(correo: correo, codigo: codigo, nuevaContrasena: nuevaContrasena))
-            let (data, response) = try await URLSession.shared.data(for: urlRequest)
-            try validarRespuesta(response)
-            return try JSONDecoder().decode(DTOMensajeResponse.self, from: data)
-        }
+    func RestablecerContrasena(correo: String, codigo: String, nuevaContrasena: String) async throws -> DTOMensajeResponse {
+        let endpointURL = url("/auth/reset-password")
+        print("🌐 Enviando POST a: \(endpointURL.absoluteString)") // Imprime la URL completa
+        
+        var urlRequest = URLRequest(url: endpointURL)
+        urlRequest.httpMethod = "POST"
+        urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let dto = DTORestablecerContrasenaRequest(correo: correo, codigo: codigo, nuevaContrasena: nuevaContrasena)
+        urlRequest.httpBody = try JSONEncoder().encode(dto)
+        
+        let (data, response) = try await URLSession.shared.data(for: urlRequest)
+        try validarRespuesta(response)
+        return try JSONDecoder().decode(DTOMensajeResponse.self, from: data)
+    }
+    
 
     /// POST /auth/refresh — cambia el refreshToken (7 días) por un accessToken nuevo.
     func Refresh() async throws -> Bool {
@@ -205,6 +211,17 @@ struct HTTPClient {
         }
         try validarRespuesta(response)
         return data
+    }
+    
+    /// POST /auth/forgot-password — Genera el código y lo envía por correo
+    func OlvideContrasena(correo: String) async throws -> DTOMensajeResponse {
+        var urlRequest = URLRequest(url: url("/auth/forgot-password"))
+        urlRequest.httpMethod = "POST"
+        urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.httpBody = try JSONEncoder().encode(DTOOlvideContrasenaRequest(correo: correo))
+        let (data, response) = try await URLSession.shared.data(for: urlRequest)
+        try validarRespuesta(response)
+        return try JSONDecoder().decode(DTOMensajeResponse.self, from: data)
     }
 
     /// Si el back responde 4xx/5xx (ej. 401 password incorrecto, 409 correo

@@ -7,8 +7,8 @@
 //  Recuperar contraseña en 3 pantallas, conectadas al back:
 //  1. ForgotPasswordView  → POST /auth/forgot-password { correo }
 //                           (el back genera un código de 6 caracteres y lo manda por correo)
-//  2. EnterTokenView      → el usuario escribe el código. El back NO tiene un endpoint
-//                           para verificarlo por separado: se valida en el paso 3.
+//  2. EnterTokenView      → POST /auth/verify-code { correo, codigo }
+//                           Verifica que el código sea correcto y no haya expirado.
 //                           "Volver a enviar" repite el paso 1.
 //  3. ResetPasswordView   → POST /auth/reset-password { correo, codigo, nuevaContrasena }
 //                           Si sale bien, regresa al Login.
@@ -134,7 +134,7 @@ struct ForgotPasswordView: View {
     }
 }
 
-// MARK: - Paso 2: código
+// MARK: - Paso 2: código (Verificación contra la API)
 struct EnterTokenView: View {
     @Environment(\.authController) var controladorRegistro
 
@@ -146,20 +146,46 @@ struct EnterTokenView: View {
     @State private var mostrarAlertaError = false
     @State private var aviso: String?
     @State private var reenviando = false
+    @State private var verificando = false
     @State private var irAReset = false
 
     private let primaryColor = Color("BrandPrimaryColor")
     private let fondo = Color("FondoApp")
     private let alfabeto = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
 
+    private func verificar() async {
+        errorMsg = nil
+        aviso = nil
+        
+        guard token.count == 6 else {
+            errorMsg = "El código de verificación debe tener exactamente 6 caracteres."
+            mostrarAlertaError = true
+            return
+        }
+        
+        verificando = true
+        do {
+            try await controladorRegistro.verificarCodigo(correo: correo, codigo: token)
+            irAReset = true
+        } catch ErrorAPI.status(401) {
+            errorMsg = "El código es incorrecto, ya expiró o fue reemplazado por uno nuevo."
+            mostrarAlertaError = true
+        } catch {
+            errorMsg = "No se pudo conectar con el servidor. Inténtalo más tarde."
+            mostrarAlertaError = true
+        }
+        verificando = false
+    }
+
     private func reenviar() async {
         errorMsg = nil
         aviso = nil
         reenviando = true
         do {
+            // CORRECCIÓN: Llamar a solicitarCodigo para generar y enviar un token nuevo
             try await controladorRegistro.solicitarCodigo(correo: correo)
             aviso = "Te enviamos un código nuevo a \(correo)"
-            token = ""
+            token = "" // Se limpia el campo para que el usuario escriba el nuevo código
         } catch {
             errorMsg = "No se pudo reenviar el código en este momento."
             mostrarAlertaError = true
@@ -222,20 +248,14 @@ struct EnterTokenView: View {
                         .bold()
                         .foregroundColor(primaryColor)
                 }
-                .disabled(reenviando)
+                .disabled(reenviando || verificando)
 
                 Spacer()
 
                 Button(action: {
-                    if token.count == 6 {
-                        errorMsg = nil
-                        irAReset = true
-                    } else {
-                        errorMsg = "El código de verificación debe tener exactamente 6 caracteres."
-                        mostrarAlertaError = true
-                    }
+                    Task { await verificar() }
                 }) {
-                    Text("Verificar token")
+                    Text(verificando ? "Verificando…" : "Verificar token")
                         .font(.headline)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
@@ -243,6 +263,7 @@ struct EnterTokenView: View {
                         .background(primaryColor)
                         .cornerRadius(12)
                 }
+                .disabled(verificando)
                 .padding(.bottom, 10)
             }
             .padding(.horizontal, 24)
@@ -297,9 +318,14 @@ struct ResetPasswordView: View {
         guard errores.isEmpty else { return }
 
         guardando = true
+        defer { guardando = false }
+
         do {
             try await controladorRegistro.restablecerContrasena(
-                correo: correo, codigo: codigo, nuevaContrasena: newPassword)
+                correo: correo,
+                codigo: codigo,
+                nuevaContrasena: newPassword
+            )
             exito = true
         } catch ErrorAPI.status(401) {
             errorDeRed = "El código de verificación es incorrecto o ya expiró (15 min). Solicita uno nuevo."
@@ -308,10 +334,13 @@ struct ResetPasswordView: View {
             errorDeRed = "La contraseña no cumple con los requisitos de seguridad."
             mostrarAlertaError = true
         } catch {
+            print("[ERROR] Fallo al restablecer contraseña: \(error)")
+            if let apiError = error as? ErrorAPI {
+                print("[ERROR] Estado HTTP: \(apiError)")
+            }
             errorDeRed = "No se pudo conectar con el servidor. Inténtalo más tarde."
             mostrarAlertaError = true
         }
-        guardando = false
     }
 
     var body: some View {
