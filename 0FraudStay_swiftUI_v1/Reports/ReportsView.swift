@@ -35,8 +35,13 @@ extension UserReport {
             estado = .enRevision
         }
 
-        self.id = String(dto.id)
-        self.folio = "RS-\(String(format: "%04d", dto.id))"
+        // dto.id ya es String (UUID)
+        self.id = dto.id
+        
+        // Muestra los primeros 8 caracteres del UUID como folio corto (ej. RS-413214E2)
+        let uuidCorto = dto.id.prefix(8).uppercased()
+        self.folio = "RS-\(uuidCorto)"
+        
         self.titulo = dto.nombre
         self.plataforma = plataforma
         self.ubicacion = dto.zona ?? "Sin zona"
@@ -66,7 +71,6 @@ enum ReportStatus: String, Codable, CaseIterable {
             return Color("VerificateColor")
         }
     }
-
     
     var colorFondo: Color {
         switch self {
@@ -80,7 +84,6 @@ enum ReportStatus: String, Codable, CaseIterable {
             return Color.green.opacity(0.12)
         }
     }
-
 }
 
 // MARK: - VISTAS
@@ -92,7 +95,8 @@ struct MyReportsView: View {
     @State private var reporteAEliminar: DTOReporteResponse?
 
     private func dto(de reporte: UserReport) -> DTOReporteResponse? {
-        vm.mios.first { String($0.id) == reporte.id }
+        // Comparación directa de String UUID
+        vm.mios.first { $0.id == reporte.id }
     }
     
     private var reportes: [UserReport] {
@@ -351,12 +355,5 @@ struct ReportRowCard: View {
         .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .shadow(color: Color.black.opacity(0.02), radius: 4, x: 0, y: 2)
-    }
-}
-
-#Preview {
-    NavigationStack {
-        MyReportsView()
-            .environmentObject(ReportesViewModel())
     }
 }

@@ -55,11 +55,11 @@ struct ControladorReportes {
         return try await httpClient.CrearReporte(request)
     }
 
-    func actualizar(id: Int, cambios: DTOActualizarReporteRequest) async throws -> DTOReporteResponse {
+    func actualizar(id: String, cambios: DTOActualizarReporteRequest) async throws -> DTOReporteResponse {
         try await httpClient.ActualizarReporte(id: id, cambios: cambios)
     }
 
-    func eliminar(id: Int) async throws {
+    func eliminar(id: String) async throws {
         try await httpClient.EliminarReporte(id: id)
     }
 }

@@ -13,13 +13,13 @@ import Foundation
 
 // MARK: - ReporteResponseDto (GET /reportes, /reportes/self, /reportes/:id)
 struct DTOReporteResponse: Codable, Identifiable, Hashable {
-    let id: Int
+    let id: String
     let nombre: String
     let descripcion: String
     let longitud: Double
     let latitud: Double
-    let portada: String
-    let evidencia: String
+    let portada: String?
+    let evidencia: String?
     let precio: Double?
     let zona: String?
     let contactoOfertante: String?
@@ -30,15 +30,22 @@ struct DTOReporteResponse: Codable, Identifiable, Hashable {
     let tipoFraudeId: Int
     let createdAt: String
     let updatedAt: String?
-    //let colorEstado: Color
-    //let iconoEstado: String
 
-    /// URL completa de la portada (el back regresa solo "/uploads/...").
-    /// Se mantiene el nombre `fotoURLCompleta` para que las vistas no cambien.
-    var fotoURLCompleta: URL? { URL(string: HTTPClient.baseURL + portada) }
+    /// URL completa de la portada.
+    var fotoURLCompleta: URL? {
+        guard let portada = portada, !portada.isEmpty else { return nil }
+        let cleanBase = HTTPClient.baseURL.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        let cleanPath = portada.hasPrefix("/") ? portada : "/\(portada)"
+        return URL(string: cleanBase + cleanPath)
+    }
 
     /// URL completa de la foto de evidencia.
-    var evidenciaURLCompleta: URL? { URL(string: HTTPClient.baseURL + evidencia) }
+    var evidenciaURLCompleta: URL? {
+        guard let evidencia = evidencia, !evidencia.isEmpty else { return nil }
+        let cleanBase = HTTPClient.baseURL.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        let cleanPath = evidencia.hasPrefix("/") ? evidencia : "/\(evidencia)"
+        return URL(string: cleanBase + cleanPath)
+    }
 
     /// "2026-09-21T17:00:00.000Z" → "2026-09-21"
     var fecha: String { String(createdAt.prefix(10)) }
@@ -46,17 +53,20 @@ struct DTOReporteResponse: Codable, Identifiable, Hashable {
     /// Solo "En revisión" (1) se puede editar/eliminar; ya revisado queda bloqueado
     var esEditable: Bool { estadoId == 1 }
 
-    /// Precio con formato de moneda: "$4,200.00 MXN" o "Sin monto registrado"
+    /// Precio con formato de moneda: "$4,200 MXN" o "Sin monto registrado"
     var precioTexto: String {
-        guard let precio else { return "Sin monto registrado" }
+        guard let precio = precio else { return "Sin monto registrado" }
         let formato = NumberFormatter()
         formato.numberStyle = .currency
         formato.locale = Locale(identifier: "es_MX")
-        return (formato.string(from: NSNumber(value: precio)) ?? "$\(precio)") + " MXN"
+        formato.maximumFractionDigits = 0
+        return (formato.string(from: NSNumber(value: precio)) ?? "$\(Int(precio))") + " MXN"
     }
 
-    /// Folio legible: "RS-0012"
-    var folio: String { "RS-\(String(format: "%04d", id))" }
+    /// Folio legible basado en los primeros 8 caracteres del UUID: "RS-A1111111"
+    var folio: String {
+        "RS-\(id.prefix(8).uppercased())"
+    }
 }
 
 // MARK: - CreateReporteDto (POST /reportes)
@@ -69,14 +79,12 @@ struct DTOCrearReporteRequest: Codable {
     let fuenteId: Int
     let tipoPropiedadId: Int
     let tipoFraudeId: Int
-    // Opcionales: si son nil, JSONEncoder no los manda
     let precio: Double?
     let zona: String?
     let contactoOfertante: String?
 }
 
-// MARK: - UpdateReporteDto (PATCH /reportes/:id) — todo opcional.
-// JSONEncoder omite los nil, así que solo se manda lo que cambió.
+// MARK: - UpdateReporteDto (PATCH /reportes/:id)
 struct DTOActualizarReporteRequest: Codable {
     var nombre: String?
     var descripcion: String?
