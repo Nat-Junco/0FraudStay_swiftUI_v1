@@ -31,7 +31,12 @@ struct EditReportView: View {
     private let rojo = Color("BrandPrimaryColor")
 
     private var precioNumero: Double? {
-        Double(precio.trimmingCharacters(in: .whitespaces))
+        let textoLimpio = precio
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: ",", with: ".")
+        
+        guard !textoLimpio.isEmpty else { return nil }
+        return Double(textoLimpio)
     }
 
     // MARK: - Validación (mismas reglas que el back)
@@ -57,6 +62,7 @@ struct EditReportView: View {
         guard errores.isEmpty else { return }
 
         guardando = true
+        
         let cambios = DTOActualizarReporteRequest(
             nombre: nombre,
             descripcion: descripcion,
@@ -64,20 +70,20 @@ struct EditReportView: View {
             tipoPropiedadId: tipoPropiedadId,
             tipoFraudeId: tipoFraudeId,
             precio: precioNumero,
-            zona: zona.esVacio ? nil : zona,
-            contactoOfertante: contactoOfertante.esVacio ? nil : contactoOfertante
+            zona: zona.isEmpty ? nil : zona,
+            contactoOfertante: contactoOfertante.isEmpty ? nil : contactoOfertante
         )
+        
         do {
+            // Usa directamente controladorReportes en lugar de vm
             _ = try await controladorReportes.actualizar(id: reporte.id, cambios: cambios)
             await vm.cargarTodo()
             dismiss()
-        } catch ErrorAPI.status(400) {
-            errores = ["El servidor rechazó los cambios. Revisa los datos."]
-        } catch ErrorAPI.status(404) {
-            errores = ["Este reporte ya no existe."]
         } catch {
-            errores = ["No se pudo guardar. \(error.localizedDescription)"]
+            print("❌ Error al guardar:", error)
+            errores = ["No se pudo guardar: \(error.localizedDescription)"]
         }
+        
         guardando = false
     }
 

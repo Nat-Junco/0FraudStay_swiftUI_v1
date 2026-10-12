@@ -85,7 +85,7 @@ struct DTOCrearReporteRequest: Codable {
 }
 
 // MARK: - UpdateReporteDto (PATCH /reportes/:id)
-struct DTOActualizarReporteRequest: Codable {
+struct DTOActualizarReporteRequest: Encodable {
     var nombre: String?
     var descripcion: String?
     var fuenteId: Int?
@@ -94,6 +94,7 @@ struct DTOActualizarReporteRequest: Codable {
     var precio: Double?
     var zona: String?
     var contactoOfertante: String?
+    var estadoId: Int?
 }
 
 // MARK: - FotoTempResponseDto (POST /reportes/fotos → arreglo de 2)
