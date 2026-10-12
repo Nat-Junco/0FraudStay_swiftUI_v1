@@ -25,20 +25,22 @@ struct UserReport: Codable, Identifiable {
 extension UserReport {
     init(dto: DTOReporteResponse, plataforma: String) {
         let estado: ReportStatus
-        // Semáforo: 1 En revisión, 2 Fraude confirmado, 3 No es fraude
+        
+        // Mapeo directo con las IDs reales de la Base de Datos (1, 2, 3)
         switch dto.estadoId {
+        case 1:
+            estado = .enRevision     // ID 1 en BD: "En revisión"
         case 2:
-            estado = .fraude
+            estado = .fraude         // ID 2 en BD: "Fraude confirmado"
         case 3:
-            estado = .noFraude
+            estado = .noFraude       // ID 3 en BD: "No es fraude"
         default:
-            estado = .enRevision
+            estado = .enRevision     // Fallback de seguridad
         }
 
-        // dto.id ya es String (UUID)
         self.id = dto.id
         
-        // Muestra los primeros 8 caracteres del UUID como folio corto (ej. RS-413214E2)
+        // Folio con los primeros 8 caracteres del UUID
         let uuidCorto = dto.id.prefix(8).uppercased()
         self.folio = "RS-\(uuidCorto)"
         
@@ -95,8 +97,7 @@ struct MyReportsView: View {
     @State private var reporteAEliminar: DTOReporteResponse?
 
     private func dto(de reporte: UserReport) -> DTOReporteResponse? {
-        // Comparación directa de String UUID
-        vm.mios.first { $0.id == reporte.id }
+        vm.mios.first { $0.id.lowercased() == reporte.id.lowercased() }
     }
     
     private var reportes: [UserReport] {
@@ -188,8 +189,16 @@ struct MyReportsView: View {
                         ForEach(reportesFiltrados) { reporte in
                             ReportRowCard(
                                 reporte: reporte,
-                                onEditar: { reporteAEditar = dto(de: reporte) },
-                                onEliminar: { reporteAEliminar = dto(de: reporte) }
+                                onEditar: {
+                                    if let dtoEncontrado = dto(de: reporte) {
+                                        reporteAEditar = dtoEncontrado
+                                    }
+                                },
+                                onEliminar: {
+                                    if let dtoEncontrado = dto(de: reporte) {
+                                        reporteAEliminar = dtoEncontrado
+                                    }
+                                }
                             )
                         }
                     }
@@ -205,12 +214,10 @@ struct MyReportsView: View {
             await vm.cargarTodo()
         }
         .sheet(item: $reporteAEditar) { reporte in
-            // PATCH /reportes/:id
             EditReportView(reporte: reporte)
                 .environmentObject(vm)
         }
         .sheet(item: $reporteAEliminar) { reporte in
-            // DELETE /reportes/:id con el diseño de DeleteReportView
             DeleteReportView(onDelete: {
                 Task { await vm.eliminar(reporte) }
             })
