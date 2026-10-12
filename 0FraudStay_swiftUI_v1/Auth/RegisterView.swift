@@ -16,6 +16,15 @@ struct RegisterView: View {
     @State private var irATerminos = false
     @State private var mostrarAlertaExito = false
     @State private var cargando = false
+    @State private var mostrarPassword = false
+    @State private var mostrarConfirmarPassword = false
+    
+    private enum CampoPassword {
+        case password
+        case confirmarPassword
+    }
+
+    @FocusState private var campoEnfocado: CampoPassword?
     
     private let primaryColor = Color("BrandPrimaryColor")
     private let fondo = Color("FondoApp")
@@ -135,22 +144,68 @@ struct RegisterView: View {
                                 .font(.caption)
                                 .bold()
                                 .foregroundColor(.gray)
-                            SecureField("Introduce tu contraseña (mín. 10 caracteres)", text: $usuario.password)
-                                .padding()
-                                .background(Color(.white))
-                                .cornerRadius(12)
+                            
+                            HStack {
+                                ZStack {
+                                    if mostrarPassword {
+                                        TextField("Introduce tu contraseña (mín. 10 caracteres)", text: $usuario.password)
+                                            .textInputAutocapitalization(.never)
+                                            .autocorrectionDisabled()
+                                            .focused($campoEnfocado, equals: .password)
+                                    } else {
+                                        SecureField("Introduce tu contraseña (mín. 10 caracteres)", text: $usuario.password)
+                                            .focused($campoEnfocado, equals: .password)
+                                    }
+                                }
+                                
+                                Button {
+                                    mostrarPassword.toggle()
+                                    campoEnfocado = .password
+                                } label: {
+                                    Image(systemName: mostrarPassword ? "eye.slash.fill" : "eye.fill")
+                                        .renderingMode(.template)
+                                        .foregroundColor(.gray)
+                                        .font(.system(size: 16))
+                                }
+                            }
+                            .padding()
+                            .background(Color(.white))
+                            .cornerRadius(12)
                         }
-                        
+
                         // Confirmar Contraseña
                         VStack(alignment: .leading, spacing: 6) {
                             Text("CONFIRMAR CONTRASEÑA")
                                 .font(.caption)
                                 .bold()
                                 .foregroundColor(.gray)
-                            SecureField("Introduce tu contraseña", text: $usuario.confirmarPassword)
-                                .padding()
-                                .background(Color(.white))
-                                .cornerRadius(12)
+                            
+                            HStack {
+                                ZStack {
+                                    if mostrarConfirmarPassword {
+                                        TextField("Introduce tu contraseña", text: $usuario.confirmarPassword)
+                                            .textInputAutocapitalization(.never)
+                                            .autocorrectionDisabled()
+                                            .focused($campoEnfocado, equals: .confirmarPassword)
+                                    } else {
+                                        SecureField("Introduce tu contraseña", text: $usuario.confirmarPassword)
+                                            .focused($campoEnfocado, equals: .confirmarPassword)
+                                    }
+                                }
+                                
+                                Button {
+                                    mostrarConfirmarPassword.toggle()
+                                    campoEnfocado = .confirmarPassword
+                                } label: {
+                                    Image(systemName: mostrarConfirmarPassword ? "eye.slash.fill" : "eye.fill")
+                                        .renderingMode(.template)
+                                        .foregroundColor(.gray)
+                                        .font(.system(size: 16))
+                                }
+                            }
+                            .padding()
+                            .background(Color(.white))
+                            .cornerRadius(12)
                         }
                     }
                     
