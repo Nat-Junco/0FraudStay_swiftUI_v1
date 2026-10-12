@@ -148,7 +148,7 @@ struct HTTPClient {
      }
 
      /// PATCH /reportes/:id
-     func ActualizarReporte(id: Int, cambios: DTOActualizarReporteRequest) async throws -> DTOReporteResponse {
+     func ActualizarReporte(id: String, cambios: DTOActualizarReporteRequest) async throws -> DTOReporteResponse {
          var urlRequest = URLRequest(url: url("/reportes/\(id)"))
          urlRequest.httpMethod = "PATCH"
          urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -158,7 +158,7 @@ struct HTTPClient {
      }
 
      /// DELETE /reportes/:id — borrado lógico, responde 204 sin cuerpo.
-     func EliminarReporte(id: Int) async throws {
+     func EliminarReporte(id: String) async throws {
          var urlRequest = URLRequest(url: url("/reportes/\(id)"))
          urlRequest.httpMethod = "DELETE"
          _ = try await enviarConToken(urlRequest)
