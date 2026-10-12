@@ -310,6 +310,7 @@ struct ReportRowCard: View {
                     } label: {
                         HStack(spacing: 6) {
                             Image(systemName: "square.and.pencil")
+                                .renderingMode(.template)
                                 .font(.system(size: 12, weight: .bold))
                             Text("Editar")
                                 .font(.system(size: 12, weight: .bold))
@@ -330,6 +331,7 @@ struct ReportRowCard: View {
                     } label: {
                         HStack(spacing: 6) {
                             Image(systemName: "trash")
+                                .renderingMode(.template)
                                 .font(.system(size: 12, weight: .bold))
                             Text("Eliminar")
                                 .font(.system(size: 12, weight: .bold))
