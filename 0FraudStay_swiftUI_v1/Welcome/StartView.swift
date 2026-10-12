@@ -275,8 +275,10 @@ struct StartView: View {
                             ForEach(misReportesEditables) { reporte in
                                 VStack(alignment: .leading, spacing: 14) {
                                     HStack(alignment: .top, spacing: 14) {
-                                        Text("⏳")
-                                            .font(.system(size: 24))
+                                        Image(systemName: "clock.fill")
+                                            .renderingMode(.template)
+                                            .font(.system(size: 20, weight: .semibold))
+                                            .foregroundStyle(reporte.colorEstado)
                                             .frame(width: 48, height: 48)
                                             .background(reporte.colorEstado.opacity(0.1))
                                             .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -309,33 +311,45 @@ struct StartView: View {
                                         Button {
                                             reporteAEditar = reporte
                                         } label: {
-                                            Text("✏️ Editar")
-                                                .font(.system(size: 14, weight: .semibold))
-                                                .foregroundStyle(textoPrincipal)
-                                                .frame(maxWidth: .infinity)
-                                                .frame(height: 38)
-                                                .background(fondo)
-                                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                                                .overlay(
-                                                    RoundedRectangle(cornerRadius: 10)
-                                                        .stroke(borde, lineWidth: 1)
-                                                )
+                                            HStack(spacing: 6) {
+                                                Image(systemName: "square.and.pencil")
+                                                    .renderingMode(.template)
+                                                    .font(.system(size: 14, weight: .semibold))
+                                                
+                                                Text("Editar")
+                                                    .font(.system(size: 14, weight: .semibold))
+                                            }
+                                            .foregroundStyle(textoPrincipal)
+                                            .frame(maxWidth: .infinity)
+                                            .frame(height: 38)
+                                            .background(fondo)
+                                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 10)
+                                                    .stroke(borde, lineWidth: 1)
+                                            )
                                         }
 
                                         Button {
                                             reporteAEliminar = reporte
                                         } label: {
-                                            Text("🗑️ Eliminar")
-                                                .font(.system(size: 14, weight: .semibold))
-                                                .foregroundStyle(rojo)
-                                                .frame(maxWidth: .infinity)
-                                                .frame(height: 38)
-                                                .background(rojo.opacity(0.06))
-                                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                                                .overlay(
-                                                    RoundedRectangle(cornerRadius: 10)
-                                                        .stroke(rojo.opacity(0.25), lineWidth: 1)
-                                                )
+                                            HStack(spacing: 6) {
+                                                Image(systemName: "trash")
+                                                    .renderingMode(.template)
+                                                    .font(.system(size: 14, weight: .semibold))
+                                                
+                                                Text("Eliminar")
+                                                    .font(.system(size: 14, weight: .semibold))
+                                            }
+                                            .foregroundStyle(rojo)
+                                            .frame(maxWidth: .infinity)
+                                            .frame(height: 38)
+                                            .background(rojo.opacity(0.06))
+                                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 10)
+                                                    .stroke(rojo.opacity(0.25), lineWidth: 1)
+                                            )
                                         }
                                     }
                                     .padding(.leading, 62)

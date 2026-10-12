@@ -35,7 +35,7 @@ extension String {
     }
     // Zona: letras (con acentos), números, espacios y . , # -  (3 a 150)
     var esZonaValida: Bool {
-        range(of: "^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9 .,#-]{3,150}$", options: .regularExpression) != nil
+        range(of: "^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9 .,#()\\-]{3,150}$", options: .regularExpression) != nil
     }
     // Teléfono: + opcional al inicio, dígitos, espacios o guiones (10 a 20)
     var esTelefonoValido: Bool {
