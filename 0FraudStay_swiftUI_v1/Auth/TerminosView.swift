@@ -42,7 +42,7 @@ struct TerminosView: View {
     
     private var headerView: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("OFRAUD STAY")
+            Text("0FRAUD STAY")
                 .font(.caption)
                 .bold()
                 .foregroundStyle(rojoPrimary)
@@ -63,14 +63,14 @@ struct TerminosView: View {
         VStack(alignment: .leading, spacing: 18) {
             seccionTexto(
                 titulo: "1. Aceptación de los Términos",
-                contenido: "Al descargar, acceder o utilizar la aplicación OFRAUD STAY, aceptas quedar vinculado por los presentes Términos y Condiciones. Si no estás de acuerdo con alguno de los puntos, te pedimos abstenerte de utilizar la plataforma."
+                contenido: "Al descargar, acceder o utilizar la aplicación 0FRAUD STAY, aceptas quedar vinculado por los presentes Términos y Condiciones. Si no estás de acuerdo con alguno de los puntos, te pedimos abstenerte de utilizar la plataforma."
             )
             
             Divider()
             
             seccionTexto(
                 titulo: "2. Uso de la Plataforma y Registro",
-                contenido: "OFRAUD STAY es una herramienta comunitaria orientada a la prevención e identificación de fraudes en rentas vacacionales. Para publicar reportes o interactuar con la plataforma, debes registrarte proporcionando información verídica y mantener la confidencialidad de tus credenciales de acceso."
+                contenido: "0FRAUD STAY es una herramienta comunitaria orientada a la prevención e identificación de fraudes en rentas vacacionales. Para publicar reportes o interactuar con la plataforma, debes registrarte proporcionando información verídica y mantener la confidencialidad de tus credenciales de acceso."
             )
             
             Divider()
@@ -84,7 +84,7 @@ struct TerminosView: View {
             
             seccionTexto(
                 titulo: "4. Moderación y Responsabilidad del Contenido",
-                contenido: "OFRAUD STAY actúa como un canal de colaboración ciudadana. Aunque implementamos filtros de moderación, no nos hacemos responsables por la precisión de la información compartida directamente por los usuarios ni por transacciones externas celebradas entre terceros."
+                contenido: "0FRAUD STAY actúa como un canal de colaboración ciudadana. Aunque implementamos filtros de moderación, no nos hacemos responsables por la precisión de la información compartida directamente por los usuarios ni por transacciones externas celebradas entre terceros."
             )
             
             Divider()
