@@ -4,23 +4,75 @@
 //
 //  Created by alumno on 25/09/26.
 //
+//  Recuperar contraseña en 3 pantallas, conectadas al back:
+//  1. ForgotPasswordView  → POST /auth/forgot-password { correo }
+//                           (el back genera un código de 6 caracteres y lo manda por correo)
+//  2. EnterTokenView      → POST /auth/verify-code { correo, codigo }
+//                           Verifica que el código sea correcto y no haya expirado.
+//                           "Volver a enviar" repite el paso 1.
+//  3. ResetPasswordView   → POST /auth/reset-password { correo, codigo, nuevaContrasena }
+//                           Si sale bien, regresa al Login.
+//
 
 import SwiftUI
 
+
+// MARK: - Paso 1: correo
 struct ForgotPasswordView: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.authController) var controladorRegistro
+
     @State private var email = ""
+    @State private var enviando = false
+    @State private var errorMsg: String?
+    @State private var mostrarAlertaError = false
+    @State private var irAToken = false
+
     private let primaryColor = Color("BrandPrimaryColor")
     private let fondo = Color("FondoApp")
-    
+
+    private func enviarCodigo() async {
+        errorMsg = nil
+        let correo = email.trimmingCharacters(in: .whitespaces).lowercased()
+        
+        if correo.isEmpty {
+            errorMsg = "Por favor, ingresa tu correo electrónico."
+            mostrarAlertaError = true
+            return
+        }
+        if !correo.esCorreoValido {
+            errorMsg = "Ingresa un correo electrónico válido."
+            mostrarAlertaError = true
+            return
+        }
+
+        enviando = true
+        do {
+            try await controladorRegistro.solicitarCodigo(correo: correo)
+            email = correo
+            irAToken = true
+        } catch ErrorAPI.status(401) {
+            errorMsg = "No encontramos una cuenta registrada con ese correo."
+            mostrarAlertaError = true
+        } catch ErrorAPI.status(500) {
+            errorMsg = "No se pudo enviar el correo. Inténtalo más tarde."
+            mostrarAlertaError = true
+        } catch {
+            errorMsg = "Ocurrió un error al conectar con el servidor."
+            mostrarAlertaError = true
+        }
+        enviando = false
+    }
+
     var body: some View {
         ZStack {
             fondo
                 .ignoresSafeArea()
-            
+
             VStack(alignment: .leading, spacing: 20) {
-                
+
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("OFRAUD STAY")
+                    Text("0FRAUD STAY")
                         .font(.caption)
                         .bold()
                         .foregroundColor(primaryColor)
@@ -32,7 +84,7 @@ struct ForgotPasswordView: View {
                         .foregroundColor(.gray)
                 }
                 .padding(.top, 16)
-                
+
                 VStack(alignment: .leading, spacing: 6) {
                     Text("CORREO ELECTRÓNICO")
                         .font(.caption)
@@ -47,11 +99,13 @@ struct ForgotPasswordView: View {
                         .background(Color(.white))
                         .cornerRadius(12)
                 }
-                
+
                 Spacer()
-                
-                NavigationLink(destination: EnterTokenView()) {
-                    Text("Enviar código")
+
+                Button(action: {
+                    Task { await enviarCodigo() }
+                }) {
+                    Text(enviando ? "Enviando…" : "Enviar código")
                         .font(.headline)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
@@ -59,66 +113,150 @@ struct ForgotPasswordView: View {
                         .background(primaryColor)
                         .cornerRadius(12)
                 }
+                .disabled(enviando)
                 .padding(.bottom, 10)
             }
             .padding(.horizontal, 24)
         }
         .tint(primaryColor)
+        .navigationTitle("Recuperar")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(isPresented: $irAToken) {
+            EnterTokenView(correo: email, onTerminado: {
+                irAToken = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { dismiss() }
+            })
+        }
+        .alert("Aviso", isPresented: $mostrarAlertaError) {
+            Button("Aceptar", role: .cancel) { }
+        } message: {
+            Text(errorMsg ?? "Revisa los datos e intenta de nuevo.")
+        }
     }
 }
 
+// MARK: - Paso 2: código (Verificación contra la API)
 struct EnterTokenView: View {
+    @Environment(\.authController) var controladorRegistro
+
+    let correo: String
+    var onTerminado: () -> Void = {}
+
     @State private var token = ""
+    @State private var errorMsg: String?
+    @State private var mostrarAlertaError = false
+    @State private var aviso: String?
+    @State private var reenviando = false
+    @State private var verificando = false
+    @State private var irAReset = false
+
     private let primaryColor = Color("BrandPrimaryColor")
     private let fondo = Color("FondoApp")
-    
+    private let alfabeto = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
+
+    private func verificar() async {
+        errorMsg = nil
+        aviso = nil
+        
+        guard token.count == 6 else {
+            errorMsg = "El código de verificación debe tener exactamente 6 caracteres."
+            mostrarAlertaError = true
+            return
+        }
+        
+        verificando = true
+        do {
+            try await controladorRegistro.verificarCodigo(correo: correo, codigo: token)
+            irAReset = true
+        } catch ErrorAPI.status(401) {
+            errorMsg = "El código es incorrecto, ya expiró o fue reemplazado por uno nuevo."
+            mostrarAlertaError = true
+        } catch {
+            errorMsg = "No se pudo conectar con el servidor. Inténtalo más tarde."
+            mostrarAlertaError = true
+        }
+        verificando = false
+    }
+
+    private func reenviar() async {
+        errorMsg = nil
+        aviso = nil
+        reenviando = true
+        do {
+            // CORRECCIÓN: Llamar a solicitarCodigo para generar y enviar un token nuevo
+            try await controladorRegistro.solicitarCodigo(correo: correo)
+            aviso = "Te enviamos un código nuevo a \(correo)"
+            token = "" // Se limpia el campo para que el usuario escriba el nuevo código
+        } catch {
+            errorMsg = "No se pudo reenviar el código en este momento."
+            mostrarAlertaError = true
+        }
+        reenviando = false
+    }
+
     var body: some View {
         ZStack {
             fondo
                 .ignoresSafeArea()
-            
+
             VStack(alignment: .leading, spacing: 20) {
-                
+
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("OFRAUD STAY")
+                    Text("0FRAUD STAY")
                         .font(.caption)
                         .bold()
                         .foregroundColor(primaryColor)
                         .tracking(1)
                     Text("Ingresar token")
                         .font(.system(size: 28, weight: .bold, design: .serif))
-                    Text("Ingresa el código de verificación que hemos enviado a tu correo.")
+                    Text("Ingresa el código de verificación que enviamos a \(correo). Vence en 15 minutos.")
                         .font(.subheadline)
                         .foregroundColor(.gray)
                 }
                 .padding(.top, 16)
-                
+
                 VStack(alignment: .leading, spacing: 6) {
                     Text("TOKEN DE VERIFICACIÓN")
                         .font(.caption)
                         .bold()
                         .foregroundColor(.gray)
-                    TextField("Ingresa el token", text: $token)
-                        .keyboardType(.numberPad)
+                    
+                    TextField("Ej. K7M2QX", text: $token)
+                        .textInputAutocapitalization(.characters)
+                        .autocorrectionDisabled()
+                        .font(.system(.body, design: .monospaced))
                         .foregroundColor(.black)
                         .padding()
                         .background(Color(.white))
                         .cornerRadius(12)
+                        .onChange(of: token) { _, nuevo in
+                            let filtrado = String(nuevo.uppercased().filter { alfabeto.contains($0) }.prefix(6))
+                            if filtrado != nuevo { token = filtrado }
+                        }
                 }
-                
+
+                if let aviso {
+                    Text(aviso)
+                        .font(.caption)
+                        .foregroundColor(.green)
+                }
+
                 Button(action: {
-                    // Lógica futura para reenviar el token
+                    Task { await reenviar() }
                 }) {
-                    Text("¿No te llegó el token? Volver a enviar")
+                    Text(reenviando ? "Reenviando…" : "¿No te llegó el token? Volver a enviar")
                         .font(.footnote)
                         .bold()
                         .foregroundColor(primaryColor)
                 }
-                
+                .disabled(reenviando || verificando)
+
                 Spacer()
-                
-                NavigationLink(destination: ResetPasswordView()) {
-                    Text("Verificar token")
+
+                Button(action: {
+                    Task { await verificar() }
+                }) {
+                    Text(verificando ? "Verificando…" : "Verificar token")
                         .font(.headline)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
@@ -126,28 +264,104 @@ struct EnterTokenView: View {
                         .background(primaryColor)
                         .cornerRadius(12)
                 }
+                .disabled(verificando)
                 .padding(.bottom, 10)
             }
             .padding(.horizontal, 24)
         }
+        .navigationTitle("Verificación")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(isPresented: $irAReset) {
+            ResetPasswordView(correo: correo, codigo: token, onTerminado: onTerminado)
+        }
+        .alert("Aviso", isPresented: $mostrarAlertaError) {
+            Button("Aceptar", role: .cancel) { }
+        } message: {
+            Text(errorMsg ?? "Ingresa un código válido.")
+        }
     }
 }
 
+// MARK: - Paso 3: nueva contraseña
 struct ResetPasswordView: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.authController) var controladorRegistro
+    @State private var mostrarNewPassword = false
+    @State private var mostrarConfirmPassword = false
+
+    private enum CampoPasswordReset {
+        case newPassword
+        case confirmPassword
+    }
+
+    @FocusState private var campoEnfocado: CampoPasswordReset?
+
+    let correo: String
+    let codigo: String
+    var onTerminado: () -> Void = {}
+
     @State private var newPassword = ""
     @State private var confirmPassword = ""
+    @State private var errores: [String] = []
+    @State private var errorDeRed: String?
+    @State private var mostrarAlertaError = false
+    @State private var guardando = false
+    @State private var exito = false
+
     private let primaryColor = Color("BrandPrimaryColor")
     private let fondo = Color("FondoApp")
-    
+
+    private func validar() -> [String] {
+        var e: [String] = []
+        if !newPassword.esLongitudValida { e.append("Debe tener al menos 10 caracteres") }
+        if !newPassword.tieneMayuscula { e.append("Debe contener al menos una mayúscula") }
+        if !newPassword.tieneMinuscula { e.append("Debe contener al menos una minúscula") }
+        if !newPassword.tieneNumero { e.append("Debe contener al menos un número") }
+        if !newPassword.tieneSimbolo { e.append("Debe contener al menos un símbolo") }
+        if newPassword.tieneTresIgualesSeguidos { e.append("No puede tener tres caracteres iguales consecutivos") }
+        if newPassword != confirmPassword { e.append("Las contraseñas no coinciden") }
+        return e
+    }
+
+    private func confirmar() async {
+        errores = validar()
+        guard errores.isEmpty else { return }
+
+        guardando = true
+        defer { guardando = false }
+
+        do {
+            try await controladorRegistro.restablecerContrasena(
+                correo: correo,
+                codigo: codigo,
+                nuevaContrasena: newPassword
+            )
+            exito = true
+        } catch ErrorAPI.status(401) {
+            errorDeRed = "El código de verificación es incorrecto o ya expiró (15 min). Solicita uno nuevo."
+            mostrarAlertaError = true
+        } catch ErrorAPI.status(400) {
+            errorDeRed = "La contraseña no cumple con los requisitos de seguridad."
+            mostrarAlertaError = true
+        } catch {
+            print("[ERROR] Fallo al restablecer contraseña: \(error)")
+            if let apiError = error as? ErrorAPI {
+                print("[ERROR] Estado HTTP: \(apiError)")
+            }
+            errorDeRed = "No se pudo conectar con el servidor. Inténtalo más tarde."
+            mostrarAlertaError = true
+        }
+    }
+
     var body: some View {
         ZStack {
             fondo
                 .ignoresSafeArea()
-            
+
             VStack(alignment: .leading, spacing: 20) {
-                
+
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("OFRAUD STAY")
+                    Text("0FRAUD STAY")
                         .font(.caption)
                         .bold()
                         .foregroundColor(primaryColor)
@@ -159,39 +373,93 @@ struct ResetPasswordView: View {
                         .foregroundColor(.gray)
                 }
                 .padding(.top, 16)
-                
+
                 VStack(alignment: .leading, spacing: 16) {
+                    // Nueva Contraseña
                     VStack(alignment: .leading, spacing: 6) {
                         Text("NUEVA CONTRASEÑA")
                             .font(.caption)
                             .bold()
                             .foregroundColor(.gray)
-                        SecureField("Ingresa tu nueva contraseña", text: $newPassword)
-                            .foregroundColor(.black)
-                            .padding()
-                            .background(Color(.white))
-                            .cornerRadius(12)
+                        
+                        HStack {
+                            ZStack {
+                                if mostrarNewPassword {
+                                    TextField("Mín. 10 caracteres, mayúscula, número y símbolo", text: $newPassword)
+                                        .foregroundColor(.black)
+                                        .textInputAutocapitalization(.never)
+                                        .autocorrectionDisabled()
+                                        .focused($campoEnfocado, equals: .newPassword)
+                                } else {
+                                    SecureField("Mín. 10 caracteres, mayúscula, número y símbolo", text: $newPassword)
+                                        .foregroundColor(.black)
+                                        .focused($campoEnfocado, equals: .newPassword)
+                                }
+                            }
+                            
+                            Button {
+                                mostrarNewPassword.toggle()
+                                campoEnfocado = .newPassword
+                            } label: {
+                                Image(systemName: mostrarNewPassword ? "eye.slash.fill" : "eye.fill")
+                                    .renderingMode(.template)
+                                    .foregroundColor(.gray)
+                                    .font(.system(size: 16))
+                            }
+                        }
+                        .padding()
+                        .background(Color(.white))
+                        .cornerRadius(12)
                     }
-                    
+
+                    // Confirmar Contraseña
                     VStack(alignment: .leading, spacing: 6) {
                         Text("CONFIRMAR CONTRASEÑA")
                             .font(.caption)
                             .bold()
                             .foregroundColor(.gray)
-                        SecureField("Confirma tu nueva contraseña", text: $confirmPassword)
-                            .foregroundColor(.black)
-                            .padding()
-                            .background(Color(.white))
-                            .cornerRadius(12)
+                        
+                        HStack {
+                            ZStack {
+                                if mostrarConfirmPassword {
+                                    TextField("Confirma tu nueva contraseña", text: $confirmPassword)
+                                        .foregroundColor(.black)
+                                        .textInputAutocapitalization(.never)
+                                        .autocorrectionDisabled()
+                                        .focused($campoEnfocado, equals: .confirmPassword)
+                                } else {
+                                    SecureField("Confirma tu nueva contraseña", text: $confirmPassword)
+                                        .foregroundColor(.black)
+                                        .focused($campoEnfocado, equals: .confirmPassword)
+                                }
+                            }
+                            
+                            Button {
+                                mostrarConfirmPassword.toggle()
+                                campoEnfocado = .confirmPassword
+                            } label: {
+                                Image(systemName: mostrarConfirmPassword ? "eye.slash.fill" : "eye.fill")
+                                    .renderingMode(.template)
+                                    .foregroundColor(.gray)
+                                    .font(.system(size: 16))
+                            }
+                        }
+                        .padding()
+                        .background(Color(.white))
+                        .cornerRadius(12)
                     }
                 }
-                
+
+                if !errores.isEmpty {
+                    ResumenErrores(errores: errores)
+                }
+
                 Spacer()
-                
+
                 Button(action: {
-                    // Lógica futura para guardar la contraseña y volver al Login
+                    Task { await confirmar() }
                 }) {
-                    Text("Confirmar")
+                    Text(guardando ? "Guardando…" : "Confirmar")
                         .font(.headline)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
@@ -199,12 +467,26 @@ struct ResetPasswordView: View {
                         .background(primaryColor)
                         .cornerRadius(12)
                 }
+                .disabled(guardando)
                 .padding(.bottom, 10)
             }
             .padding(.horizontal, 24)
         }
+        .navigationTitle("Nueva contraseña")
+        .navigationBarTitleDisplayMode(.inline)
+        .alert("Contraseña actualizada", isPresented: $exito) {
+            Button("Iniciar sesión") { onTerminado() }
+        } message: {
+            Text("Ya puedes entrar con tu nueva contraseña.")
+        }
+        .alert("Error", isPresented: $mostrarAlertaError) {
+            Button("Aceptar", role: .cancel) { }
+        } message: {
+            Text(errorDeRed ?? "Ocurrió un error inesperado.")
+        }
     }
 }
+
 #Preview {
     NavigationStack {
         ForgotPasswordView()

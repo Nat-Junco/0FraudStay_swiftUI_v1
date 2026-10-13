@@ -6,11 +6,15 @@
 //
 
 import SwiftUI
+
 struct ProfileView: View {
-    
-    @State private var nombre: String = "Nombre del usuario"
-    @State private var correo: String = "ejemplo@correo.com"
+    @StateObject private var perfil = PerfilViewModel()
+    @EnvironmentObject var vm: ReportesViewModel
+    @Environment(\.authController) var controladorRegistro
+    @AppStorage("isLoggedIn") private var isLoggedIn = false
     @State private var alertasHabilitadas: Bool = true
+    
+    @State private var mostrarAlertaError = false
     
     let primaryColor = Color("BrandPrimaryColor")
     let cardbackColor = Color(.white)
@@ -28,7 +32,7 @@ struct ProfileView: View {
                         // Header
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("OFRAUD STAY")
+                                Text("0FRAUD STAY")
                                     .font(.caption)
                                     .bold()
                                     .foregroundColor(primaryColor)
@@ -50,8 +54,7 @@ struct ProfileView: View {
                         
                         // Tarjeta de Usuario
                         NavigationLink(destination: EditProfileView(
-                            nombre: $nombre,
-                            correo: $correo,
+                            perfil: perfil,
                             alertasHabilitadas: $alertasHabilitadas
                         )) {
                             HStack(spacing: 16) {
@@ -71,12 +74,12 @@ struct ProfileView: View {
                                 }
                                 
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text(nombre)
+                                    Text(perfil.isLoading ? "Cargando..." : perfil.nombre)
                                         .font(.system(size: 18, weight: .bold, design: .serif))
                                         .foregroundColor(.primary)
                                         .multilineTextAlignment(.leading)
                                     
-                                    Text(correo)
+                                    Text(perfil.correo)
                                         .font(.subheadline)
                                         .foregroundColor(.gray)
                                         .lineLimit(1)
@@ -95,9 +98,9 @@ struct ProfileView: View {
                         
                         // Estadísticas
                         HStack(spacing: 12) {
-                            ProfileStatBox(icon: "doc.text", value: "12", label: "Reportes", backgroundColor: cardbackColor)
-                            ProfileStatBox(icon: "triangle.fill", value: "2", label: "En revisión", backgroundColor: cardbackColor)
-                            ProfileStatBox(icon: "shield.fill", value: "7", label: "Validados", backgroundColor: cardbackColor)
+                            ProfileStatBox(icon: "doc.text", value: "\(vm.mios.count)", label: "Reportes", backgroundColor: cardbackColor)
+                            ProfileStatBox(icon: "triangle.fill", value: "\(vm.mios.filter { $0.estadoId == 1 }.count)", label: "En revisión", backgroundColor: cardbackColor)
+                            ProfileStatBox(icon: "shield.fill", value: "\(vm.mios.filter { $0.estadoId == 2 }.count)", label: "Fraudes conf.", backgroundColor: cardbackColor)
                         }
                         
                         // Menú Opciones
@@ -126,7 +129,8 @@ struct ProfileView: View {
                         
                         // Botón Cerrar Sesión
                         Button(action: {
-                            // Acción pendiente
+                            controladorRegistro.logout()
+                            isLoggedIn = false
                         }) {
                             Text("Cerrar sesión")
                                 .font(.headline)
@@ -142,6 +146,23 @@ struct ProfileView: View {
                     .padding(.top, 8)
                     .padding(.bottom, 30)
                 }
+                .refreshable {
+                    await perfil.cargar()
+                    await vm.cargarTodo()
+                }
+            }
+            .task {
+                await perfil.cargar()
+            }
+            .alert("Aviso", isPresented: Binding(
+                get: { perfil.errorMessage != nil },
+                set: { if !$0 { perfil.errorMessage = nil } }
+            )) {
+                Button("Aceptar", role: .cancel) {
+                    perfil.errorMessage = nil
+                }
+            } message: {
+                Text(perfil.errorMessage ?? "")
             }
         }
     }
@@ -198,5 +219,5 @@ struct ProfileMenuItem: View {
 }
 #Preview {
     ProfileView()
+        .environmentObject(ReportesViewModel())
 }
-

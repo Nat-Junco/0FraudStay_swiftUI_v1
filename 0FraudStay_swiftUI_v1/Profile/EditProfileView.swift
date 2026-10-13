@@ -3,18 +3,23 @@ import SwiftUI
 struct EditProfileView: View {
     @Environment(\.dismiss) private var dismiss
     
-    // Bindings para sincronizar con la pantalla principal de Perfil
-    @Binding var nombre: String
-    @Binding var correo: String
+    @ObservedObject var perfil: PerfilViewModel
     @Binding var alertasHabilitadas: Bool
     
-    // Variable local para la contraseña
-    @State private var contrasena: String = ""
+    @State private var nombre: String = ""
+    @State private var correo: String = ""
+    @State private var guardando = false
+    @State private var mostrarAlertaError = false
     
     private let rojoPrimary = Color("BrandPrimaryColor")
+    private let fondoApp = Color("FondoApp")
+    private let tarjeta = Color.white
     
     var body: some View {
-        NavigationStack {
+        ZStack {
+            fondoApp
+                .ignoresSafeArea()
+            
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
                     
@@ -36,7 +41,7 @@ struct EditProfileView: View {
                                 .background(rojoPrimary)
                                 .clipShape(Circle())
                                 .overlay(
-                                    Circle().stroke(Color(.secondarySystemGroupedBackground), lineWidth: 2)
+                                    Circle().stroke(tarjeta, lineWidth: 2)
                                 )
                         }
                         
@@ -70,11 +75,11 @@ struct EditProfileView: View {
                             )
                         }
                         .padding(16)
-                        .background(Color(.secondarySystemGroupedBackground))
+                        .background(tarjeta)
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                     }
                     
-                    // MARK: - Preferencias de Cuenta (Notificaciones)
+                    // MARK: - Preferencias de Cuenta
                     VStack(alignment: .leading, spacing: 16) {
                         Text("PREFERENCIAS DE CUENTA")
                             .font(.system(size: 12, weight: .bold))
@@ -98,22 +103,31 @@ struct EditProfileView: View {
                                 
                                 Spacer()
                                 
-                                // El estado del toggle ahora se guarda directamente
                                 Toggle("", isOn: $alertasHabilitadas)
                                     .labelsHidden()
                                     .tint(rojoPrimary)
                             }
                         }
                         .padding(16)
-                        .background(Color(.secondarySystemGroupedBackground))
+                        .background(tarjeta)
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                     }
                     
                     // MARK: - Botón Guardar Cambios
                     Button(action: {
-                        dismiss() // Cierra la vista manteniendo el estado actualizado del Toggle y TextFields
+                        Task {
+                            guardando = true
+                            let exito = await perfil.guardar(nombre: nombre, correo: correo)
+                            guardando = false
+                            
+                            if exito {
+                                dismiss()
+                            } else {
+                                mostrarAlertaError = true
+                            }
+                        }
                     }) {
-                        Text("Guardar Cambios")
+                        Text(guardando ? "Guardando..." : "Guardar Cambios")
                             .font(.system(size: 16, weight: .bold))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
@@ -121,14 +135,24 @@ struct EditProfileView: View {
                             .background(rojoPrimary)
                             .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
-                    .padding(.top, 12)
+                    .padding(.top, 16)
+                    .disabled(guardando)
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 30)
             }
-            .background(Color(.systemGroupedBackground).ignoresSafeArea())
-            .navigationTitle("Editar Perfil")
-            .navigationBarTitleDisplayMode(.inline)
+        }
+        .navigationTitle("Editar Perfil")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            nombre = perfil.nombre
+            correo = perfil.correo
+            perfil.errorMessage = nil
+        }
+        .alert("No se pudo actualizar", isPresented: $mostrarAlertaError) {
+            Button("Aceptar", role: .cancel) { }
+        } message: {
+            Text(perfil.errorMessage ?? "Revisa tus datos e intenta de nuevo.")
         }
     }
     
@@ -138,8 +162,7 @@ struct EditProfileView: View {
         titulo: String,
         icono: String,
         texto: Binding<String>,
-        teclado: UIKeyboardType = .default,
-        esSeguro: Bool = false
+        teclado: UIKeyboardType = .default
     ) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(titulo)
@@ -151,26 +174,21 @@ struct EditProfileView: View {
                     .foregroundStyle(rojoPrimary)
                     .frame(width: 20)
                 
-                if esSeguro {
-                    SecureField("Ingresa contraseña", text: texto)
-                        .font(.system(size: 15))
-                        .foregroundStyle(.primary)
-                } else {
-                    TextField(titulo, text: texto)
-                        .font(.system(size: 15))
-                        .foregroundStyle(.primary)
-                        .keyboardType(teclado)
-                        .autocorrectionDisabled()
-                }
+                TextField(titulo, text: texto)
+                    .font(.system(size: 15))
+                    .foregroundStyle(.primary)
+                    .keyboardType(teclado)
+                    .autocorrectionDisabled()
             }
         }
     }
 }
 
 #Preview {
-    EditProfileView(
-        nombre: .constant("Usuario"),
-        correo: .constant("correo@ejemplo.com"),
-        alertasHabilitadas: .constant(true)
-    )
+    NavigationStack {
+        EditProfileView(
+            perfil: PerfilViewModel(),
+            alertasHabilitadas: .constant(true)
+        )
+    }
 }

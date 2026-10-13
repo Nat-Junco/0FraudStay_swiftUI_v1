@@ -1,15 +1,8 @@
-//
-//  ReportsView.swift
-//  0FraudStay_swiftUI_v1
-//
-//  Created by alumno on 23/09/26.
-//
-
 import Foundation
 import SwiftUI
 import Combine
 
-// MODELO DE DATOS
+// MARK: - MODELO DE DATOS
 struct UserReport: Codable, Identifiable {
     let id: String
     let folio: String
@@ -29,123 +22,112 @@ struct UserReport: Codable, Identifiable {
     }
 }
 
+extension UserReport {
+    init(dto: DTOReporteResponse, plataforma: String) {
+        let estado: ReportStatus
+        
+        // Mapeo directo con las IDs reales de la Base de Datos (1, 2, 3)
+        switch dto.estadoId {
+        case 1:
+            estado = .enRevision     // ID 1 en BD: "En revisión"
+        case 2:
+            estado = .fraude         // ID 2 en BD: "Fraude confirmado"
+        case 3:
+            estado = .noFraude       // ID 3 en BD: "No es fraude"
+        default:
+            estado = .enRevision     // Fallback de seguridad
+        }
+
+        self.id = dto.id
+        
+        // Folio con los primeros 8 caracteres del UUID
+        let uuidCorto = dto.id.prefix(8).uppercased()
+        self.folio = "RS-\(uuidCorto)"
+        
+        self.titulo = dto.nombre
+        self.plataforma = plataforma
+        self.ubicacion = dto.zona ?? "Sin zona"
+        self.fecha = dto.fecha
+        self.monto = dto.precioTexto
+        self.estado = estado
+        self.esEditable = dto.esEditable
+        self.imageUrl = dto.fotoURLCompleta?.absoluteString
+    }
+}
+
 enum ReportStatus: String, Codable, CaseIterable {
     case todos = "Todos"
-    case pendiente = "Pendiente"
     case enRevision = "En revisión"
     case fraude = "Fraude"
+    case noFraude = "No es fraude"
     
     var colorTexto: Color {
         switch self {
-        case .todos: return .white
-        case .pendiente: return Color(red: 0.45, green: 0.45, blue: 0.48)
-        case .enRevision: return Color(red: 0.85, green: 0.55, blue: 0.15)
-        case .fraude: return Color("BrandPrimaryColor", bundle: nil) != Color.clear ? Color("BrandPrimaryColor") : .red
+        case .todos:
+            return .white
+        case .enRevision:
+            return Color("ReviewColor")
+        case .fraude:
+            return Color.red
+        case .noFraude:
+            return Color("VerificateColor")
         }
     }
     
     var colorFondo: Color {
         switch self {
-        case .todos: return Color("BrandPrimaryColor", bundle: nil) != Color.clear ? Color("BrandPrimaryColor") : .red
-        case .pendiente: return Color(red: 0.94, green: 0.94, blue: 0.96)
-        case .enRevision: return Color(red: 1.0, green: 0.95, blue: 0.88)
-        case .fraude: return Color.red.opacity(0.1)
+        case .todos:
+            return Color.red
+        case .enRevision:
+            return Color.orange.opacity(0.15)
+        case .fraude:
+            return Color.red.opacity(0.12)
+        case .noFraude:
+            return Color.green.opacity(0.12)
         }
     }
 }
 
-// SERVICIO API (BACKEND)
-class ReportService {
-    private let baseURL = "https://api.tudominio.com/v1"
-    
-    func fetchUserReports(token: String) async throws -> [UserReport] {
-        guard let url = URL(string: "\(baseURL)/reports/me") else {
-            throw URLError(.badURL)
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        
-        let (data, response) = try await URLSession.shared.data(for: request)
-        
-        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-            throw URLError(.badServerResponse)
-        }
-        
-        return try JSONDecoder().decode([UserReport].self, from: data)
-    }
-}
-
-// VIEWMODEL
-@MainActor
-class MyReportsViewModel: ObservableObject {
-    @Published var reportes: [UserReport] = []
-    @Published var isLoading: Bool = false
-    @Published var errorMessage: String? = nil
-    
-    // Cambia a 'true' cuando tengas listo tu backend real
-    private let usarBackendReal = false
-    private let service = ReportService()
-    
-    func cargarReportes() async {
-        self.isLoading = true
-        self.errorMessage = nil
-        
-        if usarBackendReal {
-            do {
-                let token = "TOKEN_JWT_AQUI"
-                self.reportes = try await service.fetchUserReports(token: token)
-            } catch {
-                self.errorMessage = "No se pudo conectar con el servidor."
-            }
-        } else {
-            // MODO ESTÁTICO / MOCK
-            try? await Task.sleep(nanoseconds: 400_000_000) // Simula tiempo de respuesta
-            self.reportes = [
-                UserReport(id: "1", folio: "RS-2026-0089", titulo: "Depto Condesa — anfitrión desapareció tras cobro", plataforma: "Facebook Marketplace", ubicacion: "CDMX", fecha: "12 mar 2026", monto: "$8,500 MXN", estado: .enRevision, esEditable: true, imageUrl: nil),
-                UserReport(id: "2", folio: "RS-2026-0086", titulo: "Penthouse Roma Norte — cambio de último minuto", plataforma: "WhatsApp", ubicacion: "CDMX", fecha: "1 mar 2026", monto: "$14,000 MXN", estado: .pendiente, esEditable: true, imageUrl: nil),
-                UserReport(id: "3", folio: "RS-2026-0071", titulo: "Casa Tulum — fotos falsas, nunca entregaron llaves", plataforma: "Airbnb", ubicacion: "Tulum", fecha: "18 feb 2026", monto: "$22,000 MXN", estado: .fraude, esEditable: false, imageUrl: nil),
-                UserReport(id: "4", folio: "RS-2026-0058", titulo: "Studio Polanco — propietario inexistente", plataforma: "Inmuebles24", ubicacion: "CDMX", fecha: "4 feb 2026", monto: "$6,200 MXN", estado: .fraude, esEditable: false, imageUrl: nil)
-            ]
-        }
-        
-        self.isLoading = false
-    }
-}
-
-// VISTA SWIFTUI
+// MARK: - VISTAS
 struct MyReportsView: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var viewModel = MyReportsViewModel()
+    @EnvironmentObject var vm: ReportesViewModel
     @State private var filtroSeleccionado: ReportStatus = .todos
+    @State private var reporteAEditar: DTOReporteResponse?
+    @State private var reporteAEliminar: DTOReporteResponse?
+
+    private func dto(de reporte: UserReport) -> DTOReporteResponse? {
+        vm.mios.first { $0.id.lowercased() == reporte.id.lowercased() }
+    }
+    
+    private var reportes: [UserReport] {
+        vm.mios.map {
+            UserReport(dto: $0, plataforma: vm.nombreFuente($0.fuenteId))
+        }
+    }
+    
+    private var perdidas: String {
+        let confirmados = vm.mios.filter { $0.estadoId == 2 }
+        let total: Double = confirmados.reduce(0.0) { suma, r in suma + (r.precio ?? 0) }
+        return total >= 1000 ? "$\(Int(total / 1000))k" : "$\(Int(total))"
+    }
 
     private var reportesFiltrados: [UserReport] {
         if filtroSeleccionado == .todos {
-            return viewModel.reportes
+            return reportes
         }
-        return viewModel.reportes.filter { $0.estado == filtroSeleccionado }
+        return reportes.filter { $0.estado == filtroSeleccionado }
     }
 
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 18) {
                 
-                // Cabecera
                 VStack(alignment: .leading, spacing: 6) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "arrow.left")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundStyle(Color.red)
-                    }
-                    .padding(.bottom, 4)
-                    
                     Text("MI PERFIL")
                         .font(.system(size: 11, weight: .bold))
                         .kerning(0.8)
-                        .foregroundStyle(Color.gray)
+                        .foregroundStyle(Color("BrandPrimaryColor"))
                     
                     Text("Mis reportes")
                         .font(.system(size: 22, weight: .bold))
@@ -153,13 +135,13 @@ struct MyReportsView: View {
                 
                 // Tarjetas Métricas
                 HStack(spacing: 8) {
-                    MetricCard(valor: "\(viewModel.reportes.count)", titulo: "TOTAL", colorTexto: .black)
-                    MetricCard(valor: "\(viewModel.reportes.filter { $0.estado == .fraude }.count)", titulo: "FRAUDE CONF.", colorTexto: .red)
-                    MetricCard(valor: "\(viewModel.reportes.filter { $0.estado == .enRevision }.count)", titulo: "EN REVISIÓN", colorTexto: .orange)
-                    MetricCard(valor: "$51k", titulo: "PÉRDIDAS", colorTexto: .red)
+                    MetricCard(valor: "\(reportes.count)", titulo: "TOTAL", colorTexto: .black)
+                    MetricCard(valor: "\(reportes.filter { $0.estado == .fraude }.count)", titulo: "FRAUDE CONF.", colorTexto: .red)
+                    MetricCard(valor: "\(reportes.filter { $0.estado == .enRevision }.count)", titulo: "EN REVISIÓN", colorTexto: .orange)
+                    MetricCard(valor: perdidas, titulo: "PÉRDIDAS", colorTexto: .red)
                 }
 
-                // Selector de Filtros
+                // Filtros
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
                         ForEach(ReportStatus.allCases, id: \.self) { status in
@@ -185,25 +167,39 @@ struct MyReportsView: View {
                 }
 
                 // Contenido principal
-                if viewModel.isLoading {
+                if vm.isLoading && reportes.isEmpty {
                     ProgressView()
                         .frame(maxWidth: .infinity)
                         .padding(.top, 30)
-                } else if let error = viewModel.errorMessage {
+                } else if let error = vm.errorMessage, reportes.isEmpty {
                     VStack(spacing: 8) {
                         Text(error)
                             .font(.system(size: 13))
                             .foregroundStyle(Color.red)
                         Button("Reintentar") {
-                            Task { await viewModel.cargarReportes() }
+                            Task { await vm.cargarTodo() }
                         }
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.top, 20)
+                } else if reportes.isEmpty {
+                    ContentUnavailableView("Sin reportes", systemImage: "tray", description: Text("Aún no has creado ningún reporte."))
                 } else {
                     VStack(spacing: 12) {
                         ForEach(reportesFiltrados) { reporte in
-                            ReportRowCard(reporte: reporte)
+                            ReportRowCard(
+                                reporte: reporte,
+                                onEditar: {
+                                    if let dtoEncontrado = dto(de: reporte) {
+                                        reporteAEditar = dtoEncontrado
+                                    }
+                                },
+                                onEliminar: {
+                                    if let dtoEncontrado = dto(de: reporte) {
+                                        reporteAEliminar = dtoEncontrado
+                                    }
+                                }
+                            )
                         }
                     }
                 }
@@ -211,14 +207,25 @@ struct MyReportsView: View {
             .padding(20)
         }
         .background(Color(red: 0.97, green: 0.97, blue: 0.98).ignoresSafeArea())
-        .navigationBarBackButtonHidden(true)
         .task {
-            await viewModel.cargarReportes()
+            await vm.cargarTodo()
+        }
+        .refreshable {
+            await vm.cargarTodo()
+        }
+        .sheet(item: $reporteAEditar) { reporte in
+            EditReportView(reporte: reporte)
+                .environmentObject(vm)
+        }
+        .sheet(item: $reporteAEliminar) { reporte in
+            DeleteReportView(onDelete: {
+                Task { await vm.eliminar(reporte) }
+            })
+            .presentationDetents([.height(340)])
         }
     }
 }
 
-// COMPONENTES SECUNDARIOS
 struct MetricCard: View {
     let valor: String
     let titulo: String
@@ -246,9 +253,11 @@ struct MetricCard: View {
 
 struct ReportRowCard: View {
     let reporte: UserReport
+    var onEditar: (() -> Void)? = nil
+    var onEliminar: (() -> Void)? = nil
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top, spacing: 10) {
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Color.gray.opacity(0.18))
@@ -291,14 +300,61 @@ struct ReportRowCard: View {
                     .foregroundStyle(Color.gray.opacity(0.8))
             }
             
-            if !reporte.esEditable {
+            if reporte.esEditable {
+                Divider()
+                    .padding(.vertical, 2)
+                
+                HStack(spacing: 10) {
+                    Button {
+                        onEditar?()
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "square.and.pencil")
+                                .renderingMode(.template)
+                                .font(.system(size: 12, weight: .bold))
+                            Text("Editar")
+                                .font(.system(size: 12, weight: .bold))
+                        }
+                        .foregroundStyle(Color.black)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 9)
+                        .background(Color.gray.opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.gray.opacity(0.25), lineWidth: 1)
+                        )
+                    }
+                    
+                    Button {
+                        onEliminar?()
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "trash")
+                                .renderingMode(.template)
+                                .font(.system(size: 12, weight: .bold))
+                            Text("Eliminar")
+                                .font(.system(size: 12, weight: .bold))
+                        }
+                        .foregroundStyle(Color.red.opacity(0.85))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 9)
+                        .background(Color.red.opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.red.opacity(0.25), lineWidth: 1)
+                        )
+                    }
+                }
+            } else {
                 Divider()
                     .padding(.vertical, 2)
                 
                 HStack(spacing: 4) {
                     Image(systemName: "lock.fill")
                         .font(.system(size: 9))
-                    Text("Confirmado como fraude · ya no es editable")
+                    Text("Revisado por un administrador. Ya no es editable")
                         .font(.system(size: 10, weight: .medium))
                 }
                 .foregroundStyle(Color.green)
@@ -308,11 +364,5 @@ struct ReportRowCard: View {
         .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .shadow(color: Color.black.opacity(0.02), radius: 4, x: 0, y: 2)
-    }
-}
-
-#Preview {
-    NavigationStack {
-        MyReportsView()
     }
 }

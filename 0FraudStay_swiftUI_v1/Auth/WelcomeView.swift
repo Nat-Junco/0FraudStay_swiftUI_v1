@@ -8,19 +8,19 @@
 import SwiftUI
 
 struct WelcomeView: View {
-    @State private var isActive = false
+    private let fondo = Color("FondoApp")
     
     var body: some View {
-        
-        if isActive {
-            LogInView()
-        } else {
-            ZStack {
-                Color(.systemBackground)
-                    .ignoresSafeArea()
+        ZStack {
+            fondo
+                .ignoresSafeArea()
+            
+            VStack {
+                Spacer()
+                    .frame(height: 170)
                 
+                // Tarjeta centrada
                 VStack(spacing: 20) {
-                    Spacer()
                     Image(.appLogo)
                         .resizable()
                         .scaledToFit()
@@ -29,41 +29,16 @@ struct WelcomeView: View {
                     Text("0Fraud Stay")
                         .font(.system(size: 30, weight: .bold, design: .rounded))
                         .foregroundColor(.primary)
-                    
-                    Text("Reportes comunitarios de fraudes en hospedajes vacacionales")
-                        .font(.system(size: 15))
-                        .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
-                        .padding(.horizontal, 40)
-                    Spacer()
-                    
-                    HStack(spacing: 12) {
-                        Text("⚠️")
-                            .font(.title2)
-                        VStack(alignment: .leading, spacing: 2) {
-                            
-                            // Este dato hay que modificarlo por uno verdadero
-                            (Text("+1,600 reportes ")
-                                .bold().foregroundColor(.red)).font(.system(size: 13))
-                                .foregroundColor(.primary)
-                            (Text("registrados de ene–mar 2026 según el Consejo Ciudadano para la Seguridad de CDMX."))
-                                .font(.system(size: 13))
-                                .foregroundColor(.primary)
-                        }
-                    }
-                    .padding()
-                    .background(Color(.secondarySystemBackground))
-                    .cornerRadius(15)
-                    .padding(.horizontal, 24)
-                    Spacer()
+                        .frame(maxWidth: .infinity) // Garantiza el centrado del texto
                 }
-            }
-            .task {
-                try? await Task.sleep(for: .seconds(5))
+                .padding(.vertical, 32)
+                .padding(.horizontal, 24)
+                .background(Color(.secondarySystemBackground))
+                .cornerRadius(16)
+                .padding(.horizontal, 24)
                 
-                withAnimation(.easeInOut) {
-                    isActive = true
-                }
+                Spacer()
             }
         }
     }

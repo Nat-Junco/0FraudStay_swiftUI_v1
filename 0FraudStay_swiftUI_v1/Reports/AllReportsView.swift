@@ -5,68 +5,67 @@
 //  Created by alumnos on 29/09/26.
 //
 
+//  Consultar reportes (GET /reportes) con «extend» Buscar reportes
+//  (filtro local por texto y estado) y Consultar detalle (ReportDetailView).
+//
+
 import SwiftUI
 struct AllReportsView: View {
+    @EnvironmentObject var vm: ReportesViewModel
+
     private let rojo = Color("BrandPrimaryColor")
     private let verde = Color("VerificateColor")
     private let revision = Color("ReviewColor")
     private let fondo = Color("FondoApp")
     private let tarjeta = Color(.secondarySystemGroupedBackground)
     private let borde = Color("Border")
+    
     @State private var busqueda = ""
     @State private var filtro = "Todos"
-    private let filtros = ["Todos", "Verificados", "En Revisión", "Pendientes"]
-    private let reportes: [ReporteEjemplo] = [
-        ReporteEjemplo(imagen: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800",
-                       estado: "VERIFICADO", precio: "$4,200",
-                       titulo: "Depto amueblado Condesa — nunca existió",
-                       plataforma: "Facebook Marketplace", ubicacion: "Condesa, Ciudad de México",
-                       fecha: "12 mar 2026", etiqueta: "Propiedad Fantasma", votos: 47),
-        ReporteEjemplo(imagen: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800",
-                       estado: "VERIFICADO", precio: "$8,500",
-                       titulo: "Casa en Tulum — fotos robadas de Airbnb",
-                       plataforma: "Airbnb (cuenta clonada)", ubicacion: "Aldea Zama, Tulum",
-                       fecha: "28 feb 2026", etiqueta: "Clonación de Anuncio", votos: 63),
-        ReporteEjemplo(imagen: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800",
-                       estado: "EN REVISIÓN", precio: "$14,000",
-                       titulo: "Penthouse Roma Norte — cambio de último minuto",
-                       plataforma: "WhatsApp", ubicacion: "Roma Norte, Ciudad de México",
-                       fecha: "1 mar 2026", etiqueta: "Cambio de Propiedad", votos: 21),
-        ReporteEjemplo(imagen: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800",
-                       estado: "PENDIENTE", precio: "$6,200",
-                       titulo: "Studio Polanco — propietario inexistente",
-                       plataforma: "Inmuebles24", ubicacion: "Polanco, Ciudad de México",
-                       fecha: "4 feb 2026", etiqueta: "Anfitrión Falso", votos: 12)
-    ]
-    private var filtrados: [ReporteEjemplo] {
-        reportes.filter { r in
-            let coincideTexto = busqueda.isEmpty
-                || r.titulo.localizedCaseInsensitiveContains(busqueda)
-                || r.ubicacion.localizedCaseInsensitiveContains(busqueda)
-                || r.plataforma.localizedCaseInsensitiveContains(busqueda)
+    
+    private let filtros = ["Todos", "Fraude", "No es fraude"]
+
+    private var filtrados: [DTOReporteResponse] {
+        vm.todos.filter { r in
+            let coincideTexto = busqueda.esVacio
+                || r.nombre.localizedCaseInsensitiveContains(busqueda)
+                || (r.zona ?? "").localizedCaseInsensitiveContains(busqueda)
+                || vm.nombreFuente(r.fuenteId).localizedCaseInsensitiveContains(busqueda)
+                || vm.nombreTipoFraude(r.tipoFraudeId).localizedCaseInsensitiveContains(busqueda)
+
+            // ids de la tabla `estado`: 1 Pendiente, 2 En revisión, 3 Verificado (= fraude)
             let coincideEstado: Bool
             switch filtro {
-            case "Verificados": coincideEstado = r.estado == "VERIFICADO"
-            case "En Revisión": coincideEstado = r.estado == "EN REVISIÓN"
-            case "Pendientes":  coincideEstado = r.estado == "PENDIENTE"
-            default:            coincideEstado = true
+            case "Fraude":       coincideEstado = r.estadoId == 2
+            case "No es fraude": coincideEstado = r.estadoId == 3
+            default:             coincideEstado = true
             }
-            return coincideTexto && coincideEstado
+
+            return coincideTexto && coincideEstado && r.estadoId != 1
         }
     }
+
+    /// Texto del estado como lo usa el diseño ("FRAUDE" para verificados)
+    private func estadoTexto(_ r: DTOReporteResponse) -> String {
+        r.nombreEstado
+    }
+
     private func colorDe(_ estado: String) -> Color {
         switch estado {
-        case "VERIFICADO":  return verde
-        case "EN REVISIÓN": return revision
-        default:            return Color.gray
+        case "FRAUDE":       return rojo
+        case "NO ES FRAUDE": return verde
+        case "EN REVISIÓN":  return revision
+        default:             return Color.gray
         }
     }
+
+    
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 18) {
                 HStack(alignment: .center) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("OFRAUD STAY")
+                        Text("0FRAUD STAY")
                             .font(.system(size: 12, weight: .bold))
                             .kerning(1.2)
                             .foregroundStyle(rojo)
@@ -131,11 +130,24 @@ struct AllReportsView: View {
                         }
                     }
                 }
-
-                if filtrados.isEmpty {
+                if vm.isLoading && vm.todos.isEmpty {
+                    ProgressView("Cargando reportes…")
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 40)
+                } else if let error = vm.errorMessage, vm.todos.isEmpty {
+                    VStack(spacing: 12) {
+                        Text(error)
+                            .font(.system(size: 14))
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                        Button("Reintentar") { Task { await vm.cargarTodo() } }
+                            .buttonStyle(.borderedProminent)
+                            .tint(rojo)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 40)
+                } else if filtrados.isEmpty {
                     VStack(spacing: 8) {
-                        Text("🔎")
-                            .font(.system(size: 32))
                         Text("Sin resultados")
                             .font(.system(size: 17, weight: .semibold))
                         Text("No hay reportes que coincidan con tu búsqueda.")
@@ -147,11 +159,11 @@ struct AllReportsView: View {
                 } else {
                     ForEach(filtrados) { reporte in
                         NavigationLink {
-                            ReportDetailView(reporte: ReportDetail(from: reporte))
+                            ReportDetailView(reporte: reporte)
                         } label: {
                             VStack(alignment: .leading, spacing: 0) {
                                 ZStack(alignment: .top) {
-                                    AsyncImage(url: URL(string: reporte.imagen)) { fase in
+                                    AsyncImage(url: reporte.fotoURLCompleta) { fase in
                                         if let imagen = fase.image {
                                             imagen.resizable().scaledToFill()
                                         } else {
@@ -163,19 +175,19 @@ struct AllReportsView: View {
                                     .clipped()
                                     .contentShape(RoundedRectangle(cornerRadius: 18))
                                     HStack {
-                                        Text(reporte.estado)
+                                        Text(estadoTexto(reporte))
                                             .font(.system(size: 11, weight: .bold))
-                                            .foregroundStyle(colorDe(reporte.estado))
+                                            .foregroundStyle(colorDe(estadoTexto(reporte)))
                                             .padding(.horizontal, 8)
                                             .padding(.vertical, 4)
                                             .background(tarjeta.opacity(0.85))
                                             .clipShape(RoundedRectangle(cornerRadius: 6))
                                             .overlay(
                                                 RoundedRectangle(cornerRadius: 6)
-                                                    .stroke(colorDe(reporte.estado).opacity(0.4), lineWidth: 1)
+                                                    .stroke(colorDe(estadoTexto(reporte)).opacity(0.4), lineWidth: 1)
                                             )
                                         Spacer()
-                                        Text(reporte.precio)
+                                        Text(reporte.precioTexto)
                                             .font(.system(size: 13, weight: .bold))
                                             .foregroundStyle(rojo)
                                             .padding(.horizontal, 8)
@@ -186,26 +198,26 @@ struct AllReportsView: View {
                                     .padding(12)
                                 }
                                 VStack(alignment: .leading, spacing: 10) {
-                                    Text(reporte.titulo)
+                                    Text(reporte.nombre)
                                         .font(.system(size: 16, weight: .semibold))
                                         .foregroundStyle(.primary)
                                         .multilineTextAlignment(.leading)
                                         .fixedSize(horizontal: false, vertical: true)
                                     HStack(alignment: .top, spacing: 8) {
-                                        Text(reporte.plataforma)
+                                        Text(vm.nombreFuente(reporte.fuenteId))
                                             .frame(maxWidth: .infinity, alignment: .leading)
                                         Text("·")
-                                        Text(reporte.ubicacion)
+                                        Text(reporte.zona ?? "Sin zona")
                                             .frame(maxWidth: .infinity, alignment: .leading)
                                         Text("·")
                                         Text(reporte.fecha)
-                                            .frame(width: 60, alignment: .leading)
+                                            .frame(width: 80, alignment: .leading)
                                     }
                                     .font(.system(size: 13))
                                     .foregroundStyle(.secondary)
                                     .multilineTextAlignment(.leading)
                                     HStack {
-                                        Text(reporte.etiqueta)
+                                        Text(vm.nombreTipoFraude(reporte.tipoFraudeId))
                                             .font(.system(size: 12, weight: .medium))
                                             .foregroundStyle(.secondary)
                                             .padding(.horizontal, 8)
@@ -213,9 +225,6 @@ struct AllReportsView: View {
                                             .background(fondo)
                                             .clipShape(RoundedRectangle(cornerRadius: 6))
                                         Spacer()
-                                        Text("▲ \(reporte.votos)")
-                                            .font(.system(size: 13, weight: .medium))
-                                            .foregroundStyle(.secondary)
                                     }
                                 }
                                 .padding(16)
@@ -236,42 +245,13 @@ struct AllReportsView: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .background(fondo.ignoresSafeArea())
-    }
-}
-
-struct ReporteEjemplo: Identifiable {
-    let id = UUID()
-    let imagen: String
-    let estado: String
-    let precio: String
-    let titulo: String
-    let plataforma: String
-    let ubicacion: String
-    let fecha: String
-    let etiqueta: String
-    let votos: Int
-}
-// Conversión a ReportDetail
-extension ReportDetail {
-    init(from ejemplo: ReporteEjemplo) {
-        self.id = ejemplo.id.uuidString
-        self.imageUrls = [ejemplo.imagen]
-        self.estado = ejemplo.estado
-        self.tipoFraude = ejemplo.etiqueta.uppercased()
-        self.titulo = ejemplo.titulo
-        self.plataforma = ejemplo.plataforma
-        self.ubicacion = ejemplo.ubicacion
-        self.fecha = ejemplo.fecha
-        self.montoDefraudado = ejemplo.precio
-        self.descripcion = "Publicación con irregularidades detectadas. No realices transferencias ni depósitos de anticipo sin antes verificar la autenticidad del inmueble."
-        self.nombreEstafador = "En investigación"
-        self.linkEstafador = "No especificado"
+        .refreshable { await vm.cargarTodo() }
+        .task { if vm.todos.isEmpty { await vm.cargarTodo() } }
     }
 }
 #Preview {
     NavigationStack {
         AllReportsView()
+            .environmentObject(ReportesViewModel())
     }
 }
-
-
