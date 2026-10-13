@@ -36,7 +36,7 @@ struct PrivacyView: View {
                     
                     seccionTexto(
                         titulo: "1. Responsable de la Protección de Datos",
-                        contenido: "OFRAUD STAY es responsable del tratamiento de sus datos personales recolectados a través de esta aplicación móvil. Nos comprometemos a garantizar la confidencialidad y seguridad de su información conforme a la legislación aplicable."
+                        contenido: "0FRAUD STAY es responsable del tratamiento de sus datos personales recolectados a través de esta aplicación móvil. Nos comprometemos a garantizar la confidencialidad y seguridad de su información conforme a la legislación aplicable."
                     )
                     
                     Divider()

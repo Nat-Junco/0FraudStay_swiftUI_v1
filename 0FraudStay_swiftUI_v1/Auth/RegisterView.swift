@@ -9,9 +9,11 @@ struct RegisterView: View {
     @Environment(\.authController) var controladorRegistro
     @Environment(\.dismiss) private var dismiss
     @State private var usuario = Usuario()
-    
-    // Arreglo para acumular errores y desplegar el banner flotante superior
-    @State private var erroresFormulario: [String] = []
+    // Estados para mensajes de error debajo de cada campo
+    @State private var errorNombre: String? = nil
+    @State private var errorCorreo: String? = nil
+    @State private var errorPassword: String? = nil
+    @State private var errorConfirmarPassword: String? = nil
     
     @State private var irATerminos = false
     @State private var mostrarAlertaExito = false
@@ -19,58 +21,81 @@ struct RegisterView: View {
     @State private var mostrarPassword = false
     @State private var mostrarConfirmarPassword = false
     
-    private enum CampoPassword {
+    private enum CampoFormulario {
+        case nombre
+        case correo
         case password
         case confirmarPassword
     }
 
-    @FocusState private var campoEnfocado: CampoPassword?
+    @FocusState private var campoEnfocado: CampoFormulario?
     
     private let primaryColor = Color("BrandPrimaryColor")
     private let fondo = Color("FondoApp")
     
-    // Función auxiliar para mostrar errores con animación y desvanecimiento automático
-    private func mostrarErrores(_ lista: [String]) {
-        withAnimation(.easeInOut(duration: 0.3)) {
-            erroresFormulario = lista
+    // Función de validación de campos con mensajes específicos
+    private func validarFormulario() -> Bool {
+        errorNombre = nil
+        errorCorreo = nil
+        errorPassword = nil
+        errorConfirmarPassword = nil
+        var esValido = true
+        
+        // 1. Nombre
+        if usuario.nombre.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            errorNombre = "Por favor, ingresa tu nombre completo."
+            esValido = false
         }
         
-        Task {
-            try? await Task.sleep(for: .seconds(4))
-            if erroresFormulario == lista {
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    erroresFormulario = []
-                }
-            }
+        // 2. Correo Electrónico
+        let correoLimpio = usuario.correo.trimmingCharacters(in: .whitespacesAndNewlines)
+        if correoLimpio.isEmpty {
+            errorCorreo = "Por favor, ingresa tu correo electrónico."
+            esValido = false
+        } else if !correoLimpio.contains("@") || !correoLimpio.contains(".") {
+            errorCorreo = "Ingresa una dirección de correo válida."
+            esValido = false
         }
+        
+        // 3. Reglas detalladas de Contraseña
+        if usuario.password.isEmpty {
+            errorPassword = "Por favor, ingresa tu contraseña."
+            esValido = false
+        } else if !usuario.password.esLongitudValida {
+            errorPassword = "La contraseña debe tener al menos 10 caracteres."
+            esValido = false
+        } else if !usuario.password.tieneMayuscula {
+            errorPassword = "La contraseña debe contener al menos una letra mayúscula."
+            esValido = false
+        } else if !usuario.password.tieneMinuscula {
+            errorPassword = "La contraseña debe contener al menos una letra minúscula."
+            esValido = false
+        } else if !usuario.password.tieneNumero {
+            errorPassword = "La contraseña debe contener al menos un número."
+            esValido = false
+        } else if !usuario.password.tieneSimbolo {
+            errorPassword = "La contraseña debe contener al menos un símbolo especial."
+            esValido = false
+        } else if usuario.password.tieneTresIgualesSeguidos {
+            errorPassword = "La contraseña no puede tener tres caracteres iguales consecutivos."
+            esValido = false
+        }
+        
+        // 4. Confirmación de Contraseña
+        if usuario.confirmarPassword.isEmpty {
+            errorConfirmarPassword = "La confirmación de la contraseña es requerida."
+            esValido = false
+        } else if usuario.password != usuario.confirmarPassword {
+            errorConfirmarPassword = "Las contraseñas no coinciden, vuelve a intentarlo."
+            esValido = false
+        }
+        
+        return esValido
     }
     
     func registroUsuario() async {
-        withAnimation { erroresFormulario = [] }
-        var validacionesLocales: [String] = []
+        guard validarFormulario() else { return }
         
-        // 1. Validaciones locales de formulario
-        if usuario.nombre.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            validacionesLocales.append("Por favor, ingresa tu nombre completo.")
-        }
-        if usuario.correo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            validacionesLocales.append("Por favor, ingresa tu correo electrónico.")
-        }
-        if usuario.password.isEmpty {
-            validacionesLocales.append("Por favor, ingresa una contraseña válida.")
-        }
-        if usuario.confirmarPassword.isEmpty {
-            validacionesLocales.append("La confirmación de la contraseña es requerida.")
-        } else if !usuario.password.isEmpty && usuario.password != usuario.confirmarPassword {
-            validacionesLocales.append("Las contraseñas no coinciden, vuelve a intentarlo.")
-        }
-        
-        guard validacionesLocales.isEmpty else {
-            mostrarErrores(validacionesLocales)
-            return
-        }
-        
-        // 2. Petición al servidor
         cargando = true
         do {
             let response = try await controladorRegistro.registerUser(
@@ -78,21 +103,21 @@ struct RegisterView: View {
                 password: usuario.password,
                 nombre: usuario.nombre
             )
-            print("Usuario registrado: \(response.id) - \(response.email)")
+            print("Usuario registrado: \(response.id) \(response.email)")
             irATerminos = true
         } catch ErrorAPI.status(409) {
-            mostrarErrores(["Este correo electrónico ya está asociado a una cuenta."])
+            errorCorreo = "Este correo electrónico ya está asociado a una cuenta."
         } catch ErrorAPI.status(400) {
-            mostrarErrores(["Las contraseñas o datos enviados no son válidos. Revisa la información."])
+            errorPassword = "Las contraseñas o datos enviados no son válidos."
         } catch {
             print("Error al registrar: \(error)")
-            mostrarErrores(["No se pudo conectar con el servidor. Verifica tu conexión a internet o inténtalo más tarde."])
+            errorCorreo = "No se pudo conectar con el servidor. Inténtalo más tarde."
         }
         cargando = false
     }
     
     var body: some View {
-        ZStack(alignment: .top) {
+        ZStack {
             fondo
                 .ignoresSafeArea()
             
@@ -108,36 +133,61 @@ struct RegisterView: View {
                     }
                     .padding(.top, 16)
                     
-                    // Formulario de Entradas
+                    // MARK: - Formulario de Entradas
                     VStack(alignment: .leading, spacing: 14) {
                         
-                        // Nombre
+                        // Nombre Completo
                         VStack(alignment: .leading, spacing: 6) {
                             Text("NOMBRE COMPLETO")
                                 .font(.caption)
                                 .bold()
                                 .foregroundColor(.gray)
                             TextField("Introduce tu nombre completo", text: $usuario.nombre)
+                                .focused($campoEnfocado, equals: .nombre)
+                                .foregroundColor(.black)
                                 .padding()
                                 .background(Color(.white))
                                 .cornerRadius(12)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(errorNombre != nil ? Color.red : Color.clear, lineWidth: 1)
+                                )
+                            
+                            if let msg = errorNombre {
+                                Text(msg)
+                                    .font(.caption)
+                                    .foregroundColor(.red)
+                                    .padding(.leading, 4)
+                            }
                         }
                         
-                        // Email
+                        // Correo Electrónico
                         VStack(alignment: .leading, spacing: 6) {
                             Text("CORREO ELECTRÓNICO")
                                 .font(.caption)
                                 .bold()
                                 .foregroundColor(.gray)
                             TextField("Introduce tu correo", text: $usuario.correo)
+                                .focused($campoEnfocado, equals: .correo)
                                 .keyboardType(.emailAddress)
                                 .textInputAutocapitalization(.never)
                                 .autocorrectionDisabled()
+                                .foregroundColor(.black)
                                 .padding()
                                 .background(Color(.white))
                                 .cornerRadius(12)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(errorCorreo != nil ? Color.red : Color.clear, lineWidth: 1)
+                                )
+                            
+                            if let msg = errorCorreo {
+                                Text(msg)
+                                    .font(.caption)
+                                    .foregroundColor(.red)
+                                    .padding(.leading, 4)
+                            }
                         }
-                        
                         // Contraseña
                         VStack(alignment: .leading, spacing: 6) {
                             Text("CONTRASEÑA")
@@ -146,31 +196,41 @@ struct RegisterView: View {
                                 .foregroundColor(.gray)
                             
                             HStack {
-                                ZStack {
-                                    if mostrarPassword {
-                                        TextField("Introduce tu contraseña (mín. 10 caracteres)", text: $usuario.password)
-                                            .textInputAutocapitalization(.never)
-                                            .autocorrectionDisabled()
-                                            .focused($campoEnfocado, equals: .password)
-                                    } else {
-                                        SecureField("Introduce tu contraseña (mín. 10 caracteres)", text: $usuario.password)
-                                            .focused($campoEnfocado, equals: .password)
-                                    }
+                                if mostrarPassword {
+                                    TextField("Introduce tu contraseña", text: $usuario.password)
+                                        .focused($campoEnfocado, equals: .password) // Vinculación al enum
+                                        .textInputAutocapitalization(.never)
+                                        .autocorrectionDisabled()
+                                        .foregroundColor(.black)
+                                } else {
+                                    SecureField("Introduce tu contraseña", text: $usuario.password)
+                                        .focused($campoEnfocado, equals: .password) // Vinculación al mismo caso del enum
+                                        .foregroundColor(.black)
                                 }
                                 
                                 Button {
                                     mostrarPassword.toggle()
+                                    // Al hacer toggle, reasignamos el enum para que el foco no se pierda
                                     campoEnfocado = .password
                                 } label: {
                                     Image(systemName: mostrarPassword ? "eye.slash.fill" : "eye.fill")
-                                        .renderingMode(.template)
                                         .foregroundColor(.gray)
-                                        .font(.system(size: 16))
                                 }
                             }
                             .padding()
                             .background(Color(.white))
                             .cornerRadius(12)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(errorPassword != nil ? Color.red : Color.clear, lineWidth: 1)
+                            )
+                            
+                            if let msg = errorPassword {
+                                Text(msg)
+                                    .font(.caption)
+                                    .foregroundColor(.red)
+                                    .padding(.leading, 4)
+                            }
                         }
 
                         // Confirmar Contraseña
@@ -181,21 +241,20 @@ struct RegisterView: View {
                                 .foregroundColor(.gray)
                             
                             HStack {
-                                ZStack {
+                                Group {
                                     if mostrarConfirmarPassword {
                                         TextField("Introduce tu contraseña", text: $usuario.confirmarPassword)
-                                            .textInputAutocapitalization(.never)
-                                            .autocorrectionDisabled()
-                                            .focused($campoEnfocado, equals: .confirmarPassword)
                                     } else {
                                         SecureField("Introduce tu contraseña", text: $usuario.confirmarPassword)
-                                            .focused($campoEnfocado, equals: .confirmarPassword)
                                     }
                                 }
+                                .focused($campoEnfocado, equals: .confirmarPassword)
+                                .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled()
+                                .foregroundColor(.black)
                                 
                                 Button {
                                     mostrarConfirmarPassword.toggle()
-                                    campoEnfocado = .confirmarPassword
                                 } label: {
                                     Image(systemName: mostrarConfirmarPassword ? "eye.slash.fill" : "eye.fill")
                                         .renderingMode(.template)
@@ -206,12 +265,23 @@ struct RegisterView: View {
                             .padding()
                             .background(Color(.white))
                             .cornerRadius(12)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(errorConfirmarPassword != nil ? Color.red : Color.clear, lineWidth: 1)
+                            )
+                            
+                            if let msg = errorConfirmarPassword {
+                                Text(msg)
+                                    .font(.caption)
+                                    .foregroundColor(.red)
+                                    .padding(.leading, 4)
+                            }
                         }
                     }
                     
                     Spacer(minLength: 20)
                     
-                    // Botón de Registro
+                    // MARK: - Botón de Registro
                     Button(action: {
                         Task {
                             await registroUsuario()
@@ -235,49 +305,6 @@ struct RegisterView: View {
                     .padding(.bottom, 10)
                 }
                 .padding(.horizontal, 24)
-            }
-            
-            // MARK: - BANNER DE ALERTA DE ERRORES (Mismo estilo que CreateReportView)
-            if !erroresFormulario.isEmpty {
-                VStack {
-                    HStack(alignment: .top, spacing: 12) {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundColor(.white)
-                            .font(.system(size: 18))
-                        
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Por favor corrige lo siguiente:")
-                                .font(.subheadline)
-                                .bold()
-                                .foregroundColor(.white)
-                            
-                            ForEach(erroresFormulario, id: \.self) { error in
-                                Text("• \(error)")
-                                    .font(.caption)
-                                    .foregroundColor(.white.opacity(0.95))
-                            }
-                        }
-                        
-                        Spacer()
-                        
-                        Button {
-                            withAnimation { erroresFormulario = [] }
-                        } label: {
-                            Image(systemName: "xmark")
-                                .foregroundColor(.white)
-                                .font(.system(size: 14, weight: .bold))
-                        }
-                    }
-                    .padding()
-                    .background(primaryColor.opacity(0.95))
-                    .cornerRadius(14)
-                    .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 4)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 10)
-                }
-                .transition(.move(edge: .top).combined(with: .opacity))
-                .animation(.easeInOut(duration: 0.3), value: erroresFormulario)
-                .zIndex(10)
             }
         }
         .navigationDestination(isPresented: $irATerminos) {

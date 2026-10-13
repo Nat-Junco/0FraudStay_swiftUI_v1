@@ -13,48 +13,59 @@ struct LogInView: View {
     @State private var mostrarPassword = false
     @FocusState private var estaEnfocado: Bool
     
-    // Arreglo para almacenar los errores y desplegar el banner de alerta
-    @State private var erroresFormulario: [String] = []
+    // Estados para mensajes de error inline
+    @State private var errorEmail: String? = nil
+    @State private var errorPassword: String? = nil
     
     @Environment(\.authController) var controladorRegistro
     
     private let primaryColor = Color("BrandPrimaryColor")
     private let fondo = Color("FondoApp")
     
+    // Validación básica para inicio de sesión
+    private func validarFormulario() -> Bool {
+        errorEmail = nil
+        errorPassword = nil
+        var esValido = true
+        
+        let emailLimpio = email.trimmingCharacters(in: .whitespacesAndNewlines)
+        if emailLimpio.isEmpty {
+            errorEmail = "Por favor, ingresa tu correo electrónico."
+            esValido = false
+        } else if !emailLimpio.contains("@") || !emailLimpio.contains(".") {
+            errorEmail = "Ingresa una dirección de correo válida."
+            esValido = false
+        }
+        
+        if password.isEmpty {
+            errorPassword = "Por favor, ingresa tu contraseña."
+            esValido = false
+        }
+        
+        return esValido
+    }
+    
     private func login() async {
+        guard validarFormulario() else { return }
+        
         cargando = true
-        withAnimation { erroresFormulario = [] }
+        errorEmail = nil
+        errorPassword = nil
         
         do {
             let exito = try await controladorRegistro.loginUser(email: email, password: password)
             withAnimation { isLoggedIn = exito }
         } catch ErrorAPI.status(401) {
-            mostrarErrorConAutoOcultar("El correo o la contraseña ingresados son incorrectos.")
+            // Mensaje cuando las credenciales no coinciden con la base de datos
+            errorPassword = "La contraseña no coincide."
         } catch ErrorAPI.status(400) {
-            mostrarErrorConAutoOcultar("Por favor, ingresa una dirección de correo electrónico válida.")
+            errorEmail = "El formato del correo electrónico no es válido."
         } catch {
             print(error.localizedDescription)
-            mostrarErrorConAutoOcultar("No se pudo conectar con el servidor. Verifica tu conexión a internet o inténtalo más tarde.")
+            errorEmail = "No se pudo conectar con el servidor. Inténtalo más tarde."
         }
         
         cargando = false
-    }
-
-    // Función auxiliar para mostrar el banner y desvanecerlo automáticamente tras 4 segundos
-    private func mostrarErrorConAutoOcultar(_ mensaje: String) {
-        withAnimation(.easeInOut(duration: 0.3)) {
-            erroresFormulario = [mensaje]
-        }
-        
-        Task {
-            try? await Task.sleep(for: .seconds(4))
-            // Verifica que la alerta siga siendo la misma antes de ocultarla
-            if erroresFormulario.contains(mensaje) {
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    erroresFormulario = []
-                }
-            }
-        }
     }
     
     var body: some View {
@@ -62,7 +73,7 @@ struct LogInView: View {
             StartView()
         } else {
             NavigationStack {
-                ZStack(alignment: .top) {
+                ZStack {
                     fondo
                         .ignoresSafeArea()
                     
@@ -82,13 +93,16 @@ struct LogInView: View {
                         }
                         .padding(.top, 10)
                         
+                        // MARK: - Formulario de Entradas
                         VStack(alignment: .leading, spacing: 16) {
                             
+                            // Campo: Correo Electrónico
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("CORREO ELECTRÓNICO")
                                     .font(.caption)
                                     .bold()
                                     .foregroundColor(.gray)
+                                
                                 TextField("Introduce tu correo", text: $email)
                                     .keyboardType(.emailAddress)
                                     .textInputAutocapitalization(.never)
@@ -97,8 +111,20 @@ struct LogInView: View {
                                     .padding()
                                     .background(Color(.white))
                                     .cornerRadius(12)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(errorEmail != nil ? Color.red : Color.clear, lineWidth: 1)
+                                    )
+                                
+                                if let msg = errorEmail {
+                                    Text(msg)
+                                        .font(.caption)
+                                        .foregroundColor(.red)
+                                        .padding(.leading, 4)
+                                }
                             }
                             
+                            // Campo: Contraseña
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("CONTRASEÑA")
                                     .font(.caption)
@@ -107,31 +133,44 @@ struct LogInView: View {
                                 
                                 HStack {
                                     ZStack {
-                                                        if mostrarPassword {
-                                                            TextField("••••••••••", text: $password)
-                                                                .textInputAutocapitalization(.never)
-                                                                .autocorrectionDisabled()
-                                                                .focused($estaEnfocado)
-                                                        } else {
-                                                            SecureField("••••••••••", text: $password)
-                                                                .focused($estaEnfocado)
-                                                        }
-                                                    }
-                                                    
-                                                    Button {
-                                                        mostrarPassword.toggle()
-                                                        // Mantiene el foco en el campo activo para que no se pierda el teclado ni el texto
-                                                        estaEnfocado = true
-                                                    } label: {
-                                                        Image(systemName: mostrarPassword ? "eye.slash.fill" : "eye.fill")
-                                                            .renderingMode(.template)
-                                                            .foregroundColor(.gray)
-                                                            .font(.system(size: 16))
-                                                    }
+                                        if mostrarPassword {
+                                            TextField("••••••••••", text: $password)
+                                                .foregroundColor(.black)
+                                                .textInputAutocapitalization(.never)
+                                                .autocorrectionDisabled()
+                                                .focused($estaEnfocado)
+                                        } else {
+                                            SecureField("••••••••••", text: $password)
+                                                .foregroundColor(.black)
+                                                .focused($estaEnfocado)
+                                        }
+                                    }
+                                    
+                                    Button {
+                                        mostrarPassword.toggle()
+                                        estaEnfocado = true
+                                    } label: {
+                                        Image(systemName: mostrarPassword ? "eye.slash.fill" : "eye.fill")
+                                            .renderingMode(.template)
+                                            .foregroundColor(.gray)
+                                            .font(.system(size: 16))
+                                    }
                                 }
                                 .padding()
                                 .background(Color(.white))
                                 .cornerRadius(12)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(errorPassword != nil ? Color.red : Color.clear, lineWidth: 1)
+                                )
+                                
+                                // Muestra "La contraseña no coincide" cuando falla la autenticación
+                                if let msg = errorPassword {
+                                    Text(msg)
+                                        .font(.caption)
+                                        .foregroundColor(.red)
+                                        .padding(.leading, 4)
+                                }
                             }
                             
                             HStack {
@@ -146,6 +185,7 @@ struct LogInView: View {
                         
                         Spacer()
                         
+                        // MARK: - Botones de Acción
                         VStack(spacing: 12) {
                             Button(action: {
                                 Task {
@@ -175,7 +215,7 @@ struct LogInView: View {
                                     .foregroundColor(.primary)
                                     .frame(maxWidth: .infinity)
                                     .padding()
-                                    .background(Color(fondo))
+                                    .background(fondo)
                                     .cornerRadius(14)
                             }
                             
@@ -189,49 +229,6 @@ struct LogInView: View {
                         .padding(.bottom, 10)
                     }
                     .padding(.horizontal, 24)
-                    
-                    // MARK: - BANNER DE ALERTA DE ERRORES (Mismo estilo que CreateReportView)
-                    if !erroresFormulario.isEmpty {
-                        VStack {
-                            HStack(alignment: .top, spacing: 12) {
-                                Image(systemName: "exclamationmark.triangle.fill")
-                                    .foregroundColor(.white)
-                                    .font(.system(size: 18))
-                                
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("Por favor corrige lo siguiente:")
-                                        .font(.subheadline)
-                                        .bold()
-                                        .foregroundColor(.white)
-                                    
-                                    ForEach(erroresFormulario, id: \.self) { error in
-                                        Text("• \(error)")
-                                            .font(.caption)
-                                            .foregroundColor(.white.opacity(0.95))
-                                    }
-                                }
-                                
-                                Spacer()
-                                
-                                Button {
-                                    withAnimation { erroresFormulario = [] }
-                                } label: {
-                                    Image(systemName: "xmark")
-                                        .foregroundColor(.white)
-                                        .font(.system(size: 14, weight: .bold))
-                                }
-                            }
-                            .padding()
-                            .background(primaryColor.opacity(0.95))
-                            .cornerRadius(14)
-                            .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 4)
-                            .padding(.horizontal, 20)
-                            .padding(.top, 10)
-                        }
-                        .transition(.move(edge: .top).combined(with: .opacity))
-                        .animation(.easeInOut(duration: 0.3), value: erroresFormulario)
-                        .zIndex(10)
-                    }
                 }
             }
         }

@@ -73,7 +73,7 @@ struct SupportView: View {
                         .fixedSize(horizontal: false, vertical: true)
                     
                     HStack {
-                        Text("soporte@Ofraudstay.mx")
+                        Text("soporte@0fraudstay.mx")
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(primaryColor)
                         Spacer()
