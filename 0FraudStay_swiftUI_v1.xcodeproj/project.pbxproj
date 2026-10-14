@@ -12,14 +12,35 @@
 		FBEA74A430648ADE00D2BE5C /* README in Resources */ = {isa = PBXBuildFile; fileRef = FBEA74A330648AD400D2BE5C /* README */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		7F7412C9307EF895005E5537 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7F74F7363064884D00DEE9CE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7F74F73D3064884D00DEE9CE;
+			remoteInfo = 0FraudStay_swiftUI_v1;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		458C08B3307829AA00AE69DF /* -FraudStay-swiftUI-v1-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "-FraudStay-swiftUI-v1-Info.plist"; sourceTree = "<group>"; };
+		7F7412C5307EF895005E5537 /* RegistroTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RegistroTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F74F73E3064884D00DEE9CE /* 0FraudStay_swiftUI_v1.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = 0FraudStay_swiftUI_v1.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FBEA74A130648AB900D2BE5C /* .gitignore  */ = {isa = PBXFileReference; lastKnownFileType = text; path = ".gitignore "; sourceTree = "<group>"; };
 		FBEA74A330648AD400D2BE5C /* README */ = {isa = PBXFileReference; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		7F7412BE307EF803005E5537 /* Test */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Test;
+			sourceTree = "<group>";
+		};
+		7F7412C6307EF895005E5537 /* RegistroTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = RegistroTests;
+			sourceTree = "<group>";
+		};
 		7F74F7403064884D00DEE9CE /* 0FraudStay_swiftUI_v1 */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = 0FraudStay_swiftUI_v1;
@@ -28,6 +49,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		7F7412C2307EF895005E5537 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7F74F73B3064884D00DEE9CE /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -44,7 +72,9 @@
 				458C08B3307829AA00AE69DF /* -FraudStay-swiftUI-v1-Info.plist */,
 				FBEA74A330648AD400D2BE5C /* README */,
 				FBEA74A130648AB900D2BE5C /* .gitignore  */,
+				7F7412BE307EF803005E5537 /* Test */,
 				7F74F7403064884D00DEE9CE /* 0FraudStay_swiftUI_v1 */,
+				7F7412C6307EF895005E5537 /* RegistroTests */,
 				7F74F73F3064884D00DEE9CE /* Products */,
 			);
 			sourceTree = "<group>";
@@ -53,6 +83,7 @@
 			isa = PBXGroup;
 			children = (
 				7F74F73E3064884D00DEE9CE /* 0FraudStay_swiftUI_v1.app */,
+				7F7412C5307EF895005E5537 /* RegistroTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -60,6 +91,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		7F7412C4307EF895005E5537 /* RegistroTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7F7412CB307EF895005E5537 /* Build configuration list for PBXNativeTarget "RegistroTests" */;
+			buildPhases = (
+				7F7412C1307EF895005E5537 /* Sources */,
+				7F7412C2307EF895005E5537 /* Frameworks */,
+				7F7412C3307EF895005E5537 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7F7412CA307EF895005E5537 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				7F7412C6307EF895005E5537 /* RegistroTests */,
+			);
+			name = RegistroTests;
+			packageProductDependencies = (
+			);
+			productName = RegistroTests;
+			productReference = 7F7412C5307EF895005E5537 /* RegistroTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		7F74F73D3064884D00DEE9CE /* 0FraudStay_swiftUI_v1 */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7F74F7493064884E00DEE9CE /* Build configuration list for PBXNativeTarget "0FraudStay_swiftUI_v1" */;
@@ -92,6 +146,10 @@
 				LastSwiftUpdateCheck = 2650;
 				LastUpgradeCheck = 2650;
 				TargetAttributes = {
+					7F7412C4307EF895005E5537 = {
+						CreatedOnToolsVersion = 26.5;
+						TestTargetID = 7F74F73D3064884D00DEE9CE;
+					};
 					7F74F73D3064884D00DEE9CE = {
 						CreatedOnToolsVersion = 26.5;
 					};
@@ -112,11 +170,19 @@
 			projectRoot = "";
 			targets = (
 				7F74F73D3064884D00DEE9CE /* 0FraudStay_swiftUI_v1 */,
+				7F7412C4307EF895005E5537 /* RegistroTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		7F7412C3307EF895005E5537 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7F74F73C3064884D00DEE9CE /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -129,6 +195,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		7F7412C1307EF895005E5537 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7F74F73A3064884D00DEE9CE /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -139,7 +212,55 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		7F7412CA307EF895005E5537 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7F74F73D3064884D00DEE9CE /* 0FraudStay_swiftUI_v1 */;
+			targetProxy = 7F7412C9307EF895005E5537 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		7F7412CC307EF895005E5537 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Edu.RegistroTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/0FraudStay_swiftUI_v1.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/0FraudStay_swiftUI_v1";
+			};
+			name = Debug;
+		};
+		7F7412CD307EF895005E5537 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Edu.RegistroTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/0FraudStay_swiftUI_v1.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/0FraudStay_swiftUI_v1";
+			};
+			name = Release;
+		};
 		7F74F7473064884E00DEE9CE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -332,6 +453,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		7F7412CB307EF895005E5537 /* Build configuration list for PBXNativeTarget "RegistroTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7F7412CC307EF895005E5537 /* Debug */,
+				7F7412CD307EF895005E5537 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		7F74F7393064884D00DEE9CE /* Build configuration list for PBXProject "0FraudStay_swiftUI_v1" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

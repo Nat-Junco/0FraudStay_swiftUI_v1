@@ -6,32 +6,97 @@
 //
 
 import XCTest
+@testable import _FraudStay_swiftUI_v1
 
 final class RegistroTests: XCTestCase {
 
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+    //Nombre
+    
+    func testCampoVacio(){
+        XCTAssertTrue("".esVacio)
     }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    
+    func testCampoSoloEspacios(){
+        XCTAssertTrue("     ".esVacio)
     }
-
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
-        // XCTest Documentation
-        // https://developer.apple.com/documentation/xctest
+    
+    func testCampoConTexto(){
+        XCTAssertFalse("Ara".esVacio)
     }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        measure {
-            // Put the code you want to measure the time of here.
-        }
+    
+    //Correo
+    
+    func testCorreoValido(){
+        XCTAssertTrue("ara@tec.mx".esCorreoValido)
     }
+    
+    func testCorreoSinArroba(){
+        XCTAssertFalse("aratec.mx".esCorreoValido)
+    }
+    
+    func testCorreoSinDominio(){
+        XCTAssertFalse("ara@tec".esCorreoValido)
+    }
+    
+    //Contrasena
+    
+    func testContrasenaCorta(){
+        XCTAssertFalse("Fraude#26" .esLongitudValida)
+    }
+    
+    func testContrasena10Char(){
+        XCTAssertTrue("Fraude#2026" .esLongitudValida)
+    }
+    
+    func testContrasenaSinMayuscula(){
+        XCTAssertFalse("fraude#2026".tieneMayuscula)
+    }
+    
+    func testContrasenaConMayuscula(){
+        XCTAssertTrue("Fraude#2026".tieneMayuscula)
+    }
+    
+    func testContrasenaSinMinuscula(){
+        XCTAssertFalse("FRAUDE#2026".tieneMinuscula)
+    }
+    
+    func testContrasenaConMinuscula(){
+        XCTAssertTrue("FRAUDe#2026".tieneMinuscula)
+    }
+    
+    func testContrasenaSinNumero(){
+        XCTAssertFalse("Fraude#fraude".tieneNumero)
+    }
+    
+    func testContrasenaConNumero(){
+        XCTAssertTrue("Fraude#fraud3".tieneNumero)
+    }
+    
+    func testContrasenaSinSimbolo(){
+        XCTAssertFalse("Fraude2026".tieneSimbolo)
+    }
+    
+    func testContrasenaConSimbolo(){
+        XCTAssertTrue("Fraude/2026".tieneSimbolo)
+    }
+    
+    func testContrasenaConTresIguales(){
+        XCTAssertTrue("Fraude#111".tieneTresIgualesSeguidos)
+    }
+    
+    func testContrasenaSinTresIguales(){
+        XCTAssertFalse("Fraude#123".tieneTresIgualesSeguidos)
+    }
+    
+    func testContrasenaValida(){
+        let contrasena = "Fraude//2026"
+        XCTAssertTrue(contrasena.esLongitudValida)
+        XCTAssertTrue(contrasena.tieneMayuscula)
+        XCTAssertTrue(contrasena.tieneMinuscula)
+        XCTAssertTrue(contrasena.tieneNumero)
+        XCTAssertTrue(contrasena.tieneSimbolo)
+        XCTAssertFalse(contrasena.tieneTresIgualesSeguidos)
+    }
+    
 
 }
