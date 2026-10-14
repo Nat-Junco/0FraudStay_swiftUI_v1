@@ -21,7 +21,7 @@ struct ImagePicker: UIViewControllerRepresentable {
         return picker
     }
 
-    func updateUIViewController(_ _: UIImagePickerController, context: Context) {
+    func updateUIViewController(_ _: UIImagePickerController, context _: Context) {
          // Vacío a propósito: el picker no necesita actualizarse desde SwiftUI
     }
 
