@@ -8,7 +8,9 @@ import Foundation
 
 
 class DTORegistroUsuarioRequest: Codable {
-    var email, password, nombre: String
+    var email: String
+    var password: String
+    var nombre: String
 
     init(email: String, password: String, nombre: String) {
         self.email = email
@@ -19,7 +21,8 @@ class DTORegistroUsuarioRequest: Codable {
 
 
 class DTORegistroUsuarioResponse: Codable {
-    var id, email: String
+    var id: String
+    var email: String
 
     init(id: String, email: String) {
         self.id = id
