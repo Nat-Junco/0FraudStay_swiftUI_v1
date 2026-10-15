@@ -13,6 +13,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		FB3F6679308178A900101829 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7F74F7363064884D00DEE9CE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7F74F73D3064884D00DEE9CE;
+			remoteInfo = 0FraudStay_swiftUI_v1;
+		};
 		FB7725EB307EFBC6007A65F3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 7F74F7363064884D00DEE9CE /* Project object */;
@@ -25,15 +32,24 @@
 /* Begin PBXFileReference section */
 		458C08B3307829AA00AE69DF /* -FraudStay-swiftUI-v1-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "-FraudStay-swiftUI-v1-Info.plist"; sourceTree = "<group>"; };
 		7F74F73E3064884D00DEE9CE /* 0FraudStay_swiftUI_v1.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = 0FraudStay_swiftUI_v1.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FB3F6675308178A900101829 /* EditProfileTest.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EditProfileTest.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB7725E7307EFBC6007A65F3 /* ForgotPassTest.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ForgotPassTest.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FBEA74A130648AB900D2BE5C /* .gitignore  */ = {isa = PBXFileReference; lastKnownFileType = text; path = ".gitignore "; sourceTree = "<group>"; };
 		FBEA74A330648AD400D2BE5C /* README */ = {isa = PBXFileReference; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		FB3F6681308178B300101829 /* Exceptions for "Test" folder in "EditProfileTest" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				EditProfileTest/EditProfileTest.swift,
+			);
+			target = FB3F6674308178A900101829 /* EditProfileTest */;
+		};
 		FB7725F3307EFBCB007A65F3 /* Exceptions for "Test" folder in "0FraudStay_swiftUI_v1" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				EditProfileTest/EditProfileTest.swift,
 				ForgotPassTest/ForgotPassTest.swift,
 			);
 			target = 7F74F73D3064884D00DEE9CE /* 0FraudStay_swiftUI_v1 */;
@@ -68,6 +84,7 @@
 			exceptions = (
 				FB7725F3307EFBCB007A65F3 /* Exceptions for "Test" folder in "0FraudStay_swiftUI_v1" target */,
 				FB7725F4307EFBCB007A65F3 /* Exceptions for "Test" folder in "ForgotPassTest" target */,
+				FB3F6681308178B300101829 /* Exceptions for "Test" folder in "EditProfileTest" target */,
 			);
 			path = Test;
 			sourceTree = "<group>";
@@ -76,6 +93,13 @@
 
 /* Begin PBXFrameworksBuildPhase section */
 		7F74F73B3064884D00DEE9CE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FB3F6672308178A900101829 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -109,6 +133,7 @@
 			children = (
 				7F74F73E3064884D00DEE9CE /* 0FraudStay_swiftUI_v1.app */,
 				FB7725E7307EFBC6007A65F3 /* ForgotPassTest.xctest */,
+				FB3F6675308178A900101829 /* EditProfileTest.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -138,6 +163,26 @@
 			productName = 0FraudStay_swiftUI_v1;
 			productReference = 7F74F73E3064884D00DEE9CE /* 0FraudStay_swiftUI_v1.app */;
 			productType = "com.apple.product-type.application";
+		};
+		FB3F6674308178A900101829 /* EditProfileTest */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FB3F667B308178A900101829 /* Build configuration list for PBXNativeTarget "EditProfileTest" */;
+			buildPhases = (
+				FB3F6671308178A900101829 /* Sources */,
+				FB3F6672308178A900101829 /* Frameworks */,
+				FB3F6673308178A900101829 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				FB3F667A308178A900101829 /* PBXTargetDependency */,
+			);
+			name = EditProfileTest;
+			packageProductDependencies = (
+			);
+			productName = EditProfileTest;
+			productReference = FB3F6675308178A900101829 /* EditProfileTest.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		FB7725E6307EFBC6007A65F3 /* ForgotPassTest */ = {
 			isa = PBXNativeTarget;
@@ -172,6 +217,10 @@
 					7F74F73D3064884D00DEE9CE = {
 						CreatedOnToolsVersion = 26.5;
 					};
+					FB3F6674308178A900101829 = {
+						CreatedOnToolsVersion = 26.5;
+						TestTargetID = 7F74F73D3064884D00DEE9CE;
+					};
 					FB7725E6307EFBC6007A65F3 = {
 						CreatedOnToolsVersion = 26.5;
 						TestTargetID = 7F74F73D3064884D00DEE9CE;
@@ -194,6 +243,7 @@
 			targets = (
 				7F74F73D3064884D00DEE9CE /* 0FraudStay_swiftUI_v1 */,
 				FB7725E6307EFBC6007A65F3 /* ForgotPassTest */,
+				FB3F6674308178A900101829 /* EditProfileTest */,
 			);
 		};
 /* End PBXProject section */
@@ -205,6 +255,13 @@
 			files = (
 				FBEA74A430648ADE00D2BE5C /* README in Resources */,
 				FBEA74A230648AC500D2BE5C /* .gitignore  in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FB3F6673308178A900101829 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -226,6 +283,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FB3F6671308178A900101829 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FB7725E3307EFBC6007A65F3 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -236,6 +300,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		FB3F667A308178A900101829 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7F74F73D3064884D00DEE9CE /* 0FraudStay_swiftUI_v1 */;
+			targetProxy = FB3F6679308178A900101829 /* PBXContainerItemProxy */;
+		};
 		FB7725EC307EFBC6007A65F3 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 7F74F73D3064884D00DEE9CE /* 0FraudStay_swiftUI_v1 */;
@@ -433,6 +502,46 @@
 			};
 			name = Release;
 		};
+		FB3F667C308178A900101829 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = adri.EditProfileTest;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/0FraudStay_swiftUI_v1.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/0FraudStay_swiftUI_v1";
+			};
+			name = Debug;
+		};
+		FB3F667D308178A900101829 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = adri.EditProfileTest;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/0FraudStay_swiftUI_v1.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/0FraudStay_swiftUI_v1";
+			};
+			name = Release;
+		};
 		FB7725EE307EFBC6007A65F3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -490,6 +599,15 @@
 			buildConfigurations = (
 				7F74F74A3064884E00DEE9CE /* Debug */,
 				7F74F74B3064884E00DEE9CE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FB3F667B308178A900101829 /* Build configuration list for PBXNativeTarget "EditProfileTest" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FB3F667C308178A900101829 /* Debug */,
+				FB3F667D308178A900101829 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
