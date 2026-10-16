@@ -166,15 +166,15 @@ struct HTTPClient {
     
     // Usuarios (Perfil)
 
-    /// GET /usuarios/:id — datos del usuario (nombre, correo, rol).
-    func ObtenerUsuario(id: String) async throws -> DTOUsuarioResponse {
-        let data = try await enviarConToken(URLRequest(url: url("/usuarios/\(id)")))
+    /// GET /usuarios/me — datos del usuario autenticado.
+    func ObtenerUsuario() async throws -> DTOUsuarioResponse {
+        let data = try await enviarConToken(URLRequest(url: url("/usuarios/me")))
         return try JSONDecoder().decode(DTOUsuarioResponse.self, from: data)
     }
 
-    /// PATCH /usuarios/:id — actualiza nombre y/o correo.
-    func ActualizarUsuario(id: String, cambios: DTOActualizarUsuarioRequest) async throws -> DTOUsuarioResponse {
-        var urlRequest = URLRequest(url: url("/usuarios/\(id)"))
+  /// PATCH /usuarios/me — actualiza nombre y/o correo del usuario autenticado.
+    func ActualizarUsuario(cambios: DTOActualizarUsuarioRequest) async throws -> DTOUsuarioResponse {
+        var urlRequest = URLRequest(url: url("/usuarios/me"))
         urlRequest.httpMethod = "PATCH"
         urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
         urlRequest.httpBody = try JSONEncoder().encode(cambios)
