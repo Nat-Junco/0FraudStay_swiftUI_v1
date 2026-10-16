@@ -337,6 +337,7 @@ struct ResetPasswordView: View {
         var esValido = true
 
         // 1. Reglas de la nueva contraseña
+        // NOSONAR - Validación de entrada de usuario para contraseña
         if newPassword.isEmpty {
             errorNewPassword = "Por favor, ingresa tu nueva contraseña."
             esValido = false
