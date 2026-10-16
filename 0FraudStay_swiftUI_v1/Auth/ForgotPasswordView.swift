@@ -128,7 +128,8 @@ struct ForgotPasswordView: View {
             })
         }
         .alert("Aviso", isPresented: $mostrarAlertaError) {
-            Button("Aceptar", role: .cancel) { }
+            Button("Aceptar", role: .cancel) { // Se descarta la alerta automáticamente al presionar el botón
+            }
         } message: {
             Text(errorMsg ?? "Revisa los datos e intenta de nuevo.")
         }
@@ -279,7 +280,8 @@ struct EnterTokenView: View {
             ResetPasswordView(correo: correo, codigo: token, onTerminado: onTerminado)
         }
         .alert("Aviso", isPresented: $mostrarAlertaError) {
-            Button("Aceptar", role: .cancel) { }
+            Button("Aceptar", role: .cancel) { // Se descarta la alerta automáticamente al presionar el botón
+            }
         } message: {
             Text(errorMsg ?? "Ingresa un código válido.")
         }
