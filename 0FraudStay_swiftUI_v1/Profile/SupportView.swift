@@ -121,6 +121,7 @@ struct FAQCard: View {
                     Image(systemName: "triangle.fill")
                         .font(.system(size: 10))
                         .foregroundColor(.gray)
+                        .rotationEffect(.degrees(isExpanded ? 180 : 0))
                 }
                 .padding(.horizontal, 18)
                 .padding(.vertical, 18)
@@ -146,6 +147,7 @@ struct FAQCard: View {
         .shadow(color: Color.black.opacity(0.02), radius: 4, x: 0, y: 2)
     }
 }
+
 #Preview {
     NavigationStack {
         SupportView()
