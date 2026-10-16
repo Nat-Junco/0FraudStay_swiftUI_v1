@@ -21,7 +21,9 @@ struct ImagePicker: UIViewControllerRepresentable {
         return picker
     }
 
-    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+    func updateUIViewController(_ _: UIImagePickerController, context _: Context) {
+         // Vacío a propósito: el picker no necesita actualizarse desde SwiftUI
+    }
 
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
@@ -34,14 +36,14 @@ struct ImagePicker: UIViewControllerRepresentable {
             self.parent = parent
         }
 
-        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        func imagePickerController(_ _: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
             if let image = info[.originalImage] as? UIImage {
                 parent.image = image
             }
             parent.dismiss()
         }
 
-        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        func imagePickerControllerDidCancel(_ _: UIImagePickerController) {
             parent.dismiss()
         }
     }
@@ -584,7 +586,9 @@ struct CreateReportView: View {
                     abrirGaleria.wrappedValue = true
                 }
                 
-                Button("Cancelar", role: .cancel) {}
+                Button("Cancelar", role: .cancel) {
+                    // Vacío a propósito: el rol .cancel cierra la alerta automáticamente
+                }
             }
         }
         .frame(maxWidth: .infinity)

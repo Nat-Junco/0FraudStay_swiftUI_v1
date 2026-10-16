@@ -10,7 +10,8 @@ import Foundation
 
 // MARK: - DTOLoginRequest
 class DTOLoginRequest: Codable {
-    var email, password: String
+    var email: String
+    var password: String
 
     init(email: String, password: String) {
         self.email = email
@@ -20,7 +21,8 @@ class DTOLoginRequest: Codable {
 
 // MARK: - DTOLoginResponse
 class DTOLoginResponse: Codable {
-    var accessToken, refreshToken: String
+    var accessToken: String
+    var refreshToken: String
 
     init(accessToken: String, refreshToken: String) {
         self.accessToken = accessToken
