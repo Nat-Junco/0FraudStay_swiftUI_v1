@@ -150,7 +150,9 @@ struct EditProfileView: View {
             perfil.errorMessage = nil
         }
         .alert("No se pudo actualizar", isPresented: $mostrarAlertaError) {
-            Button("Aceptar", role: .cancel) { }
+            Button("Aceptar", role: .cancel) { 
+             // Vacío a propósito: el rol .cancel cierra la alerta automáticamente
+            }
         } message: {
             Text(perfil.errorMessage ?? "Revisa tus datos e intenta de nuevo.")
         }

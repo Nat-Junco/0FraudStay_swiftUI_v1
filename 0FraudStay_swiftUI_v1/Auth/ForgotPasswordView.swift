@@ -128,7 +128,8 @@ struct ForgotPasswordView: View {
             })
         }
         .alert("Aviso", isPresented: $mostrarAlertaError) {
-            Button("Aceptar", role: .cancel) { // Se descarta la alerta automáticamente al presionar el botón
+            Button("Aceptar", role: .cancel) {
+                 // Vacío a propósito: el rol .cancel cierra la alerta automáticamente
             }
         } message: {
             Text(errorMsg ?? "Revisa los datos e intenta de nuevo.")
@@ -145,7 +146,9 @@ struct EnterTokenView: View {
     @Environment(\.authController) var controladorRegistro
 
     let correo: String
-    var onTerminado: () -> Void = {}
+    var onTerminado: () -> Void = {
+      // Por defecto no hace nada; la vista padre puede asignar una acción  
+    }
 
     @State private var token = ""
     @State private var errorMsg: String?
@@ -280,7 +283,8 @@ struct EnterTokenView: View {
             ResetPasswordView(correo: correo, codigo: token, onTerminado: onTerminado)
         }
         .alert("Aviso", isPresented: $mostrarAlertaError) {
-            Button("Aceptar", role: .cancel) { // Se descarta la alerta automáticamente al presionar el botón
+            Button("Aceptar", role: .cancel) { 
+             // Vacío a propósito: el rol .cancel cierra la alerta automáticamente
             }
         } message: {
             Text(errorMsg ?? "Ingresa un código válido.")
@@ -308,7 +312,9 @@ struct ResetPasswordView: View {
 
     let correo: String
     let codigo: String
-    var onTerminado: () -> Void = {}
+    var onTerminado: () -> Void = {
+        // Por defecto no hace nada; la vista padre puede asignar una acción 
+    }
 
     @State private var newPassword = ""
     @State private var confirmPassword = ""
@@ -541,7 +547,9 @@ struct ResetPasswordView: View {
             Text("Ya puedes entrar con tu nueva contraseña.")
         }
         .alert("Error", isPresented: $mostrarAlertaError) {
-            Button("Aceptar", role: .cancel) { }
+            Button("Aceptar", role: .cancel) {
+                // Vacío a propósito: el rol .cancel cierra la alerta automáticamente
+            }
         } message: {
             Text(errorDeRed ?? "Ocurrió un error inesperado.")
         }

@@ -12,23 +12,77 @@
 		FBEA74A430648ADE00D2BE5C /* README in Resources */ = {isa = PBXBuildFile; fileRef = FBEA74A330648AD400D2BE5C /* README */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		FB7725EB307EFBC6007A65F3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7F74F7363064884D00DEE9CE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7F74F73D3064884D00DEE9CE;
+			remoteInfo = 0FraudStay_swiftUI_v1;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		458C08B3307829AA00AE69DF /* -FraudStay-swiftUI-v1-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "-FraudStay-swiftUI-v1-Info.plist"; sourceTree = "<group>"; };
 		7F74F73E3064884D00DEE9CE /* 0FraudStay_swiftUI_v1.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = 0FraudStay_swiftUI_v1.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FB7725E7307EFBC6007A65F3 /* ForgotPassTest.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ForgotPassTest.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FBEA74A130648AB900D2BE5C /* .gitignore  */ = {isa = PBXFileReference; lastKnownFileType = text; path = ".gitignore "; sourceTree = "<group>"; };
 		FBEA74A330648AD400D2BE5C /* README */ = {isa = PBXFileReference; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		FB7725F3307EFBCB007A65F3 /* Exceptions for "Test" folder in "0FraudStay_swiftUI_v1" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				ForgotPassTest/ForgotPassTest.swift,
+			);
+			target = 7F74F73D3064884D00DEE9CE /* 0FraudStay_swiftUI_v1 */;
+		};
+		FB7725F4307EFBCB007A65F3 /* Exceptions for "Test" folder in "ForgotPassTest" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				ForgotPassTest/ForgotPassTest.swift,
+			);
+			target = FB7725E6307EFBC6007A65F3 /* ForgotPassTest */;
+		};
+		FB7725FA307F079B007A65F3 /* Exceptions for "0FraudStay_swiftUI_v1" folder in "ForgotPassTest" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Extensiones/ValidarDatosRegistro.swift,
+			);
+			target = FB7725E6307EFBC6007A65F3 /* ForgotPassTest */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		7F74F7403064884D00DEE9CE /* 0FraudStay_swiftUI_v1 */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				FB7725FA307F079B007A65F3 /* Exceptions for "0FraudStay_swiftUI_v1" folder in "ForgotPassTest" target */,
+			);
 			path = 0FraudStay_swiftUI_v1;
+			sourceTree = "<group>";
+		};
+		FB7725E2307EFBB8007A65F3 /* Test */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				FB7725F3307EFBCB007A65F3 /* Exceptions for "Test" folder in "0FraudStay_swiftUI_v1" target */,
+				FB7725F4307EFBCB007A65F3 /* Exceptions for "Test" folder in "ForgotPassTest" target */,
+			);
+			path = Test;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		7F74F73B3064884D00DEE9CE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FB7725E4307EFBC6007A65F3 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -44,6 +98,7 @@
 				458C08B3307829AA00AE69DF /* -FraudStay-swiftUI-v1-Info.plist */,
 				FBEA74A330648AD400D2BE5C /* README */,
 				FBEA74A130648AB900D2BE5C /* .gitignore  */,
+				FB7725E2307EFBB8007A65F3 /* Test */,
 				7F74F7403064884D00DEE9CE /* 0FraudStay_swiftUI_v1 */,
 				7F74F73F3064884D00DEE9CE /* Products */,
 			);
@@ -53,6 +108,7 @@
 			isa = PBXGroup;
 			children = (
 				7F74F73E3064884D00DEE9CE /* 0FraudStay_swiftUI_v1.app */,
+				FB7725E7307EFBC6007A65F3 /* ForgotPassTest.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -74,6 +130,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				7F74F7403064884D00DEE9CE /* 0FraudStay_swiftUI_v1 */,
+				FB7725E2307EFBB8007A65F3 /* Test */,
 			);
 			name = 0FraudStay_swiftUI_v1;
 			packageProductDependencies = (
@@ -81,6 +138,26 @@
 			productName = 0FraudStay_swiftUI_v1;
 			productReference = 7F74F73E3064884D00DEE9CE /* 0FraudStay_swiftUI_v1.app */;
 			productType = "com.apple.product-type.application";
+		};
+		FB7725E6307EFBC6007A65F3 /* ForgotPassTest */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FB7725ED307EFBC6007A65F3 /* Build configuration list for PBXNativeTarget "ForgotPassTest" */;
+			buildPhases = (
+				FB7725E3307EFBC6007A65F3 /* Sources */,
+				FB7725E4307EFBC6007A65F3 /* Frameworks */,
+				FB7725E5307EFBC6007A65F3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				FB7725EC307EFBC6007A65F3 /* PBXTargetDependency */,
+			);
+			name = ForgotPassTest;
+			packageProductDependencies = (
+			);
+			productName = ForgotPassTest;
+			productReference = FB7725E7307EFBC6007A65F3 /* ForgotPassTest.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -94,6 +171,10 @@
 				TargetAttributes = {
 					7F74F73D3064884D00DEE9CE = {
 						CreatedOnToolsVersion = 26.5;
+					};
+					FB7725E6307EFBC6007A65F3 = {
+						CreatedOnToolsVersion = 26.5;
+						TestTargetID = 7F74F73D3064884D00DEE9CE;
 					};
 				};
 			};
@@ -112,6 +193,7 @@
 			projectRoot = "";
 			targets = (
 				7F74F73D3064884D00DEE9CE /* 0FraudStay_swiftUI_v1 */,
+				FB7725E6307EFBC6007A65F3 /* ForgotPassTest */,
 			);
 		};
 /* End PBXProject section */
@@ -126,6 +208,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FB7725E5307EFBC6007A65F3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -137,7 +226,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FB7725E3307EFBC6007A65F3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		FB7725EC307EFBC6007A65F3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7F74F73D3064884D00DEE9CE /* 0FraudStay_swiftUI_v1 */;
+			targetProxy = FB7725EB307EFBC6007A65F3 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		7F74F7473064884E00DEE9CE /* Debug */ = {
@@ -329,6 +433,46 @@
 			};
 			name = Release;
 		};
+		FB7725EE307EFBC6007A65F3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Mar.ForgotPassTest;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/0FraudStay_swiftUI_v1.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/0FraudStay_swiftUI_v1";
+			};
+			name = Debug;
+		};
+		FB7725EF307EFBC6007A65F3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Mar.ForgotPassTest;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/0FraudStay_swiftUI_v1.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/0FraudStay_swiftUI_v1";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -346,6 +490,15 @@
 			buildConfigurations = (
 				7F74F74A3064884E00DEE9CE /* Debug */,
 				7F74F74B3064884E00DEE9CE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FB7725ED307EFBC6007A65F3 /* Build configuration list for PBXNativeTarget "ForgotPassTest" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FB7725EE307EFBC6007A65F3 /* Debug */,
+				FB7725EF307EFBC6007A65F3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
