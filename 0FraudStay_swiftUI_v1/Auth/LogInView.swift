@@ -5,6 +5,12 @@
 
 import SwiftUI
 
+extension View {
+    func ocultarTeclado() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+}
+
 struct LogInView: View {
     @AppStorage("isLoggedIn") private var isLoggedIn = true
     @State private var email = ""
@@ -229,6 +235,11 @@ struct LogInView: View {
                         .padding(.bottom, 10)
                     }
                     .padding(.horizontal, 24)
+                }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                estaEnfocado = false
+                ocultarTeclado()
                 }
             }
         }

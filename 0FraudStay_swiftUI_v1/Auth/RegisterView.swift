@@ -306,6 +306,11 @@ struct RegisterView: View {
                 }
                 .padding(.horizontal, 24)
             }
+            .contentShape(Rectangle())
+            .onTapGesture {
+            campoEnfocado = nil
+            ocultarTeclado()
+            }
         }
         .navigationDestination(isPresented: $irATerminos) {
             TerminosView(onAccept: {

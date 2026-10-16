@@ -132,6 +132,10 @@ struct ForgotPasswordView: View {
         } message: {
             Text(errorMsg ?? "Revisa los datos e intenta de nuevo.")
         }
+        .contentShape(Rectangle())
+        .onTapGesture {
+        ocultarTeclado()
+        }
     }
 }
 
@@ -279,6 +283,10 @@ struct EnterTokenView: View {
         } message: {
             Text(errorMsg ?? "Ingresa un código válido.")
         }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            ocultarTeclado()
+        }
     }
 }
 
@@ -302,7 +310,10 @@ struct ResetPasswordView: View {
 
     @State private var newPassword = ""
     @State private var confirmPassword = ""
-    @State private var errores: [String] = []
+    
+    // MARK: - Estados de error para cada campo
+    @State private var errorNewPassword: String? = nil
+    @State private var errorConfirmPassword: String? = nil
     @State private var errorDeRed: String?
     @State private var mostrarAlertaError = false
     @State private var guardando = false
@@ -311,21 +322,50 @@ struct ResetPasswordView: View {
     private let primaryColor = Color("BrandPrimaryColor")
     private let fondo = Color("FondoApp")
 
-    private func validar() -> [String] {
-        var e: [String] = []
-        if !newPassword.esLongitudValida { e.append("Debe tener al menos 10 caracteres") }
-        if !newPassword.tieneMayuscula { e.append("Debe contener al menos una mayúscula") }
-        if !newPassword.tieneMinuscula { e.append("Debe contener al menos una minúscula") }
-        if !newPassword.tieneNumero { e.append("Debe contener al menos un número") }
-        if !newPassword.tieneSimbolo { e.append("Debe contener al menos un símbolo") }
-        if newPassword.tieneTresIgualesSeguidos { e.append("No puede tener tres caracteres iguales consecutivos") }
-        if newPassword != confirmPassword { e.append("Las contraseñas no coinciden") }
-        return e
+    // MARK: - Validación Individual
+    private func validarFormulario() -> Bool {
+        errorNewPassword = nil
+        errorConfirmPassword = nil
+        var esValido = true
+
+        // 1. Reglas de la nueva contraseña
+        if newPassword.isEmpty {
+            errorNewPassword = "Por favor, ingresa tu nueva contraseña."
+            esValido = false
+        } else if !newPassword.esLongitudValida {
+            errorNewPassword = "La contraseña debe tener al menos 10 caracteres."
+            esValido = false
+        } else if !newPassword.tieneMayuscula {
+            errorNewPassword = "La contraseña debe contener al menos una mayúscula."
+            esValido = false
+        } else if !newPassword.tieneMinuscula {
+            errorNewPassword = "La contraseña debe contener al menos una minúscula."
+            esValido = false
+        } else if !newPassword.tieneNumero {
+            errorNewPassword = "La contraseña debe contener al menos un número."
+            esValido = false
+        } else if !newPassword.tieneSimbolo {
+            errorNewPassword = "La contraseña debe contener al menos un símbolo especial."
+            esValido = false
+        } else if newPassword.tieneTresIgualesSeguidos {
+            errorNewPassword = "La contraseña no puede tener tres caracteres iguales consecutivos."
+            esValido = false
+        }
+
+        // 2. Confirmación de contraseña
+        if confirmPassword.isEmpty {
+            errorConfirmPassword = "La confirmación de la contraseña es requerida."
+            esValido = false
+        } else if newPassword != confirmPassword {
+            errorConfirmPassword = "Las contraseñas no coinciden, vuelve a intentarlo."
+            esValido = false
+        }
+
+        return esValido
     }
 
     private func confirmar() async {
-        errores = validar()
-        guard errores.isEmpty else { return }
+        guard validarFormulario() else { return }
 
         guardando = true
         defer { guardando = false }
@@ -375,6 +415,7 @@ struct ResetPasswordView: View {
                 .padding(.top, 16)
 
                 VStack(alignment: .leading, spacing: 16) {
+                    
                     // Nueva Contraseña
                     VStack(alignment: .leading, spacing: 6) {
                         Text("NUEVA CONTRASEÑA")
@@ -410,6 +451,17 @@ struct ResetPasswordView: View {
                         .padding()
                         .background(Color(.white))
                         .cornerRadius(12)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(errorNewPassword != nil ? Color.red : Color.clear, lineWidth: 1)
+                        )
+                        
+                        if let msg = errorNewPassword {
+                            Text(msg)
+                                .font(.caption)
+                                .foregroundColor(.red)
+                                .padding(.leading, 4)
+                        }
                     }
 
                     // Confirmar Contraseña
@@ -447,11 +499,18 @@ struct ResetPasswordView: View {
                         .padding()
                         .background(Color(.white))
                         .cornerRadius(12)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(errorConfirmPassword != nil ? Color.red : Color.clear, lineWidth: 1)
+                        )
+                        
+                        if let msg = errorConfirmPassword {
+                            Text(msg)
+                                .font(.caption)
+                                .foregroundColor(.red)
+                                .padding(.leading, 4)
+                        }
                     }
-                }
-
-                if !errores.isEmpty {
-                    ResumenErrores(errores: errores)
                 }
 
                 Spacer()
@@ -484,11 +543,10 @@ struct ResetPasswordView: View {
         } message: {
             Text(errorDeRed ?? "Ocurrió un error inesperado.")
         }
-    }
-}
-
-#Preview {
-    NavigationStack {
-        ForgotPasswordView()
+        .contentShape(Rectangle())
+        .onTapGesture {
+            campoEnfocado = nil
+            ocultarTeclado()
+        }
     }
 }

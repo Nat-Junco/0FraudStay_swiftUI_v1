@@ -121,11 +121,6 @@ struct StartView: View {
                             }
                             
                             HStack(spacing: 10) {
-                                Text("+1,600 afectados por fraudes en rentas vacacionales")
-                                    .font(.system(size: 17, weight: .bold, design: .serif))
-                                    .foregroundStyle(textoPrincipal)
-                                    .fixedSize(horizontal: false, vertical: true)
-                                
                                 Spacer(minLength: 4)
                                 
                                 VStack(spacing: 2) {
