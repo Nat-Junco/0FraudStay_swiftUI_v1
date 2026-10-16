@@ -11,6 +11,7 @@ struct RegisterView: View {
     @State private var usuario = Usuario()
     // Estados para mensajes de error debajo de cada campo
     @State private var errorNombre: String? = nil
+    @State private var errorLongNombre: String? = nil
     @State private var errorCorreo: String? = nil
     @State private var errorPassword: String? = nil
     @State private var errorConfirmarPassword: String? = nil
@@ -36,16 +37,21 @@ struct RegisterView: View {
     // Función de validación de campos con mensajes específicos
     private func validarFormulario() -> Bool {
         errorNombre = nil
+        errorLongNombre = nil
         errorCorreo = nil
         errorPassword = nil
         errorConfirmarPassword = nil
         var esValido = true
         
         // 1. Nombre
-        if usuario.nombre.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            errorNombre = "Por favor, ingresa tu nombre completo."
-            esValido = false
-        }
+                let nombreLimpio = usuario.nombre.trimmingCharacters(in: .whitespacesAndNewlines)
+                if nombreLimpio.isEmpty {
+                    errorNombre = "Por favor, ingresa tu nombre completo."
+                    esValido = false
+                } else if nombreLimpio.count < 3 {
+                    errorLongNombre = "El nombre debe tener al menos 3 caracteres."
+                    esValido = false
+                }
         
         // 2. Correo Electrónico
         let correoLimpio = usuario.correo.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -150,10 +156,10 @@ struct RegisterView: View {
                                 .cornerRadius(12)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 12)
-                                        .stroke(errorNombre != nil ? Color.red : Color.clear, lineWidth: 1)
+                                        .stroke((errorNombre != nil || errorLongNombre != nil) ? Color.red : Color.clear, lineWidth: 1)
                                 )
                             
-                            if let msg = errorNombre {
+                            if let msg = errorNombre ?? errorLongNombre {
                                 Text(msg)
                                     .font(.caption)
                                     .foregroundColor(.red)

@@ -35,6 +35,10 @@ struct TerminosView: View {
             }
             .background(Color(.systemGroupedBackground).ignoresSafeArea())
             .navigationBarTitleDisplayMode(.inline)
+            // Oculta la flecha de retroceso nativa de la barra de navegación
+            .navigationBarBackButtonHidden(true)
+            // Deshabilita el gesto de deslizar hacia atrás desde el borde izquierdo
+            .interactiveDismissDisabled(true)
         }
     }
     
@@ -119,6 +123,7 @@ struct TerminosView: View {
                 }
             }
             .buttonStyle(.plain)
+            
             Button {
                 if isAccepted.wrappedValue {
                     onAccept?()
