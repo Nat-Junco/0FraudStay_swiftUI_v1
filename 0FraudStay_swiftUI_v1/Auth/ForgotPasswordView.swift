@@ -315,7 +315,7 @@ struct ResetPasswordView: View {
     
     // MARK: - Estados de error para cada campo
     @State private var errorNewPassword: String? = nil
-    @State private var errorConfirmPassword: String? = nil
+    @State private var errorConfirmacion: String? = nil
     @State private var errorDeRed: String?
     @State private var mostrarAlertaError = false
     @State private var guardando = false
@@ -327,7 +327,7 @@ struct ResetPasswordView: View {
     // MARK: - Validación Individual
     private func validarFormulario() -> Bool {
         errorNewPassword = nil
-        errorConfirmPassword = nil
+        errorConfirmacion = nil
         var esValido = true
 
         // 1. Reglas de la nueva contraseña
@@ -356,10 +356,10 @@ struct ResetPasswordView: View {
 
         // 2. Confirmación de contraseña
         if confirmPassword.isEmpty {
-            errorConfirmPassword = "La confirmación de la contraseña es requerida."
+            errorConfirmacion = "La confirmación de la contraseña es requerida."
             esValido = false
         } else if newPassword != confirmPassword {
-            errorConfirmPassword = "Las contraseñas no coinciden, vuelve a intentarlo."
+            errorConfirmacion = "Las contraseñas no coinciden, vuelve a intentarlo."
             esValido = false
         }
 
@@ -503,10 +503,10 @@ struct ResetPasswordView: View {
                         .cornerRadius(12)
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
-                                .stroke(errorConfirmPassword != nil ? Color.red : Color.clear, lineWidth: 1)
+                                .stroke(errorConfirmacion != nil ? Color.red : Color.clear, lineWidth: 1)
                         )
                         
-                        if let msg = errorConfirmPassword {
+                        if let msg = errorConfirmacion {
                             Text(msg)
                                 .font(.caption)
                                 .foregroundColor(.red)
