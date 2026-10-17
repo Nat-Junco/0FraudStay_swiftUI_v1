@@ -129,18 +129,28 @@ struct EditReportView: View {
                     }
 
                     Picker("Plataforma", selection: $fuenteId) {
-                        ForEach(vm.fuentes) { Text($0.valorFuente).tag($0.id) }
-                    }
+                            ForEach(vm.fuentes) { fuente in
+                                Text(fuente.valorFuente).tag(fuente.id)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                    
                     Picker("Tipo de propiedad", selection: $tipoPropiedadId) {
-                        ForEach(vm.tiposPropiedad) { Text($0.nombre).tag($0.id) }
-                    }
+                            ForEach(vm.tiposPropiedad) { tipo in
+                                Text(tipo.nombre).tag(tipo.id)
+                            }
+                        }
+                        .pickerStyle(.menu)
                 }
 
                 // MARK: - Sección: ¿Qué sucedió?
                 Section("¿Qué sucedió?") {
                     Picker("Tipo de fraude", selection: $tipoFraudeId) {
-                        ForEach(vm.tiposFraude) { Text($0.nombre).tag($0.id) }
-                    }
+                            ForEach(vm.tiposFraude) { tipo in
+                                Text(tipo.nombre).tag(tipo.id)
+                            }
+                        }
+                        .pickerStyle(.menu)
 
                     VStack(alignment: .leading, spacing: 6) {
                         TextEditor(text: $descripcion)
@@ -254,9 +264,11 @@ struct EditReportView: View {
                 contactoOfertante = reporte.contactoOfertante ?? ""
             }
         }
-        .contentShape(Rectangle())
-        .onTapGesture {
-            ocultarTeclado()
-        }
+        // Usamos simultaneousGesture para no bloquear la interacción con los Pickers
+        .simultaneousGesture(
+            TapGesture().onEnded {
+                ocultarTeclado()
+            }
+        )
     }
 }

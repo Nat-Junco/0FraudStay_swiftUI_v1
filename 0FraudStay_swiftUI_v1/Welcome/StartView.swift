@@ -47,7 +47,7 @@ struct StartView: View {
             .tag(Tab.reportes)
             
             NavigationStack {
-                CreateReportView()
+                CreateReportView(selectedTab: $selectedTab)
             }
             .tabItem {
                 Label("Crear", systemImage: "plus.app.fill")
@@ -140,8 +140,8 @@ struct StartView: View {
                         
                         // Botones Denunciar y consultar
                         HStack(spacing: 12) {
-                            NavigationLink {
-                                CreateReportView()
+                            Button{
+                                selectedTab = .crear
                             } label: {
                                 VStack(spacing: 10) {
                                     Image(systemName: "square.and.pencil")
