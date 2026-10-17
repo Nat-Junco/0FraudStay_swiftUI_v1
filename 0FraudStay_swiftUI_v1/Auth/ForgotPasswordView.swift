@@ -316,11 +316,11 @@ struct ResetPasswordView: View {
         // Por defecto no hace nada; la vista padre puede asignar una acción 
     }
 
-    @State private var newPassword = ""
-    @State private var confirmPassword = ""
+    @State private var newPass = ""
+    @State private var confirmPass = ""
     
     // MARK: - Estados de error para cada campo
-    @State private var errorNewPassword: String? = nil
+    @State private var errorNewPass: String? = nil
     @State private var errorConfirmacion: String? = nil
     @State private var errorDeRed: String?
     @State private var mostrarAlertaError = false
@@ -332,40 +332,39 @@ struct ResetPasswordView: View {
 
     // MARK: - Validación Individual
     private func validarFormulario() -> Bool {
-        errorNewPassword = nil
+        errorNewPass = nil
         errorConfirmacion = nil
         var esValido = true
 
         // 1. Reglas de la nueva contraseña
-        // NOSONAR - Validación de entrada de usuario para contraseña
-        if newPassword.isEmpty {
-            errorNewPassword = "Por favor, ingresa tu nueva contraseña."
+        if newPass.isEmpty {
+            errorNewPass = "Por favor, ingresa tu nueva contraseña."
             esValido = false
-        } else if !newPassword.esLongitudValida {
-            errorNewPassword = "La contraseña debe tener al menos 10 caracteres."
+        } else if !newPass.esLongitudValida {
+            errorNewPass = "La contraseña debe tener al menos 10 caracteres."
             esValido = false
-        } else if !newPassword.tieneMayuscula {
-            errorNewPassword = "La contraseña debe contener al menos una mayúscula."
+        } else if !newPass.tieneMayuscula {
+            errorNewPass = "La contraseña debe contener al menos una mayúscula."
             esValido = false
-        } else if !newPassword.tieneMinuscula {
-            errorNewPassword = "La contraseña debe contener al menos una minúscula."
+        } else if !newPass.tieneMinuscula {
+            errorNewPass = "La contraseña debe contener al menos una minúscula."
             esValido = false
-        } else if !newPassword.tieneNumero {
-            errorNewPassword = "La contraseña debe contener al menos un número."
+        } else if !newPass.tieneNumero {
+            errorNewPass = "La contraseña debe contener al menos un número."
             esValido = false
-        } else if !newPassword.tieneSimbolo {
-            errorNewPassword = "La contraseña debe contener al menos un símbolo especial."
+        } else if !newPass.tieneSimbolo {
+            errorNewPass = "La contraseña debe contener al menos un símbolo especial."
             esValido = false
-        } else if newPassword.tieneTresIgualesSeguidos {
-            errorNewPassword = "La contraseña no puede tener tres caracteres iguales consecutivos."
+        } else if newPass.tieneTresIgualesSeguidos {
+            errorNewPass = "La contraseña no puede tener tres caracteres iguales consecutivos."
             esValido = false
         }
 
         // 2. Confirmación de contraseña
-        if confirmPassword.isEmpty {
+        if confirmPass.isEmpty {
             errorConfirmacion = "La confirmación de la contraseña es requerida."
             esValido = false
-        } else if newPassword != confirmPassword {
+        } else if newPass != confirmPass {
             errorConfirmacion = "Las contraseñas no coinciden, vuelve a intentarlo."
             esValido = false
         }
@@ -383,7 +382,7 @@ struct ResetPasswordView: View {
             try await controladorRegistro.restablecerContrasena(
                 correo: correo,
                 codigo: codigo,
-                nuevaContrasena: newPassword
+                nuevaContrasena: newPass
             )
             exito = true
         } catch ErrorAPI.status(401) {
@@ -435,13 +434,13 @@ struct ResetPasswordView: View {
                         HStack {
                             ZStack {
                                 if mostrarNewPassword {
-                                    TextField("Mín. 10 caracteres, mayúscula, número y símbolo", text: $newPassword)
+                                    TextField("Mín. 10 caracteres, mayúscula, número y símbolo", text: $newPass)
                                         .foregroundColor(.black)
                                         .textInputAutocapitalization(.never)
                                         .autocorrectionDisabled()
                                         .focused($campoEnfocado, equals: .newPassword)
                                 } else {
-                                    SecureField("Mín. 10 caracteres, mayúscula, número y símbolo", text: $newPassword)
+                                    SecureField("Mín. 10 caracteres, mayúscula, número y símbolo", text: $newPass)
                                         .foregroundColor(.black)
                                         .focused($campoEnfocado, equals: .newPassword)
                                 }
@@ -462,10 +461,10 @@ struct ResetPasswordView: View {
                         .cornerRadius(12)
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
-                                .stroke(errorNewPassword != nil ? Color.red : Color.clear, lineWidth: 1)
+                                .stroke(errorNewPass != nil ? Color.red : Color.clear, lineWidth: 1)
                         )
                         
-                        if let msg = errorNewPassword {
+                        if let msg = errorNewPass {
                             Text(msg)
                                 .font(.caption)
                                 .foregroundColor(.red)
@@ -483,13 +482,13 @@ struct ResetPasswordView: View {
                         HStack {
                             ZStack {
                                 if mostrarConfirmPassword {
-                                    TextField("Confirma tu nueva contraseña", text: $confirmPassword)
+                                    TextField("Confirma tu nueva contraseña", text: $confirmPass)
                                         .foregroundColor(.black)
                                         .textInputAutocapitalization(.never)
                                         .autocorrectionDisabled()
                                         .focused($campoEnfocado, equals: .confirmPassword)
                                 } else {
-                                    SecureField("Confirma tu nueva contraseña", text: $confirmPassword)
+                                    SecureField("Confirma tu nueva contraseña", text: $confirmPass)
                                         .foregroundColor(.black)
                                         .focused($campoEnfocado, equals: .confirmPassword)
                                 }
