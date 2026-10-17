@@ -105,64 +105,6 @@ struct StartView: View {
                         }
                         .padding(.top, 8)
                         
-                        VStack(alignment: .leading, spacing: 12) {
-                            HStack(spacing: 10) {
-                                Text("ALERTA ACTIVA")
-                                    .font(.system(size: 11, weight: .bold))
-                                    .kerning(0.8)
-                                    .foregroundStyle(rojo)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(rojo.opacity(0.12))
-                                    .clipShape(RoundedRectangle(cornerRadius: 6))
-                                Text("CDMX · 2026")
-                                    .font(.system(size: 13))
-                                    .foregroundStyle(textoGris)
-                            }
-                            
-                            HStack(spacing: 10) {
-                                Spacer(minLength: 4)
-                                
-                                VStack(spacing: 2) {
-                                    Text("\(vm.todos.count)")
-                                        .font(.system(size: 18, weight: .bold))
-                                        .foregroundStyle(verde)
-                                    Text("Rep.")
-                                        .font(.system(size: 11))
-                                        .foregroundStyle(textoGris)
-                                }
-                                .frame(width: 50, height: 52)
-                                .background(rojo.opacity(0.12))
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                                
-                                VStack(spacing: 2) {
-                                    Text("\(vm.totalVerificados)")
-                                        .font(.system(size: 18, weight: .bold))
-                                        .foregroundStyle(verde)
-                                    Text("Verif.")
-                                        .font(.system(size: 11))
-                                        .foregroundStyle(textoGris)
-                                }
-                                .frame(width: 50, height: 52)
-                                .background(verde.opacity(0.12))
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                            }
-                        }
-                        .padding(18)
-                        .background(
-                            ZStack(alignment: .topTrailing) {
-                                rojo.opacity(0.07)
-                                Circle()
-                                    .fill(rojo.opacity(0.06))
-                                    .frame(width: 120, height: 120)
-                                    .offset(x: 35, y: -35)
-                            }
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(rojo.opacity(0.2), lineWidth: 1)
-                        )
                         
                         // Guías de seguridad
                         NavigationLink {
