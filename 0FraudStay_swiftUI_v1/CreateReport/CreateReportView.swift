@@ -54,6 +54,7 @@ struct CreateReportView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.reportesController) var controladorReportes
     @EnvironmentObject var vm: ReportesViewModel
+    @Binding var selectedTab: Tab
     
     @State private var pasoActual = 1
     
@@ -449,7 +450,7 @@ struct CreateReportView: View {
         .alert("¡Reporte enviado!", isPresented: $reporteCreado) {
             Button("Aceptar") {
                 limpiarFormulario()
-                dismiss()
+                selectedTab = .inicio
             }
         } message: {
             Text("Tu reporte quedó como Pendiente hasta que un administrador lo revise.")
@@ -711,7 +712,7 @@ struct CreateReportView: View {
             
             tarjeta {
                 VStack(alignment: .leading, spacing: 6) {
-                    etiqueta("Zona / Colonia", opcional: true)
+                    etiqueta("Zona / Colonia")
                     campoTexto("Ej. Condesa, CDMX", $zona)
                     if buscandoZona {
                         Text("Buscando zona…")
@@ -740,19 +741,12 @@ struct CreateReportView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                     .overlay(RoundedRectangle(cornerRadius: 10).stroke(borde, lineWidth: 1))
                     
-                    Text(coordenada.map { String(format: "📍 %.5f, %.5f", $0.latitude, $0.longitude) }
+                    Text(coordenada.map { String(format: " %.5f, %.5f", $0.latitude, $0.longitude) }
                         ?? "Toca el mapa para colocar el pin")
                         .font(.caption)
                         .foregroundStyle(.gray)
                 }
             }
         }
-    }
-}
-
-#Preview {
-    NavigationStack {
-        CreateReportView()
-            .environmentObject(ReportesViewModel())
     }
 }
