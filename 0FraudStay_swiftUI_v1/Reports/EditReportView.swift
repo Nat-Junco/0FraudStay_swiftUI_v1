@@ -26,7 +26,14 @@ struct EditReportView: View {
     @State private var zona = ""
     @State private var contactoOfertante = ""
     @State private var guardando = false
-    @State private var errores: [String] = []
+
+    // MARK: - Estados de error para cada campo
+    @State private var errorNombre: String? = nil
+    @State private var errorDescripcion: String? = nil
+    @State private var errorPrecio: String? = nil
+    @State private var errorZona: String? = nil
+    @State private var errorContacto: String? = nil
+    @State private var errorGeneral: String? = nil
 
     private let rojo = Color("BrandPrimaryColor")
 
@@ -39,27 +46,43 @@ struct EditReportView: View {
         return Double(textoLimpio)
     }
 
-    // MARK: - Validación (mismas reglas que el back)
-    private func validar() -> [String] {
-        var e: [String] = []
-        if nombre.esVacio { e.append("El título no puede estar vacío") }
-        if descripcion.esVacio { e.append("La descripción no puede estar vacía") }
+    // MARK: - Validación individual
+    private func validarFormulario() -> Bool {
+        errorNombre = nil
+        errorDescripcion = nil
+        errorPrecio = nil
+        errorZona = nil
+        errorContacto = nil
+        errorGeneral = nil
+        var esValido = true
+
+        if nombre.esVacio {
+            errorNombre = "El título no puede estar vacío."
+            esValido = false
+        }
+        if descripcion.esVacio {
+            errorDescripcion = "La descripción no puede estar vacía."
+            esValido = false
+        }
         if !precio.esVacio && !precio.esPrecioValido {
-            e.append("El precio solo puede tener números y máximo 2 decimales")
+            errorPrecio = "El precio solo puede tener números y máximo 2 decimales."
+            esValido = false
         }
         if !zona.esVacio && !zona.esZonaValida {
-            e.append("La zona solo puede tener letras, números, espacios y . , # -")
+            errorZona = "La zona solo puede tener letras, números, espacios y . , # -"
+            esValido = false
         }
         if !contactoOfertante.esVacio && !contactoOfertante.esTelefonoValido {
-            e.append("El contacto debe ser un teléfono válido (sin letras)")
+            errorContacto = "El contacto debe ser un teléfono válido (sin letras)."
+            esValido = false
         }
-        return e
+
+        return esValido
     }
 
     // MARK: - Guardar (PATCH /reportes/:id)
     private func guardar() async {
-        errores = validar()
-        guard errores.isEmpty else { return }
+        guard validarFormulario() else { return }
 
         guardando = true
         
@@ -75,13 +98,12 @@ struct EditReportView: View {
         )
         
         do {
-            // Usa directamente controladorReportes en lugar de vm
             _ = try await controladorReportes.actualizar(id: reporte.id, cambios: cambios)
             await vm.cargarTodo()
             dismiss()
         } catch {
-            print("❌ Error al guardar:", error)
-            errores = ["No se pudo guardar: \(error.localizedDescription)"]
+            print("Error al guardar:", error)
+            errorGeneral = "No se pudo guardar: \(error.localizedDescription)"
         }
         
         guardando = false
@@ -90,8 +112,22 @@ struct EditReportView: View {
     var body: some View {
         NavigationStack {
             Form {
+                // MARK: - Sección: Anuncio
                 Section("Anuncio") {
-                    TextField("Título", text: $nombre)
+                    VStack(alignment: .leading, spacing: 6) {
+                        TextField("Título", text: $nombre)
+                            .padding(8)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(errorNombre != nil ? Color.red : Color.clear, lineWidth: 1)
+                            )
+                        if let msg = errorNombre {
+                            Text(msg)
+                                .font(.caption)
+                                .foregroundColor(.red)
+                        }
+                    }
+
                     Picker("Plataforma", selection: $fuenteId) {
                         ForEach(vm.fuentes) { Text($0.valorFuente).tag($0.id) }
                     }
@@ -100,28 +136,88 @@ struct EditReportView: View {
                     }
                 }
 
+                // MARK: - Sección: ¿Qué sucedió?
                 Section("¿Qué sucedió?") {
                     Picker("Tipo de fraude", selection: $tipoFraudeId) {
                         ForEach(vm.tiposFraude) { Text($0.nombre).tag($0.id) }
                     }
-                    TextEditor(text: $descripcion)
-                        .frame(minHeight: 120)
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        TextEditor(text: $descripcion)
+                            .frame(minHeight: 120)
+                            .padding(4)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(errorDescripcion != nil ? Color.red : Color.clear, lineWidth: 1)
+                            )
+                        if let msg = errorDescripcion {
+                            Text(msg)
+                                .font(.caption)
+                                .foregroundColor(.red)
+                        }
+                    }
                 }
 
+                // MARK: - Sección: Datos adicionales
                 Section("Datos adicionales (opcionales)") {
-                    TextField("Precio", text: $precio)
-                        .keyboardType(.decimalPad)
-                    TextField("Zona / Colonia", text: $zona)
-                    TextField("Contacto del ofertante", text: $contactoOfertante)
-                        .keyboardType(.phonePad)
+                    // Campo Precio
+                    VStack(alignment: .leading, spacing: 6) {
+                        TextField("Precio", text: $precio)
+                            .keyboardType(.decimalPad)
+                            .padding(8)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(errorPrecio != nil ? Color.red : Color.clear, lineWidth: 1)
+                            )
+                        if let msg = errorPrecio {
+                            Text(msg)
+                                .font(.caption)
+                                .foregroundColor(.red)
+                        }
+                    }
+
+                    // Campo Zona
+                    VStack(alignment: .leading, spacing: 6) {
+                        TextField("Zona / Colonia", text: $zona)
+                            .padding(8)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(errorZona != nil ? Color.red : Color.clear, lineWidth: 1)
+                            )
+                        if let msg = errorZona {
+                            Text(msg)
+                                .font(.caption)
+                                .foregroundColor(.red)
+                        }
+                    }
+
+                    // Campo Contacto
+                    VStack(alignment: .leading, spacing: 6) {
+                        TextField("Contacto del ofertante", text: $contactoOfertante)
+                            .keyboardType(.phonePad)
+                            .padding(8)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(errorContacto != nil ? Color.red : Color.clear, lineWidth: 1)
+                            )
+                        if let msg = errorContacto {
+                            Text(msg)
+                                .font(.caption)
+                                .foregroundColor(.red)
+                        }
+                    }
                 }
 
-                if !errores.isEmpty {
+                // MARK: - Error de servidor
+                if let errorGen = errorGeneral {
                     Section {
-                        ResumenErrores(errores: errores)
+                        Text(errorGen)
+                            .font(.caption)
+                            .foregroundColor(.red)
                     }
                 }
             }
+            .scrollDismissesKeyboard(.immediately)
             .navigationTitle("Editar \(reporte.folio)")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -148,7 +244,6 @@ struct EditReportView: View {
                 if filtrado != nuevo { contactoOfertante = filtrado }
             }
             .onAppear {
-                // Precargar los datos actuales del reporte
                 nombre = reporte.nombre
                 descripcion = reporte.descripcion
                 fuenteId = reporte.fuenteId
@@ -158,6 +253,10 @@ struct EditReportView: View {
                 zona = reporte.zona ?? ""
                 contactoOfertante = reporte.contactoOfertante ?? ""
             }
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            ocultarTeclado()
         }
     }
 }
