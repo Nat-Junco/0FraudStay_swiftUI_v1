@@ -712,7 +712,7 @@ struct CreateReportView: View {
             
             tarjeta {
                 VStack(alignment: .leading, spacing: 6) {
-                    etiqueta("Zona / Colonia")
+                    etiqueta("Zona / Colonia", opcional: true)
                     campoTexto("Ej. Condesa, CDMX", $zona)
                     if buscandoZona {
                         Text("Buscando zona…")

@@ -9,7 +9,7 @@ import Foundation
 
 struct HTTPClient {
     // NOSONAR: IP estática utilizada únicamente para entorno de desarrollo local
-    let serverIP = "192.168.100.133"
+    let serverIP = "192.168.40.10"
 
     // En el simulador `localhost` apunta a tu Mac. En un iPhone físico
     // cámbialo por la IP de tu Mac, p. ej. "http://192.168.1.20:3000".
