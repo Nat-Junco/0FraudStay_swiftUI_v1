@@ -6,25 +6,56 @@
 //
 
 import Foundation
+import Security
 
 struct TokenStorage {
+    
     @discardableResult
     static func set(identifier: String, value: String) -> Bool {
-        UserDefaults.standard.set(value, forKey: identifier)
-        return true
+        guard let data = value.data(using: .utf8) else { return false }
+        
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: identifier,
+            kSecValueData as String: data,
+            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlocked
+        ]
+        
+        // Elimina cualquier valor previo asociado a esa clave
+        SecItemDelete(query as CFDictionary)
+        
+        // Guarda el nuevo valor de forma cifrada en el Keychain
+        let status = SecItemAdd(query as CFDictionary, nil)
+        return status == errSecSuccess
     }
     
     static func get(identifier: String) -> String? {
-        UserDefaults.standard.string(forKey: identifier)
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: identifier,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne
+        ]
+        
+        var dataTypeRef: AnyObject?
+        let status = SecItemCopyMatching(query as CFDictionary, &dataTypeRef)
+        
+        if status == errSecSuccess, let data = dataTypeRef as? Data {
+            return String(data: data, encoding: .utf8)
+        }
+        
+        return nil
     }
     
     /// Elimina la entrada si existe. Regresa true si había valor, false si no existía.
     @discardableResult
     static func delete(identifier: String) -> Bool {
-        let existed = UserDefaults.standard.object(forKey: identifier) != nil
-        if existed {
-            UserDefaults.standard.removeObject(forKey: identifier)
-        }
-        return existed
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: identifier
+        ]
+        
+        let status = SecItemDelete(query as CFDictionary)
+        return status == errSecSuccess
     }
 }
